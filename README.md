@@ -8,7 +8,21 @@ This course is intended for laboratory professionals with a basic command of R a
 
 ## Pre-course work/requirements
 
-- A laptop with wifi, access to the internet, and the ability to download files is required (confirm you can connect to conference wifi prior to class)
-- Install latest version of R by choosing closest CRAN mirror here at https://cran.r-project.org/mirrors.html and downloading the version for your operating system
-- Install latest version of RStudio Desktop at https://www.rstudio.com/products/rstudio/download/#download 
+- A laptop with wifi, access to the internet, and the ability to download files is required
+  - Confirm you can connect to conference wifi prior to class
+- Install the latest version of R by choosing the closest CRAN mirror here at https://cran.r-project.org/mirrors.html and downloading the version for your operating system
+- Install the latest version of RStudio Desktop at https://www.rstudio.com/products/rstudio/download/#download 
 - Open RStudio and confirm you are able to install packages by running `install.packages("tidyverse", dependencies = TRUE)`
+
+## Course content
+
+- **Lesson 1**: Adopting principles of reproducible research
+- **Lesson 2**: Getting cozy with R Markdown
+- **Lesson 3**: Reading and writing files - beyond the basics
+- **Lesson 4**: Data manipulation in the tidyverse
+- **Lesson 5**: Blending data sets
+- **Lesson 6**: Taking plotting to the next level with ggplot2
+- **Lesson 7**: Modelling data
+- **Lesson 8**: Beyond flat files - parsing complex data
+- **Lesson 9**: Scaling - don't make me repeat myself
+- **Lesson 10**: End-to-end - from file import to communication
