@@ -4,7 +4,7 @@ Course content for MSACL Data Science 201: Going Further with R
 This course is intended for laboratory professionals with a basic command of R and is a follow-up course to Daniel Holmes' and Steve Master's basic R course at MSACL. The emphasis of this course will be best practices in applying R to solve problems in mass spectrometry and in the clinical laboratory.
 
 - Instructors: Patrick Mathias & Randall Julian
-- Teaching assistant: 
+- Teaching assistant: Adam Zabell
 
 ## Pre-course work/requirements
 
@@ -16,7 +16,7 @@ This course is intended for laboratory professionals with a basic command of R a
 
 ## Course content
 
-- **Lesson 1**: Adopting principles of reproducible research
+- **Lesson 1**: [Adopting principles of reproducible research](lesson1/lesson1.Rmd)
 - **Lesson 2**: Getting cozy with R Markdown
 - **Lesson 3**: Reading and writing files - beyond the basics
 - **Lesson 4**: Data manipulation in the tidyverse
