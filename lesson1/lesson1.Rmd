@@ -9,7 +9,7 @@ bibliography: lesson1_references.bib
 
 In its simplest form, reproducible research is the principle that any research result can be reproduced by anybody. Or, per Wikipedia: "The term reproducible research refers to the idea that the ultimate product of academic research is the paper along with the laboratory notebooks and full computational environment used to produce the results in the paper such as the code, data, etc. that can be used to reproduce the results and create new work based on the research."
 
-Reproducibility can be achieved when the following criteria are met [@rbloggers]:
+Reproducibility can be achieved when the following criteria are met (https://www.r-bloggers.com/what-is-reproducible-research/):
 - All methods are fully reported
 - All data and files used for the analysis are available
 - The process of analyzing raw data is well reported and preserved
