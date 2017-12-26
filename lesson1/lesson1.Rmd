@@ -21,3 +21,49 @@ Reproducibility can be achieved when the following criteria are met [(Marecelino
 - You will probably want to run the same exact analysis or a very similar analysis on the same data set or a new data set in the future
 
 **"Everything you do, you will probably have to do over again."** [(Noble 2009)](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1000424)
+
+There are three practices we will cover in this lesson to help get your code to be more reproducible and reusable:
+
+- Develop a standardized but easy-to-use project structure
+- Adopt a style convention for coding
+- Enforce reproducibility when working with packages
+
+## Develop a standard project structure
+
+In their article "Good enough practices in scientific computing", Wilson et al. highlight useful recommendations for organizing projects [(Wilson 2017)](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510):
+
+- **Put each project in its own directory, which is named after the project**
+- Put text documents associated with the project in the doc directory
+- **Put raw data and metadata in a data directory and files generated during cleanup and analysis in a results directory**
+- Put project source code in the src directory
+- Put compiled programs in the bin directory
+- **Name all files to reflect their content or function**
+
+Because we are focusing on using RMarkdown, notebooks, and less complex types of analyses, we are going to focus on the recommendations in bold in this course. All of these practices are recommended and we encourage everyone to read the original article to better understand motivations behind the recommendations.
+
+### Put each project in its own directory, which is named after the project ###
+
+Putting projects into their own directories helps to ensure that everything you need to run an analysis is in one place. That helps you minimize manual navigation to try and tie everything together (assuming you create the directory as a first step in the project).
+
+What is a project? Wilson et al. suggest dividing projects based on "overlap in data and code files." I tend to think about this question from the perspective of output, so a project is going to be the unit of work that creates an analysis document that will go on to wider consumption. If I am going to create multiple documents from the same data set, that will likely be included in the same project. It gets me to the same place that Wilson et al. suggest, but very often you start a project with a deliverable document in mind and then decide to branch out or not down the road.
+
+Now that we're thinking about creating directories for projects and directory structure in general, let's take the opportunity to review some basic commands and configuration related to directories in R.
+
+1. Navigate to your **Preferences** for the RStudio application and note the *Default working directory (when not in a project)*
+2. Navigate to your Console and get the working directory using `getwd()`
+3. Review the contents of your current folder using `list.files()`
+4. Now try to set your working directory using `setwd("test_dir")`. What happened?
+5. Create a new test directory using `dir.create("test_dir")`
+6. Review your current directory
+7. Set your directory to the test directory you just created
+8. Using the Files window (bottom right in RStudio, click on **Files** tab if on another tab), navigate to the test directory you just created. *Pro tip: The More menu here has shortcuts to set the currently displayed directory as your working directory and to navigate to the current working directory*
+9. Navigate back to one level above the directory you created using `setwd("..")`
+10. Delete the directory you created using the `unlink()` function. Learn more about how to use the function by reviewing the documentation: `?unlink`. Pay special attention to comments about deleting directories.
+
+Now that you're warmed up with navigating through directories using R, let's use functionality that's built into RStudio to make our project-oriented lives easier. To enter this brave new world of project directories, let's make a home for our projects. (Alternately, if you already have a directory that's a home for your projects, set your working directory there.)
+
+```{r}
+dir.create("Projects")
+```
+
+Now, navigate to the **File** menu and select **New Project...**
