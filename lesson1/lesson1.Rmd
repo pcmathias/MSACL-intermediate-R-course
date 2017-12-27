@@ -64,6 +64,15 @@ Now that you're warmed up with navigating through directories using R, let's use
 
 ```{r}
 dir.create("Projects")
+setwd("/Projects")
 ```
 
-Now, navigate to the **File** menu and select **New Project...**
+You can do the above steps within your operating system (eg. on a Mac, open Finder window and create a folder) or if you are comfortable working at the command line, you can make a directory there. In the newest version of RStudio (version 1.1), you have the option of opening up a command line prompt under the Terminal tab (on the left side, next to the Console tab).
+
+Let's start a new project :
+1. (a) Navigate to the **File** menu and select **New Project...** OR
+1. (b) Select the **Create a project** button on the global toolbar (2nd from the left)
+2. Select **New Directory** option
+3. In the Project Type prompt, select **New Project**
+4. In the Directory Name prompt under Create New Project, enter "intermediate-R-course"
+5. In the Create Project as a Subdirectory of prompt under Create New Project, navigate to the Projects folder you just created (if it is not already there). You can type in the path or hit the **Browse** button to find the directory.
