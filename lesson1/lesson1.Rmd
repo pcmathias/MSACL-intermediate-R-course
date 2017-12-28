@@ -70,9 +70,18 @@ setwd("/Projects")
 You can do the above steps within your operating system (eg. on a Mac, open Finder window and create a folder) or if you are comfortable working at the command line, you can make a directory there. In the newest version of RStudio (version 1.1), you have the option of opening up a command line prompt under the Terminal tab (on the left side, next to the Console tab).
 
 Let's start a new project :
-1. (a) Navigate to the **File** menu and select **New Project...** OR
-1. (b) Select the **Create a project** button on the global toolbar (2nd from the left)
+1. Navigate to the **File** menu and select **New Project...** OR Select the **Create a project** button on the global toolbar (2nd from the left)
 2. Select **New Directory** option
 3. In the Project Type prompt, select **New Project**
 4. In the Directory Name prompt under Create New Project, enter "intermediate-R-course"
 5. In the Create Project as a Subdirectory of prompt under Create New Project, navigate to the Projects folder you just created (if it is not already there). You can type in the path or hit the **Browse** button to find the directory.
+
+So, what exactly does creating a Project in RStudio do for you? In a nutshell, using these Projects allows you to drop what you're doing, close RStudio, and then open the Project to pick up where you left off. Your data, history, settings, open tabs, etc. will be saved for you automatically.
+
+Does using a RStudio Project allow someone else to pick up your code and just use it? Or let you come back to a Project 1 year later and have everything work magically? Not by itself, but with a few more tricks you will be able to more easily re-run or share your code.
+
+### Put raw data and metadata in a data directory and files generated during cleanup and analysis in a results directory ###
+
+Before we broke up with Excel, it was standard operating procedure to perform our calculations and data manipulations in the same place that our data lived. This is not necessarily incompatible with reproducibility, if we have very careful workflows and make creative use of macros. However, once you have modified your original input file, it may be non-trivial to review what you actually did to your original raw data (particularly if you did not save it as a separate file). Morever, Excel generally lends itself to non-repeatable manual data manipulation that can take extensive detective work to piece together.
+
+Using R alone will not necessarily save you from these patterns but they take a different form. Instead of clicking around, dragging, and entering formulas, you might find yourself throwing different functions at your data in a different order each time you open up R. While it takes some effort to overwrite your original data file in R, other non-ideal patterns of file management that are common in Excel-land can creep up on you if you're not careful.
