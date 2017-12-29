@@ -1,0 +1,29 @@
+---
+title: 'Lesson 7: Modelling the data'
+author: "Adam Zabell"
+date: "12/28/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+rootDir <- "/Users/azabell/Dropbox/R/"
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+# Data Modelling
+
+## Parsing dates and times with *lubridate*
+
+## Symbolic formula notation
+
+## Linear modelling 
+lm() and glm()
+weights
+categorical vs continuous variables
+
+## Nonlinear modelling
+nlm()
+how to guess a good start
+
+# Summary

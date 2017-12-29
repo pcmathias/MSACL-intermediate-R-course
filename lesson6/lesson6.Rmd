@@ -1,0 +1,70 @@
+---
+title: 'Lesson 6: Stronger visualizations with ggplot2 and lattice'
+author: "Adam Zabell"
+date: "12/28/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+rootDir <- "/Users/azabell/Dropbox/R/MSACL-intermediate-R-course/"
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lattice)
+```
+
+# Plotting Data With Default Graphics
+Default **R** comes with several basic plotting commands -- *plot* to draw an X,Y graph, *points* to add X,Y points to the current graph, *barplot* to draw vertical or horizontal bars, *boxplot* to draw box-and-whisker plots, *hist* to build and draw a histogram, and many other plot types or plot-specific additions to plots.
+
+The first major drawback to using these plots is that each requires learning a slightly different syntax to decorate the graph. 
+```{r plot_color_syntax}
+workingDir <- paste0(rootDir,"class_data")
+jan.s <- read_csv(file.path(workingDir,"2017-01-06.csv"))
+hasIonRatio <- jan.s$ionRatio > 0
+plot(jan.s$ionRatio[which(hasIonRatio)],col='blue')
+hist(jan.s$ionRatio[which(hasIonRatio)],col='blue')
+hist(jan.s$ionRatio[which(hasIonRatio)],border='blue',main='Histogram')
+```
+
+The second drawback is that these plots, while drawn quickly, require detailed sort and select mechanisms in order to display complex data on a single graph.
+```{r plot_by_compound}
+compounds <- unique(jan.s$compoundName)
+for(i in 1:length(compounds)) {
+  if(i==1) {
+    plot(jan.s$ionRatio[hasIonRatio & jan.s$compoundName==compounds[i]],
+         col=i,
+         main="color by compound")
+  } else {
+    points(jan.s$ionRatio[hasIonRatio & jan.s$compoundName==compounds[i]],col=i)
+  }
+}
+```
+
+# Plotting Data With *ggplot2*
+To maintain the 'keep the exploring simple' focus of the tidyverse, the **ggplot2** package keeps the same syntax for all graphing schemes, has arguably prettier default graphs, and much easier layering/faceting of the underlying data. The main drawback is that a large dataset (more than ~500k rows in a data.frame) can take minutes to plot. The year of mock data in this course definitely qualifies as a large dataset, so we recommend that ggplot2 be used judiciously for plotting the full database.
+
+Syntax follows the format of {'define the data' {+ 'describe the visualization'}} where each description is called a *geom* and multiple geoms can be stacked together. Definitions for the aesthetic mappings (e.g. plotTerms, color, iconShape, lineType) can be supplied when defining the data and are applied to the subsequent stack of geoms. Those mappings can also be overridden within an individual geom.
+```{r gg_plotting}
+jan.s$idx <- c(1:nrow(jan.s))
+g <- ggplot(data=jan.s[hasIonRatio,],
+            aes(x=idx,y=ionRatio,colour=sampleType))
+g + geom_point() + facet_wrap(~compoundName) + scale_x_continuous(labels=NULL)
+g + geom_smooth() + facet_wrap(~compoundName)
+g + geom_histogram(mapping=aes(x=ionRatio,colour=sampleType),inherit.aes=FALSE) + facet_wrap(~compoundName)
+```
+
+We could easily spend the whole class session on this package, but the above plots showcase the basic syntax necessary to use ggplot2. We recommend downloading the cheatsheet from the link given at the end of this lesson for additional examples of what can be done.
+
+# Plotting Data with *lattice*
+When working with very large data sets, the tidyverse ideal of 'keep the exploring simple' requires moving to another graphing package. Using **lattice** maintains much of the same functionality but requires a syntax more typical of the default graphics and modelling packages.
+```{r lattice_plotting}
+xyplot(ionRatio ~ idx | compoundName, data=jan.s[hasIonRatio,], groups=sampleType, auto.key=TRUE)
+xyplot(ionRatio ~ idx | compoundName, data=jan.s[hasIonRatio,], groups=sampleType, auto.key=TRUE, type=c("l","spline"))
+histogram( ~ ionRatio | compoundName + sampleType, data=jan.s[hasIonRatio,])
+```
+
+
+# Summary
+* [ggplot2 cheatsheat](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
+* [lattice overview](https://www.statmethods.net/advgraphs/trellis.html)
+* [download a PDF comparison of both packages](http://www.londonr.org/download/?id=69)
+* plotting with the lattice package is highly recommended when working with more than 500k rows, while even the default graphics are faster at that scale.
