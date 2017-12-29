@@ -1,0 +1,31 @@
+---
+title: 'Lesson 9: Scaling with purrr to loop through a vector'
+author: "Adam Zabell"
+date: "12/29/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Looping Commands
+Typing more than once increases the risk of typos, and decreases readability. 
+The easiest way to cycle through an action more than once is with a for..loop or a while..loop 
+
+## Looping with *for* and *while*
+Loops are explicit.
+Code looks like it would on a single runthrough. 
+
+## Looping with *map*
+Loops are better, but require a lot of "bookkeeping" code, decreasing readability.
+The class of map_* functions accept a vector, apply a command to every element, and return a vector matching the specified type.
+
+# Nested Looping 
+## Looping with user functions
+One of the great reasons for using **R** is that it was designed to accept user-defined functions.
+User functions help reduce errors, because you're reusing code.
+User functions help hide messy parts, letting you read the workflow without getting bogged down in details.
+
+#Summary
+
