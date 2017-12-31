@@ -1,0 +1,761 @@
+---
+title: "msacl_making_data"
+author: "Adam Zabell"
+date: "12/20/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+useNewerPackage <- FALSE # If running R 3.3.0 or newer, use openxlsx
+if(useNewerPackage) {
+ #install.packages("openxlsx")
+ library(openxlsx)
+} else {
+ #install.packages("xlsx")
+ library(xlsx)
+}
+```
+
+# 1. Data Creation for the MSACL Class
+Each batch consists of three dataframes; a batchLevel, a compoundLevel, and a peakLevel of data associated with the batch. A series of batches from timeStart to timeEnd are kept separate within a `list()` until after the data manipulation steps are completed. At that point, an `rbind` is performed to generate the per Month dataframes, each of which is saved in a different format so the class can become familiar with the different ways to import.  
+A batch is 7 standards, 3 qcs (low,mid,hi), 2 blanks, and 40 unknowns : 52 samples total. We assume a lab throughput of 20 batches a day, being run on one of 7 instruments and reviewed by one of 4 technicians.
+
+## Clean slate, set operating variables, enumerate data.frame fields 
+Warnings (briefly) turned off because of a timezone foible about Indianapolis.
+```{r header}
+rm(list=ls())
+options(stringsAsFactors=FALSE)
+
+yearComplete <- FALSE
+options(warn=-1)
+startDate <- as.Date("2017-01-05")
+options(warn=0)
+workingDir <- "/Users/azabell/Dropbox/R/mockData MSACL2018"
+allRdata <- list.files(path=workingDir,pattern="Rdata$",full.names=TRUE)
+l <- length(allRdata)
+if(l==0) {
+  currentStartDate <- startDate
+} else {
+  load(allRdata[l])
+  priorLastDay <- as.Date(max(batchLevel$batchCollectedTimestamp,na.rm=TRUE))
+  currentStartDate <- priorLastDay 
+}
+
+fields.byPeak <- c("batchName","sampleName","compoundName","chromatogramName","peakArea","peakQuality","manuallyModified")
+fields.byCompound <- c("batchName","sampleName","compoundName","ionRatio","response","concentration","sampleType","expectedConcentration","usedForCurve","samplePassed")
+fields.byBatch <- c("batchName","instrumentName","compoundName","calibrationSlope","calibrationIntercept","calibrationR2","reviewerName","batchCollectedTimestamp","reviewStartTimestamp","reviewCompleteTimestamp")
+```
+
+# 2. Builder Functions
+## Initialize the three dataframes
+`makeABatchOfData()` `determineConcentration()` : doing initial dataframe build
+```{r basic_build_functions}
+makeABatchOfData <- function(batchName,instrumentName,unksFraction=0.5) {
+  sampleName <- paste0("s",substr(batchName,5,8),formatC(seq(1,52), width = 3, format = "d", flag = "0")) 
+  compoundName <- c("morphine","hydromorphone","oxymorphone",
+                    "codeine","hydrocodone","oxycodone")
+  compoundISName <- c("morphine-13C","hydromorphone-d3","oxymorphone-d3",
+                      "codeine-d6","hydrocodone-d3","oxycodone-d3")
+  chromatogramName <- c("quant","qual")
+  
+  ## framework for the three dataframes
+  stdConcs <- c(0,20,50,100,200,300,500)
+  qcConcs <- c(40,250,400)
+  lcN <- length(compoundName)
+  lcISN <- length(compoundISName)
+  byBatch <- data.frame(batchName=batchName,
+                        instrumentName=instrumentName,
+                        compoundName=compoundName,
+                        calibrationSlope=0,
+                        calibrationIntercept=0,
+                        calibrationR2=0,
+                        batchPassed=TRUE,
+                        reviewerName="none",
+                        batchCollectedTimestamp=NA,
+                        reviewStartTimestamp=NA,
+                        reviewCompleteTimestamp=NA)
+  byCompound <- data.frame(batchName=batchName,
+                           sampleName=rep(sampleName,each=lcN),
+                           compoundName=compoundName,
+                           ionRatio=0,
+                           response=0,
+                           concentration=0,
+                           sampleType=rep(c("blank",
+                                            rep("standard",7),"blank",
+                                            rep(c(rep("unknown",10),"qc"),3),
+                                            rep("unknown",10)),
+                                          each=lcN),
+                           expectedConcentration=rep(c(0,
+                                                       stdConcs,
+                                                       0,
+                                                       rep(0,10),
+                                                       unlist(lapply(qcConcs,c,rep(0,10)))),
+                                                     each=lcN),
+                           usedForCurve=rep(c(FALSE,rep(TRUE,7),rep(FALSE,44)),each=lcN),
+                           samplePassed=TRUE)
+  byPeak <- data.frame(batchName=batchName,
+                       sampleName=rep(sampleName,each=(lcN+lcISN)*2),
+                       compoundName=rep(c(compoundName,compoundISName),each=2),
+                       chromatogramName=chromatogramName,
+                       peakArea=0,
+                       peakQuality=0,
+                       manuallyModified=FALSE)
+  
+  ## backfill Standards and QCs 
+  whichStds <- which(byCompound$sampleType=="standard")
+  whichQCs <- which(byCompound$sampleType=="qc")
+  byCompound$concentration[whichQCs] <- byCompound$expectedConcentration[whichQCs] * 
+    rnorm(length(whichQCs),mean=1,sd=0.12)
+  byCompound$response[whichStds] <- byCompound$expectedConcentration[whichStds] * 0.007 * 
+    rnorm(length(whichStds),mean=1,sd=0.12)
+  ## backfill Unknowns
+  whichUnknowns <- which(byCompound$sampleType=="unknown")
+  haveResponse <- which(runif(40*lcN)<unksFraction)
+  byCompound$concentration[whichUnknowns][haveResponse] <- runif(length(haveResponse),stdConcs[2],stdConcs[7])
+  ## backfill ISareas
+  theQuant <- grepl("-",byPeak$compoundName) & byPeak$chromatogramName=="quant"
+  theQual <- grepl("-",byPeak$compoundName) & byPeak$chromatogramName=="qual"
+  byPeak$peakArea[theQuant] <- rnorm(lcISN*52,mean=1e5,sd=2e3)
+  byPeak$peakArea[theQual] <- rnorm(lcISN*52,mean=7e4,sd=5e3)
+
+  for(cpd in unique(byCompound$compoundName)) {
+    ## calculate the calibraiton curve, back-calculate stdConc
+    thisStd <- which(byCompound$compoundName==cpd & byCompound$sampleType=="standard")
+    std.df <-  data.frame(concentration=byCompound$expectedConcentration[thisStd],
+                          response=byCompound$response[thisStd])
+    w <- 1/((std.df$concentration)^2)
+    w[1] <- 1
+    regressionCurve <- lm(response~concentration,data=std.df,weights=w)
+    byBatch[byBatch$compoundName==cpd,c("calibrationIntercept","calibrationSlope")] <- coef(regressionCurve)
+    byBatch$calibrationR2[byBatch$compoundName==cpd] <- summary(regressionCurve)$r.squared
+    byCompound$concentration[thisStd] <- determineConcentration(coef(regressionCurve),
+                                                                byCompound$response[thisStd])
+    byCompound$concentration[byCompound$compoundName==cpd & byCompound$concentration<0] <- 0
+    ## calculate unkResponse and qcResponse 
+    whichUnkQc <- which(byCompound$compoundName==cpd & byCompound$concentration > 0 &
+                        (byCompound$sampleType=="unknown" | byCompound$sampleType=="qc") )
+    byCompound$response[whichUnkQc] <- predict(regressionCurve,
+                                               data.frame(concentration=byCompound$concentration[whichUnkQc]))
+    byCompound$response[byCompound$response[byCompound$compoundName==cpd] < 0] <- 0
+    ## turn compoundResponse into quantArea
+    isName <- grep(paste0(cpd,"-"),compoundISName,value=TRUE)
+    isPeakAreas <- byPeak$peakArea[byPeak$compoundName==isName & byPeak$chromatogramName=="quant"]
+    quantPeaks <- which(byPeak$compoundName==cpd & byPeak$chromatogramName=="quant")
+    byPeak$peakArea[quantPeaks] <- byCompound$response[byCompound$compoundName==cpd] * isPeakAreas
+    ## do qualArea for all quantArea, then ionRatio
+    qualPeaks <- which(byPeak$compoundName==cpd & byPeak$chromatogramName=="qual")
+    byPeak$peakArea[qualPeaks] <- byPeak$peakArea[quantPeaks] * rnorm(length(quantPeaks),mean=0.8,sd=5e-2)
+    negativeQualPeak <- which(byPeak$peakArea[qualPeaks] < 0)
+    byPeak$peakArea[qualPeaks][negativeQualPeak] <- 0
+    byCompound$ionRatio[byCompound$compoundName==cpd] <- byPeak$peakArea[quantPeaks] / byPeak$peakArea[qualPeaks]
+  }
+  byCompound$ionRatio[is.nan(byCompound$ionRatio)] <- 0
+  
+  ## do peakQuality
+  pQ <- rnorm(nrow(byPeak),mean=0,sd=0.0005) # rcauchy()
+  pQ.tail <- which(pQ > mean(pQ))
+  pQ[pQ.tail] <- -1*(pQ[pQ.tail]-mean(pQ))
+  rangeQ <- abs(max(pQ)-min(pQ))
+  pQ <- pQ/(max(pQ)-min(pQ))
+  pQ <- round(1+(0.05*pQ), 2)
+  byPeak$peakQuality <- ifelse(byPeak$peakArea>0,1,0) * pQ
+
+  return(list(batchLevel=byBatch,compoundLevel=byCompound,peakLevel=byPeak))
+}
+determineConcentration <- function(cf, vectorResponse, minConc=0, maxConc=0) {
+  coeffs <- rep(0,4)
+  coeffs[1:length(cf)] <- cf
+  returnVector <- c()
+  
+  for (observation in vectorResponse) {
+    coeffs[1] <- cf[1] - observation
+    roots <- polyroot(coeffs)
+    realVect <- rep(FALSE, length(roots))
+    for (i in 1:length(roots)) { if(isTRUE(all.equal(Im(roots[i]), 0, tolerance = 1e-6))) realVect[i] <- TRUE }
+    roots <- Re(roots)[realVect]
+    betweenVal <- which(roots > minConc & roots < maxConc)
+    if (observation <= 0) {
+      returnVector <- c(returnVector,0)
+    } else if (length(roots) == 0) {
+      returnVector <- c(returnVector,NA)
+    } else if (length(betweenVal) > 0) {
+      returnVector <- c(returnVector, mean(roots[betweenVal]))
+    } else {
+      x <- which.min(abs(roots - mean(c(minConc, maxConc))))
+      returnVector <- c(returnVector,roots[x])
+    }
+  }
+  return(returnVector)
+}
+```
+
+## Populate additional fields
+`add_timestamps()` `add_reviewer()` `add_time_and_reviewer()` : who did what and when  
+`recursive_drop_one()` `autodrop_calibration_points()` `fit_r2_and_recalibrate()` : automated calibration towards a target R^2  
+`flag_qc_failures()` `mark_failing_samples()` : assign pass/fail flag status  
+`plotAllEdits()` : plot function to showcase edited values
+```{r field_population_functions}
+add_timestamps <- function(largeList,batchNames,dateCollected="2017-01-01") {
+  # year of data from 15Jan2017-15Jan2018, 
+  # data collected 8pm-2am, reviewStart 9am-2pm, avg batch review time is 1 hr
+  dateAs.posixlt <- strptime(paste(dateCollected,"20:00:00"),"%F %X") 
+  for(b in batchNames) {
+    doneTime <- dateAs.posixlt + round(runif(1,0,21600),0)
+    startTime <- dateAs.posixlt + round(runif(1,46800,64800),0)
+    endTime <- startTime + round(rnorm(1,3600,900),0)
+    if(endTime > startTime) {endTime <- startTime + round(runif(1,900,2700),0)}
+    largeList[[b]]$batchLevel$batchCollectedTimestamp <- as.character(doneTime)
+    largeList[[b]]$batchLevel$reviewStartTimestamp <- as.character(startTime)
+    largeList[[b]]$batchLevel$reviewCompleteTimestamp <- as.character(endTime)
+  }
+  return(largeList)
+}
+add_reviewer <- function(largeList,batchNames,reviewerName) {
+  for(b in batchNames) {
+    largeList[[b]]$batchLevel$reviewerName <- reviewerName
+  }
+  return(largeList)
+}
+add_time_and_reviewer <- function(largeList,reviewerNames,batchesPerDay,firstDateCollected="2017-01-01") {
+  l <- length(largeList)/batchesPerDay
+  for(i in 1:l) {
+    batchNames <- names(largeList)[(((i-1)*batchesPerDay)+1):(i*batchesPerDay)]
+    dateCollected <- as.Date(firstDateCollected) + i
+    largeList <- add_timestamps(largeList,batchNames,dateCollected)
+    randOrderedReviewers <- reviewerNames[order(runif(length(reviewerNames)))]
+    randBatches <- runif(length(batchNames))
+    for(thisGuy in randOrderedReviewers) {
+      idx <- which(randOrderedReviewers%in%thisGuy)
+      theseForThisGuy <- which(randBatches<=(idx/length(randOrderedReviewers)))
+      if(length(theseForThisGuy)==0) {next}
+      largeList <- add_reviewer(largeList,batchNames[theseForThisGuy],thisGuy)
+      randBatches[theseForThisGuy] <- 2
+    }
+  }
+  return(largeList)
+}
+recursive_drop_one <- function(stdSamples,r_sq_target) {
+  fracDiff <- abs( (stdSamples$concentration-stdSamples$expectedConcentration)/stdSamples$expectedConcentration )
+  fracDiff[1] <- 0
+  inUse <- which(stdSamples$usedForCurve==TRUE)
+  nextDropPoint <- which(fracDiff==max(fracDiff[inUse]))
+  stdSamples$usedForCurve[nextDropPoint] <- FALSE
+  std.df <- data.frame(concentration=stdSamples$expectedConcentration[stdSamples$usedForCurve],
+                       response=stdSamples$response[stdSamples$usedForCurve])
+  w <- 1/((std.df$concentration)^2)
+  w[1] <- 1
+  regressionCurve <- lm(response~concentration,data=std.df,weights=w)
+  if(summary(regressionCurve)$r.squared < r_sq_target) {
+    stdSamples <- recursive_drop_one(stdSamples,r_sq_target)
+  }
+  return(stdSamples)
+}
+autodrop_calibration_points <- function(largeList,compoundName,batchNames,r_sq_target=0.98) {
+  for(b in batchNames) {
+    byCompound <- largeList[[b]]$compoundLevel
+    stdSamples <- byCompound[byCompound$compoundName==compoundName & byCompound$sampleType=="standard",]
+    stdSamples <- recursive_drop_one(stdSamples,r_sq_target)
+    weight <- 1/((stdSamples$expectedConcentration)^2)
+    weight[1] <- 1
+    regressionCurve <- lm(response~concentration,
+                          data.frame(concentration=stdSamples$expectedConcentration[stdSamples$usedForCurve],
+                                     response=stdSamples$response[stdSamples$usedForCurve]),
+                          weights=weight[stdSamples$usedForCurve])
+    byCompound$usedForCurve[as.numeric(row.names(stdSamples))] <- stdSamples$usedForCurve
+    bcCompound <- byCompound$compoundName==compoundName
+    byCompound$concentration[bcCompound] <- determineConcentration(coef(regressionCurve),
+                                                                     byCompound$response[bcCompound])
+    largeList[[b]]$compoundLevel <- byCompound
+    
+    byBatch <- largeList[[b]]$batchLevel
+    bbCompound <- byBatch$compoundName==compoundName
+    byBatch[bbCompound,c("calibrationIntercept","calibrationSlope")] <- coef(regressionCurve) 
+    byBatch$calibrationR2[bbCompound] <- summary(regressionCurve)$r.squared
+    largeList[[b]]$batchLevel <- byBatch
+  }
+  return(largeList)
+} 
+fit_r2_and_recalibrate <- function(largeList,r_sq_target=0.98) {
+  batchEdits <- data.frame()
+  for(l in largeList) {
+    poorCalibrations <- l$batchLevel$compoundName[l$batchLevel$calibrationR2 < r_sq_target]
+    if(length(poorCalibrations) > 0) {
+      l.df <- data.frame(batchName=l$batchLevel$batchName[1],compoundName=poorCalibrations)
+      batchEdits <- rbind(batchEdits,l.df)
+    }
+  }
+  for(n in unique(batchEdits$compoundName)) {
+    b <- batchEdits$batchName[batchEdits$compoundName==n]
+    largeList <- autodrop_calibration_points(largeList,n,b)
+  }
+  return(largeList)
+}
+flag_qc_failures <- function(largeList,qcThreshold=0.2) {
+  for(l in largeList) {
+    b <- l$batchLevel$batchName[1]
+    isQC <- which(l$compoundLevel$sampleType=="qc")
+    delta <- l$compoundLevel$concentration[isQC]-l$compoundLevel$expectedConcentration[isQC]
+    fractionQC <- abs(delta)/l$compoundLevel$expectedConcentration[isQC]
+    largeList[[b]]$compoundLevel$samplePassed[isQC[which(fractionQC>qcThreshold)]] <- FALSE
+  }
+  return(largeList)
+}
+mark_failing_samples <- function(largeList,unknownFailureRate=0.02,manuallyModifiedRate=0.05) {
+  for(l in largeList) {
+    b <- l$batchLevel$batchName[1]
+    positiveUnknown <- which(l$compoundLevel$sampleType=="unknown" & l$compoundLevel$concentration > 0)
+    largeList[[b]]$compoundLevel$samplePassed[runif(length(positiveUnknown)) < unknownFailureRate] <- FALSE
+    notBlankSamples <- l$compoundLevel$sampleName[l$compoundLevel$sampleType!="blank"]
+    notBlankPeaks <- which(l$peakLevel$sampleName %in% notBlankSamples)
+    manuallyModify <- runif(length(notBlankPeaks)) < manuallyModifiedRate
+    largeList[[b]]$peakLevel$manuallyModified[notBlankPeaks][manuallyModify] <- TRUE
+    largeList[[b]]$peakLevel$peakQuality[notBlankPeaks][manuallyModify] <- -1
+  }
+  return(largeList)
+}
+plotAllEdits <- function(largeList) {
+  batchEdits <- data.frame()
+  for(l in largeList) {
+    droppedCalibrator <- which(!l$compoundLevel$usedForCurve & l$compoundLevel$sampleType=="standard")
+    if(length(droppedCalibrator) > 0) {
+      batchEdits <- rbind(batchEdits,
+                          data.frame(batchName=l$batchLevel$batchName[1],
+                                     compoundName=l$compoundLevel$compoundName[droppedCalibrator],
+                                     sampleName=l$compoundLevel$sampleName[droppedCalibrator],
+                                     reason="droppedCalibrator"))
+    }
+    isKnown <- which(l$compoundLevel$sampleType=="qc" | l$compoundLevel$sampleType=="standard")
+    twentyPercentError <- which( c(abs(l$compoundLevel$concentration-l$compoundLevel$expectedConcentration)/l$compoundLevel$expectedConcentration)[isKnown] > 0.2 )
+    if(length(twentyPercentError) > 0) {
+      batchEdits <- rbind(batchEdits,
+                          data.frame(batchName=l$batchLevel$batchName[1],
+                                     compoundName=l$compoundLevel$compoundName[isKnown][twentyPercentError],
+                                     sampleName=l$compoundLevel$sampleName[isKnown][twentyPercentError],
+                                     reason="twentyPercentError"))
+    }
+    manuallyModified <- which(l$peakLevel$manuallyModified)
+    if(length(manuallyModified) > 0) {
+      batchEdits <- rbind(batchEdits,
+                          data.frame(batchName=l$batchLevel$batchName[1],
+                                     compoundName=l$peakLevel$compoundName[manuallyModified],
+                                     sampleName=l$peakLevel$sampleName[manuallyModified],
+                                     reason="manuallyModified"))
+    }
+  }
+  for(b in unique(batchEdits$batchName)) {
+    foo.b <- largeList[[b]]$batchLevel
+    foo.c <- largeList[[b]]$compoundLevel
+    for(cpd in unique(batchEdits$compoundName[batchEdits$batchName==b])) {
+      if(grepl("-",cpd)) {next}
+      foo.cpd <- foo.c[foo.c$compoundName==cpd,]
+      whichStd <- which(foo.cpd$sampleType=="standard") 
+      whichQC <- which(foo.cpd$sampleType=="qc") 
+      whichUnk <- which(foo.cpd$sampleType=="unknown" & foo.cpd$response > 0)
+      plot(foo.cpd[whichStd,c("expectedConcentration","response")],main=paste(b,cpd),xlab="concentration",ylab="response")
+      abline(0,0.007,col='grey',lwd=3)
+      abline(foo.b$calibrationIntercept[foo.b$compoundName==cpd],foo.b$calibrationSlope[foo.b$compoundName==cpd])
+      points(foo.cpd[intersect(whichStd,which(!foo.cpd$usedForCurve)),c("expectedConcentration","response")],col='red',pch=4,cex=2)
+      points(foo.cpd[whichQC,c("concentration","response")],col='blue',lwd=2,pch=5)
+      fancy <- data.frame( "concentration"=unlist(lapply(1:3,function(x){c(foo.cpd$concentration[whichQC[x]],foo.cpd$expectedConcentration[whichQC[x]])})),
+                           "response"=unlist(lapply(1:3,function(x){rep(foo.cpd$response[whichQC[x]],2)})) )
+      lines(fancy[1:2,],col='blue') ; lines(fancy[3:4,],col='blue') ; lines(fancy[5:6,],col='blue')
+      bad <- foo.cpd[foo.cpd$sampleName %in% batchEdits$sampleName[batchEdits$batchName==b & batchEdits$compoundName==cpd & batchEdits$reason=="twentyPercentError"],]
+      points(bad[bad$sampleType=="standard",c("expectedConcentration","response")],col='magenta',lwd=2,cex=2)
+      points(bad[bad$sampleType=="qc",c("concentration","response")],col='magenta',lwd=2,pch=5,cex=2)
+      points(foo.c[whichUnk,c("concentration","response")],pch=3)
+    }
+  }
+}
+```
+## Purposefully skew a value
+Described in-line, but not here so we don't immediately give away the edits being made
+```{r skewing_functions, echo=FALSE}
+propogate_Up <- function(oneBatch,compoundNames="all",redropCalibration=TRUE) { 
+  bL<- oneBatch$batchLevel
+  cL <- oneBatch$compoundLevel
+  pL <- oneBatch$peakLevel
+  allNames <- unique(pL$compoundName)
+  if(compoundNames[1] == "all") {compoundNames <- allNames[!grepl("-",allNames)]}
+  for(cpd in compoundNames) {
+    cpdIS <- allNames[grepl(paste0("^",cpd,"-"),allNames)]
+    response <- pL$peakArea[pL$compoundName==cpd & pL$chromatogramName=="quant"] / pL$peakArea[pL$compoundName==cpdIS & pL$chromatogramName=="quant"]
+    cL$response[cL$compoundName==cpd] <- response
+    ionRatio <- pL$peakArea[pL$compoundName==cpd & pL$chromatogramName=="quant"] / pL$peakArea[pL$compoundName==cpd & pL$chromatogramName=="qual"]
+    cL$ionRatio[cL$compoundName==cpd][which(is.finite(ionRatio))] <- ionRatio[which(is.finite(ionRatio))]
+    stdSamples <- cL[cL$compoundName==cpd&cL$sampleType=="standard",]
+    weight <- 1/((stdSamples$expectedConcentration)^2)
+    weight[1] <- 1
+    regressionCurve <- lm(response~concentration,
+                          data.frame(concentration=stdSamples$expectedConcentration[stdSamples$usedForCurve],
+                                     response=stdSamples$response[stdSamples$usedForCurve]),
+                          weights=weight[stdSamples$usedForCurve])
+    r_sq_target <- 0.98
+    if(redropCalibration & summary(regressionCurve)$r.squared < r_sq_target) {
+      stdSamples$usedForCurve <- TRUE
+      stdSamples <- recursive_drop_one(stdSamples,r_sq_target)
+      regressionCurve <- lm(response~concentration,
+                            data.frame(concentration=stdSamples$expectedConcentration[stdSamples$usedForCurve],
+                                       response=stdSamples$response[stdSamples$usedForCurve]),
+                            weights=weight[stdSamples$usedForCurve])
+    }
+    cL$usedForCurve[as.numeric(row.names(stdSamples))] <- stdSamples$usedForCurve
+    cL$concentration[cL$compoundName==cpd] <- determineConcentration(coef(regressionCurve),cL$response[cL$compoundName==cpd])
+    bL[bL$compoundName==cpd,c("calibrationIntercept","calibrationSlope","calibrationR2")] <- c(coef(regressionCurve),summary(regressionCurve)$r.squared)
+  }
+  oneBatch$compoundLevel <- cL
+  oneBatch$batchLevel <- bL
+  return(oneBatch)
+}
+change_all_isArea <- function(oneBatch,isCompoundNames="all",change=list(which="quant",what="fraction",value=2,changeSD=5e3),flagManualChange=FALSE) {
+  #change=list(what=c("fraction","fixed","mean"),value=c(2,1e5,7e4),sd=5e3,flagManual=c(T,F)
+  #quantIS: rnorm(1,mean=1e5,sd=2e3) ; qualIS: rnorm(1,mean=7e4,sd=5e3) ; qual: quant*rnorm(1,mean=0.8,sd=5e-2)
+  pL <- oneBatch$peakLevel
+  allNames <- unique(pL$compoundName)
+  if(isCompoundNames == "all") { isCompoundNames <- allNames[grepl("-",allNames)] }
+  for(cpd in isCompoundNames) {
+    if(change$which=="both") {
+      pL.which <- pL$compoundName==cpd
+    } else {
+      pL.which <- pL$compoundName==cpd & pL$chromatogramName==change$which
+    }
+    o <- pL$peakArea[pL.which]
+    n <- switch(change$what,
+                fraction=change$value*o,
+                fixed=change$value,
+                mean=rnorm(length(o),mean=change$value,sd=change$changeSD))
+    pL$peakArea[pL.which] <- n
+    if(flagManualChange) {pL$manuallyModified <- TRUE}
+  }
+  oneBatch$peakLevel <- pL
+  quantCompoundNames <- unlist(lapply(isCompoundNames,strsplit,"-"))[seq(1,2*length(isCompoundNames),by=2)]
+  oneBatch <- propogate_Up(oneBatch,quantCompoundNames,redropCalibration=TRUE)
+  return(oneBatch)
+}
+change_anything <- function(oneBatch,changeLevel,csp,changeTerms=list(),recalibrate=FALSE) {
+  if(FALSE) {csp <- c("morphine","s845004","quant")}
+  df <- switch(changeLevel,batch=oneBatch$batchLevel,compound=oneBatch$compoundLevel,peak=oneBatch$peakLevel)
+  oneRow <- switch(changeLevel,
+                   batch=df[df$compoundName==csp[1],],
+                   compound=df[df$compoundName==csp[1]&df$sampleName==csp[2],],
+                   peak=df[df$compoundName==csp[1]&df$sampleName==csp[2]&df$chromatogramName==csp[3],])
+  for(i in 1:length(changeTerms)) {
+    n <- names(changeTerms)[i]
+    oneRow[n] <- changeTerms[[n]]
+  }
+  df[as.numeric(row.names(oneRow)),] <- oneRow
+  oneBatch[[switch(changeLevel,batch=1,compound=2,peak=3)]] <- df
+  if(recalibrate) {oneBatch <- propogate_Up(oneBatch,csp[1],redropCalibration=TRUE)}
+  return(oneBatch)
+}
+drop_allButTwo_calibrators <- function(oneBatch,compoundNames="all") {
+  #cheats the R2
+  cL <- oneBatch$compoundLevel
+  if(compoundNames == "all") {compoundNames <- unique(cL$compoundName)}
+  for(cpd in compoundNames) {
+    stdSamples <- cL[cL$compoundName==cpd & cL$sampleType=="standard",]
+    stdSamples$usedForCurve[c(1,7)] <- TRUE
+    stdSamples$usedForCurve[2:6] <- FALSE
+    cL[cL$compoundName==cpd & cL$sampleType=="standard",] <- stdSamples
+  }
+  oneBatch$compoundLevel <- cL
+  oneBatch <- propogate_Up(oneBatch,compoundNames="all",redropCalibration=FALSE)
+}
+```
+
+# 3. Create the data
+## Initialize a month of batches
+```{r build_a_month}
+instrumentNames <- c("sleepy","happy","grumpy","bashful","doc","sneezy","dopey")
+batchesPerDay <- 20
+numberOfDays <- 30
+monthOfBatches <- list()
+for(i in paste0("b",round(runif(batchesPerDay*numberOfDays,min=1e5,max=9e5),0)) ) {
+  instrumentName <- instrumentNames[ceiling(runif(1,min=0,max=7))]
+  monthOfBatches[[i]] <- makeABatchOfData(i,instrumentName,unksFraction=0.5)
+}
+```
+
+## Populate the reviewer and the timestamps
+``` {r technician_and_date}
+allReviewerNames <- list(Alice=c(1:12),
+                         Brad=c(1:12),
+                         Charles=c(1:12),
+                         Dave=c(5:12),
+                         Elizabeth=c(6:12),
+                         Frank=c(6:12),
+                         Walter=c(4:5),
+                         Xavier=c(1:3),
+                         Yolanda=c(1:5),
+                         Zachary=c(1:4))
+twelveMonths <- c("January","February","March","April","May","June",
+                  "July","August","September","October","November","December")
+currentFirstDate <- as.Date(currentStartDate)
+currentLastDate <- currentFirstDate + (length(monthOfBatches)/batchesPerDay)
+pivotNamesToMonths <- lapply(twelveMonths,function(x){i<-which(twelveMonths%in%x)
+                                                      tf<-sapply(allReviewerNames,function(xx){i%in%xx})
+                                                      names(tf)[tf]})
+reviewerNames <- pivotNamesToMonths[[which(twelveMonths%in%months(currentLastDate))]]
+monthOfBatches <- add_time_and_reviewer(monthOfBatches,reviewerNames,batchesPerDay,currentFirstDate)
+```
+
+## Populate flags and fit to R2
+Calibraiton curve is checked versus a relatively liberal R^2^ of 0.98 and progressive calibrator drops are made until target is met. QC samples are flagged 'fail' when their calculated concentration is more than 20% away from expected. Arbitrarily, 2% of all unknowns with a found concentration are flagged 'fail' to simulate the possible failure modes, and 5% of all non-blank samples are marked as 'manual' modification samples to simulate the cases where automatic peak picking was insufficient.
+```{r flags_and_r2}
+r_sq_target <- 0.98
+monthOfBatches <- fit_r2_and_recalibrate(monthOfBatches,r_sq_target)
+monthOfBatches <- flag_qc_failures(monthOfBatches,qcThreshold=0.2)
+monthOfBatches <- mark_failing_samples(monthOfBatches,unknownFailureRate=0.02,manuallyModifiedRate=0.05)
+```
+
+# 4. Manipulate the data
+All of the code is included, but most of it remains masked in the markdown document so the student doesn't immediately know what to look for.
+```{r prepwork_for_manipulation}
+l <- length(monthOfBatches)
+batchLookup <- data.frame()
+for(b in monthOfBatches) {
+  batchLookup <- rbind(batchLookup,data.frame(batch=b$batchLevel$batchName[1],
+                                              date=b$batchLevel$batchCollectedTimestamp[1],
+                                              technician=b$batchLevel$reviewerName[1],
+                                              instrument=b$batchLevel$instrumentName[1]))
+}
+currentFirstDate <- min(as.Date(batchLookup$date),na.rm=TRUE)
+currentLastDate <- max(as.Date(batchLookup$date),na.rm=TRUE)
+```
+
+```{r do_manipulation, echo=FALSE}
+# 1 # # volume is wrong, so there's 2x the IS in every compound, every sample of a batch, 20 batches
+randoBatch <- 1+floor(runif(20,0,batchesPerDay*30*12))
+dayOfEachBatch <- rep(seq(1,30*12),each=batchesPerDay)
+first <- as.numeric(currentFirstDate - as.Date(startDate))
+last <- as.numeric(currentLastDate - as.Date(startDate))
+justTheseBatches <- intersect(randoBatch,which(dayOfEachBatch > first & dayOfEachBatch <= last) ) - (first*batchesPerDay)
+for(r in justTheseBatches) {
+  monthOfBatches[[r]] <- change_all_isArea(monthOfBatches[[r]],
+                                          isCompoundNames="all",
+                                          change=list(which="both",what="fraction",value=2),
+                                          flagManualChange=FALSE)
+}  
+# 2 # # lot is wrong, so there's 0.6x of one IS compound from batch N --> batch M
+badLot <- list(begin=as.Date("2017-10-01"),end=as.Date("2017-11-15"))
+batchesToChange <- which(as.Date(batchLookup$date) >= badLot$begin & 
+                         as.Date(batchLookup$date) <= badLot$end)
+compoundToChange <- "codeine-d6"
+for(b in batchLookup$batch[batchesToChange]) {
+  monthOfBatches[[b]] <- change_all_isArea(monthOfBatches[[b]],
+                                          isCompoundNames=compoundToChange,
+                                          change=list(which="both",what="fraction",value=0.6),
+                                          flagManualChange=FALSE)
+}
+# 3 # # technician modifies standards in order to get batch R2 to pass
+badTech <- "Dave"
+badDate <- list(start=as.Date("2017-05-01"),end=as.Date("2017-05-31"))
+batchesToChange <- which(as.Date(batchLookup$date) >= badDate$start & 
+                         as.Date(batchLookup$date) <= badDate$end &
+                         batchLookup$technician == badTech)
+for(b in batchLookup$batch[batchesToChange]) {
+  monthOfBatches[[b]] <- drop_allButTwo_calibrators(monthOfBatches[[b]])
+}
+# 4 # # technician modifies QCs to adjust peakQuant in order to get area within 20% of expected conc
+badTech <- "Zachary"
+badDate <- list(start=as.Date("2017-02-01"),end=as.Date("2017-03-31"))
+batchesToChange <- which(as.Date(batchLookup$date) >= badDate$start & 
+                         as.Date(batchLookup$date) <= badDate$end &
+                         batchLookup$technician == badTech)
+for(b in batchLookup$batch[batchesToChange]) {
+  oneBatch <- monthOfBatches[[b]]
+  pL <- oneBatch$peakLevel
+  cL.QC <- oneBatch$compoundLevel[oneBatch$compoundLevel$sampleType=="qc",]
+  outOfRange <- which((abs(cL.QC$concentration - cL.QC$expectedConcentration) / cL.QC$expectedConcentration) > 0.2)
+  for(i in outOfRange) {
+    csp <- c(cL.QC$compoundName[i],cL.QC$sampleName[i],"quant")
+    acceptableConc <- ifelse(cL.QC$expectedConcentration[i]>cL.QC$concentration[i],
+                             cL.QC$expectedConcentration[i] * 0.85,
+                             cL.QC$expectedConcentration[i] * 1.15 )
+    acceptableQuant <- pL$peakArea[pL$compoundName==csp[1] & pL$sampleName==csp[2] & pL$chromatogramName==csp[3]] * acceptableConc/cL.QC$concentration[i]
+    oneBatch <- change_anything(oneBatch,changeLevel="peak",csp,changeTerms=list(peakArea=acceptableQuant, peakQuality=-1, manuallyModified=TRUE))
+  }
+  oneBatch <- propogate_Up(oneBatch,compoundNames="all",redropCalibration=TRUE) 
+  monthOfBatches[[b]] <- oneBatch
+}
+# 5 # # technician modifies unknowns so there are no positive unknowns
+badTech <- "Walter"
+badDate <- list(start=as.Date("2017-04-01"),end=as.Date("2017-05-31"))
+batchesToChange <- which(as.Date(batchLookup$date) >= badDate$start & 
+                         as.Date(batchLookup$date) <= badDate$end &
+                         batchLookup$technician == badTech)
+for(b in batchLookup$batch[batchesToChange]) {
+  oneBatch <- monthOfBatches[[b]]
+  cL.unk <- oneBatch$compoundLevel[oneBatch$compoundLevel$sampleType=="unknown" & oneBatch$compoundLevel$concentration > 0,]
+  if(nrow(cL.unk) == 0) {next}
+  for(i in 1:nrow(cL.unk)) {
+    csp <- c(cL.unk$compoundName[i],cL.unk$sampleName[i],"quant")
+    oneBatch <- change_anything(oneBatch,changeLevel="peak",csp,changeTerms=list(peakArea=0,peakQuality=-1,manuallyModified=TRUE))
+  }
+  oneBatch <- propogate_Up(oneBatch,compoundNames="all",redropCalibration=TRUE) 
+  monthOfBatches[[b]] <- oneBatch
+}
+# 6 # # IS quant+qualArea fluctuates, single day change of SD, all compounds
+badInstrument <- "sneezy"
+badDate <- list(start=as.Date("2017-05-17"),end=as.Date("2017-05-17"))
+batchesToChange <- which(as.Date(batchLookup$date) >= badDate$start & 
+                           as.Date(batchLookup$date) <= badDate$end &
+                           batchLookup$instrument == badInstrument)
+for(b in batchLookup$batch[batchesToChange]) {
+  oneBatch <- monthOfBatches[[b]]
+  # isquantSD 3x , isqualSD 4x
+  oneBatch <- change_all_isArea(oneBatch,isCompoundNames="all",change=list(which="quant",what="mean",value=1e5,changeSD=6e3),flagManualChange=FALSE)
+  oneBatch <- change_all_isArea(oneBatch,isCompoundNames="all",change=list(which="qual",what="mean",value=7e4,changeSD=2e4),flagManualChange=FALSE)
+  oneBatch$peakLevel$peakArea[oneBatch$peakLevel$peakArea < 0] <- 0
+  oneBatch <- propogate_Up(oneBatch)
+  monthOfBatches[[b]] <- oneBatch
+} 
+# 7 # # IS quant+qualArea fluctuates, persistent change of SD and mean, one compound
+badInstrument <- "sleepy"
+badDate <- list(start=as.Date("2017-08-09"),end=as.Date("2017-12-31"))
+batchesToChange <- which(as.Date(batchLookup$date) >= badDate$start & 
+                           as.Date(batchLookup$date) <= badDate$end &
+                           batchLookup$instrument == badInstrument)
+compoundToChange <- "oxymorphone-d3"
+for(b in batchLookup$batch[batchesToChange]) {
+  oneBatch <- monthOfBatches[[b]]
+  oneBatch <- change_all_isArea(oneBatch,isCompoundNames=compoundToChange,change=list(which="both",what="mean",value=5e5,changeSD=6e3),flagManualChange=FALSE)
+  oneBatch$peakLevel$peakArea[oneBatch$peakLevel$peakArea < 0] <- 0
+  oneBatch <- propogate_Up(oneBatch)
+  monthOfBatches[[b]] <- oneBatch
+}
+# 8 # # ionRatio fluctuates, persistent change of SD and mean, one compound
+badInstrument <- "grumpy"
+badDate <- list(start=as.Date("2017-03-23"),end=as.Date("2017-12-31"))
+batchesToChange <- which(as.Date(batchLookup$date) >= badDate$start & 
+                           as.Date(batchLookup$date) <= badDate$end &
+                           batchLookup$instrument == badInstrument)
+compoundToChange <- "oxycodone"
+for(b in batchLookup$batch[batchesToChange]) {
+  oneBatch <- monthOfBatches[[b]]
+  pL.hasArea <- oneBatch$peakLevel[oneBatch$peakLevel$compoundName==compoundToChange &
+                                   oneBatch$peakLevel$chromatogramName=="qual" & 
+                                   oneBatch$peakLevel$peakArea > 0, ]
+  newArea <- pL.hasArea$peakArea * rnorm(nrow(pL.hasArea),mean=0.9,sd=9e-2)
+  newArea[newArea<0] <- 0
+  for(i in 1:nrow(pL.hasArea)) {
+    csp <- c(pL.hasArea$compoundName[i],pL.hasArea$sampleName[i],"qual")
+    oneBatch <- change_anything(oneBatch,changeLevel="peak",csp,changeTerms=list(peakArea=newArea[i],manuallyModified=FALSE))
+  }
+  oneBatch <- propogate_Up(oneBatch,compoundNames="oxycodone",redropCalibration=TRUE) 
+  monthOfBatches[[b]] <- oneBatch
+}
+# 9 # # meanPeakQuality goes to 0.8, linearly for 3 days, then stays there for 1 day, stepfunction back to normal 
+badInstrument <- "grumpy"
+allBadDates <- c(seq(as.Date("2017-02-03"),by=1,length.out=4),
+                 seq(as.Date("2017-05-09"),by=1,length.out=4),
+                 seq(as.Date("2017-08-02"),by=1,length.out=4),
+                 seq(as.Date("2017-11-23"),by=1,length.out=4))
+batchesToChange <- which(as.Date(batchLookup$date) %in% allBadDates &
+                         batchLookup$instrument == badInstrument)
+for(b in batchLookup$batch[batchesToChange]) {
+  oneBatch <- monthOfBatches[[b]]
+  d <- as.Date(batchLookup$date[batchLookup$batch==b])
+  multiplier <- min(1+as.numeric(d - badDate$start),3)
+  pL <- oneBatch$peakLevel
+  pQ <- rnorm(nrow(pL),mean=0,sd=1) # rcauchy()
+  pQ.mean <- mean(pQ)
+  pQ.pivot <- pQ.mean + (multiplier*1)
+  pQ.tailFlip <- which(pQ > pQ.pivot)
+  pQ[pQ.tailFlip] <- (2*pQ.pivot)-pQ[pQ.tailFlip]
+  pQ <- pQ - max(pQ)
+  pQ <- pQ/(max(pQ)-min(pQ))
+  pQ <- round(1+(0.35*pQ), 2)
+  pL$peakQuality <- ifelse(pL$peakArea>0,1,0) * pQ
+  oneBatch$peakLevel <- pL
+  monthOfBatches[[b]] <- oneBatch
+}
+# 10 # # slope is different for every compound (from batch N --> batch M) on just this instrument
+badInstrument <- "doc"
+badDate <- list(start=as.Date("2017-07-05"),end=as.Date("2017-12-01"))
+batchesToChange <- which(as.Date(batchLookup$date) >= badDate$start & 
+                           as.Date(batchLookup$date) <= badDate$end &
+                           batchLookup$instrument == badInstrument)
+batchesToChange <- which(batchLookup$instrument == badInstrument)
+for(b in batchLookup$batch[batchesToChange]) {
+  oneBatch <- monthOfBatches[[b]]
+  wasQuantArea <- oneBatch$peakLevel$peakArea[oneBatch$peakLevel$chromatogramName=="quant"]
+  oneBatch$peakLevel$peakArea[oneBatch$peakLevel$chromatogramName=="quant"] <- oneBatch$peakLevel$peakArea[oneBatch$peakLevel$chromatogramName=="qual"]
+  oneBatch$peakLevel$peakArea[oneBatch$peakLevel$chromatogramName=="qual"] <- wasQuantArea
+  oneBatch <- propogate_Up(oneBatch,redropCalibration=TRUE)
+  monthOfBatches[[b]] <- oneBatch
+}
+# 11 # # qcs are always failing, keep the IS but move the compound conc 
+allBadDates <- c(seq(as.Date("2017-04-07"),by=1,length.out=8),
+                 seq(as.Date("2017-06-10"),by=1,length.out=8),
+                 seq(as.Date("2017-07-22"),by=1,length.out=8),
+                 seq(as.Date("2017-11-29"),by=1,length.out=8)) 
+for(bad in 1:4) {
+  i <- 1+8*(bad-1)
+  j <- i+7
+  if(any(allBadDates[i:j]%in%as.Date(batchLookup$date))) { break }
+}
+badInstrument <- switch(bad,"bashful","happy","sneezy","dopey")
+compoundToChange <- switch(bad,"morphine","hydrocodone","hydrocodone","codeine")
+batchesToChange <- which(as.Date(batchLookup$date) %in% allBadDates &
+                         batchLookup$instrument == badInstrument)
+for(b in batchLookup$batch[batchesToChange]) {
+  oneBatch <- monthOfBatches[[b]]
+  pL <- oneBatch$peakLevel
+  cL.QC <- oneBatch$compoundLevel[oneBatch$compoundLevel$sampleType=="qc",]
+  inRange <- which((abs(cL.QC$concentration - cL.QC$expectedConcentration) / cL.QC$expectedConcentration) <= 0.2)
+  for(i in inRange) {
+    csp <- c(cL.QC$compoundName[i],cL.QC$sampleName[i],"quant")
+    delta <- cL.QC$concentration[i] - cL.QC$expectedConcentration[i]
+    unacceptableConc <- ifelse(delta > 0,
+                               (cL.QC$expectedConcentration[i]*1.2)+delta,
+                               (cL.QC$expectedConcentration[i]*0.8)-delta)
+    unacceptableQuant <- pL$peakArea[pL$compoundName==csp[1] & pL$sampleName==csp[2] & pL$chromatogramName==csp[3]] * unacceptableConc/cL.QC$concentration[i]
+    oneBatch <- change_anything(oneBatch,changeLevel="peak",csp,changeTerms=list(peakArea=unacceptableQuant))
+  }
+  oneBatch <- propogate_Up(oneBatch,compoundNames=compoundToChange,redropCalibration=TRUE) 
+  monthOfBatches[[b]] <- oneBatch
+}
+```
+
+# 5. Write files
+Each pass through this script (see `currentStartDate`, line 30) generates a large list of batches, where each batch is another list of three dataframes for the batchLevel, compoundLevel, and peakLevel data. On a run through the script, an .Rdata file for these coallated dataframes is made, and then each is saved in either Excel (batchLevel), CSV (compoundLevel) or TSV (peakLevel) format. On the last run through the script (see `yearComplete`, line 31) all twelve Rdata files are opened and restitched to make a year of batchLevel, compoundLevel, and peakLevel data. Those full-year dataframes are resaved as an Rdata file.
+
+If you are running a version of R 3.3.0 or newer, the `openxlsx` package is recommended instead of the older `xlsx` in order to avoid dependencies on Java.
+```{r write_one_month}
+batchLevel <- do.call(rbind,lapply(monthOfBatches, function(x) {x$batchLevel}))
+compoundLevel <- do.call(rbind,lapply(monthOfBatches, function(x) {x$compoundLevel}))
+peakLevel <- do.call(rbind,lapply(monthOfBatches, function(x) {x$peakLevel}))
+save(list=c("batchLevel","compoundLevel","peakLevel"),
+     file=file.path(workingDir,paste0(as.character(currentFirstDate),".Rdata")) )
+
+excelFile <- paste0(as.character(currentFirstDate),".xlsx")
+csvFile <- paste0(as.character(currentFirstDate),".csv")
+tabFile <- paste0(as.character(currentFirstDate),".txt")
+write.xlsx2(batchLevel, file=file.path(workingDir,excelFile), row.names=FALSE )
+write.csv(compoundLevel, file=file.path(workingDir,csvFile), row.names=FALSE )
+write.table(peakLevel, file=file.path(workingDir,tabFile), sep="\t", row.names=FALSE)
+
+allRdata <- list.files(path=workingDir,pattern="Rdata$",full.names=TRUE)
+if(yearComplete | length(allRdata)==12) {
+  bigBatchLevel <- list()
+  bigCompoundLevel <- list()
+  bigPeakLevel <- list()
+  for(r in allRdata) {
+    load(r)
+    m <- switch(as.numeric(strsplit(r,"-")[[1]][2]),
+                "January","February","March","April","May","June",
+                "July","August","September","October","November","December")
+    bigBatchLevel[[m]] <- batchLevel
+    bigCompoundLevel[[m]] <- compoundLevel
+    bigPeakLevel[[m]] <- peakLevel
+  }
+  batchYear <- do.call(rbind,lapply(bigBatchLevel, function(x) {return(x)}))
+  compoundYear <- do.call(rbind,lapply(bigCompoundLevel, function(x) {return(x)}))
+  peakYear <- do.call(rbind,lapply(bigPeakLevel, function(x) {return(x)}))
+  save(list=c("batchYear","compoundYear","peakYear"),
+     file=file.path(workingDir,"wholeYear.Rdata") )
+}
+```
+
+

@@ -20,9 +20,9 @@ This course is intended for laboratory professionals with a basic command of R a
 - **Lesson 2**: Getting cozy with R Markdown
 - **Lesson 3**: Reading and writing files - beyond the basics
 - **Lesson 4**: Data manipulation in the tidyverse
-- **Lesson 5**: Blending data sets
-- **Lesson 6**: Taking plotting to the next level with ggplot2
-- **Lesson 7**: Modelling data
-- **Lesson 8**: Beyond flat files - parsing complex data
-- **Lesson 9**: Scaling - don't make me repeat myself
-- **Lesson 10**: End-to-end - from file import to communication
+- **Lesson 5**: [Blending data sets](lesson5/lesson5.Rmd)
+- **Lesson 6**: [Taking plotting to the next level](lesson6/lesson6.Rmd)
+- **Lesson 7**: [Modelling data](lesson7/lesson7.Rmd)
+- **Lesson 8**: [Beyond flat files](lesson8/lesson8.Rmd)
+- **Lesson 9**: [Scaling - don't make me repeat myself](lesson9/lesson9.Rmd)
+- **Lesson 10**: [End-to-end - from file import to communication](lesson10/lesson10.Rmd)

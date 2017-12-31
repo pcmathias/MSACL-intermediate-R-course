@@ -1,0 +1,142 @@
+---
+title: "tuning_the_data"
+author: "Adam Zabell"
+date: "12/21/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+workingDir <- "/Users/azabell/Dropbox/R/mockData MSACL2018"
+useNewerPackage <- FALSE # If running R 3.3.0 or newer, use openxlsx
+if(useNewerPackage) {
+ #install.packages("openxlsx")
+ library(openxlsx)
+} else {
+ #install.packages("xlsx")
+ library(xlsx)
+}
+```
+
+# Making database repairs 
+After construction of the data files, several gaps were discovered. Most notably, there were five days of batches where a timestamp and a reviewer were not added. Other edits will be applied from this file as their need is discovered.
+
+## 1. Missing timestamps
+```{r missing_timestamp}
+add_timestamps_postproduction <- function(batch.df,batchNames,dateCollected="2017-01-01") {
+  # data collected 8pm-2am, reviewStart 9am-2pm, avg batch review time is 1 hr
+  dateAs.posixlt <- strptime(paste(dateCollected,"20:00:00"),"%F %X") 
+  for(b in batchNames) {
+    doneTime <- dateAs.posixlt + round(runif(1,0,21600),0)
+    startTime <- dateAs.posixlt + round(runif(1,46800,64800),0)
+    endTime <- startTime + round(rnorm(1,3600,900),0)
+    if(endTime > startTime) {endTime <- startTime + round(runif(1,900,2700),0)}
+    batch.df$batchCollectedTimestamp[batch.df$batchName == b] <- as.character(doneTime)
+    batch.df$reviewStartTimestamp[batch.df$batchName == b] <- as.character(startTime)
+    batch.df$reviewCompleteTimestamp[batch.df$batchName == b] <- as.character(endTime)
+  }
+  return(batch.df)
+}
+
+allRdata <- list.files(path=workingDir,pattern="Rdata$",full.names=TRUE)
+for(i in 1:12) {
+  load(allRdata[i])
+  didNotTimestamp <- which(is.na(batchLevel$batchCollectedTimestamp))
+  if(length(didNotTimestamp) == 0) {next}
+  batchNames <- unique(batchLevel$batchName[didNotTimestamp])
+  justBefore <- batchLevel[didNotTimestamp[1]-1,]
+  noon <- paste(as.Date(justBefore$batchCollectedTimestamp),"12:00:00 GMT")
+  isAfterNoon <- justBefore$batchCollectedTimestamp > noon
+  todaysDate <- as.Date(justBefore$batchCollectedTimestamp)
+  if(isAfterNoon) {todaysDate <- todaysDate + 1}
+  batchLevel <- add_timestamps_postproduction(batchLevel,batchNames,dateCollected=as.character(todaysDate))
+  firstDate <- as.Date(min(batchLevel$batchCollectedTimestamp))
+  save(list=c("batchLevel","compoundLevel","peakLevel"),
+     file=file.path(workingDir,paste0(as.character(firstDate),".Rdata")) )
+  excelFile <- paste0(as.character(firstDate),".xlsx")
+  write.xlsx2(batchLevel, file=file.path(workingDir,excelFile), row.names=FALSE )
+}
+```
+
+## 2. Missing reviewers
+This looks much like the prior section, with an extra function (hidden in the report but present in the script) to make sure the course lessons don't get broken.
+```{r missing_reviewer_adjusting_function, echo=FALSE}
+adjust_reviewer_index <- function(randomNameAssignments,i) {
+  if(i==2 | i==3) {
+    #no Zachary
+    randomNameAssignments[randomNameAssignments==6] <- 2
+  }
+  if(i==4) {
+    #no Walter
+    randomNameAssignments[randomNameAssignments==4] <- 6
+  }
+  if(i==5) {
+    #no Dave
+    randomNameAssignments[randomNameAssignments==4] <- 3
+    #no Walter
+    randomNameAssignments[randomNameAssignments==5] <- 6
+  }
+  return(randomNameAssignments)
+}
+```
+```{r missing_reviewer}
+add_reviewer_postproduction <- function(batch.df,batchNames,reviewerName) {
+  for(b in batchNames) {
+    batch.df$reviewerName[batch.df$batchName == b] <- reviewerName
+  }
+  return(batch.df)
+}
+
+allReviewerNames <- list(Alice=c(1:12),
+                         Brad=c(1:12),
+                         Charles=c(1:12),
+                         Dave=c(5:12),
+                         Elizabeth=c(6:12),
+                         Frank=c(6:12),
+                         Walter=c(4:5),
+                         Xavier=c(1:3),
+                         Yolanda=c(1:5),
+                         Zachary=c(1:4))
+allRdata <- list.files(path=workingDir,pattern="Rdata$",full.names=TRUE)
+for(i in 1:12) {
+  load(allRdata[i])
+  didNotAddReviewer <- which(batchLevel$reviewerName=="none")
+  if(length(didNotAddReviewer) == 0) {next}
+  batchNames <- unique(batchLevel$batchName[didNotAddReviewer])
+  currentReviewers <- names(allReviewerNames)[sapply(allReviewerNames,function(x){i%in%x})]
+  randomNameAssignments <- ceiling(runif(length(batchNames))*6)
+  randomNameAssignments <- adjust_reviewer_index(randomNameAssignments,i)
+  for(idx in 1:6) {
+    batchSubset <- which(randomNameAssignments==idx)
+    if(length(batchSubset) == 0) {next}
+    batchLevel <- add_reviewer_postproduction(batchLevel,batchNames[batchSubset],currentReviewers[idx]) 
+  }
+  firstDate <- as.Date(min(batchLevel$batchCollectedTimestamp))
+  save(list=c("batchLevel","compoundLevel","peakLevel"),
+     file=file.path(workingDir,paste0(as.character(firstDate),".Rdata")) )
+  excelFile <- paste0(as.character(firstDate),".xlsx")
+  write.xlsx2(batchLevel, file=file.path(workingDir,excelFile), row.names=FALSE )
+}
+```
+
+## 3. Rewrite the Year
+```{r rewrite_year}
+  allRdata <- list.files(path=workingDir,pattern="Rdata$",full.names=TRUE)
+  bigBatchLevel <- list()
+  bigCompoundLevel <- list()
+  bigPeakLevel <- list()
+  for(r in 1:12) {
+    load(allRdata[r])
+    m <- switch(r,
+                "January","February","March","April","May","June",
+                "July","August","September","October","November","December")
+    bigBatchLevel[[m]] <- batchLevel
+    bigCompoundLevel[[m]] <- compoundLevel
+    bigPeakLevel[[m]] <- peakLevel
+  }
+  batchYear <- do.call(rbind,lapply(bigBatchLevel, function(x) {return(x)}))
+  compoundYear <- do.call(rbind,lapply(bigCompoundLevel, function(x) {return(x)}))
+  peakYear <- do.call(rbind,lapply(bigPeakLevel, function(x) {return(x)}))
+  save(list=c("batchYear","compoundYear","peakYear"),
+     file=file.path(workingDir,"wholeYear.Rdata") )
+```

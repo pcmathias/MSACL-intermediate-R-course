@@ -1,0 +1,25 @@
+---
+title: 'Lesson 10: Bringing it all together from import to graph to result'
+author: "Adam Zabell"
+date: "12/29/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Import to Graph
+Each of these lessons reinforce the others. You can write purely linear code, but **purrr** makes the code easier to read, and remember, and use again. You can read and examine each csv file as a separate data.frame, but **rbind** and **dplyr** make it much easier to aggregate and discover problems. What follows are the steps to replicate the disocvery of one particular problem in the mock data.
+
+read April, May, June
+plot the R2, sort by technician
+discover technician01 has R2=1 for everything in the month of May.
+
+# Graph to Result
+So there's something going on here. The question is, what? 
+
+Look at the batches run by technician01 in May.
+Discover that all but the low and high calibrators are being dropped.
+Note that they're being dropped regardless of how good they are.
+The data doesn't say why technician01 is doing this, but there are a couple of good guesses here which revolve around training.
