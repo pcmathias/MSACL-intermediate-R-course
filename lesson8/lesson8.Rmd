@@ -1,54 +1,83 @@
 ---
 title: 'Lesson 8: Beyond the csv -- parsing xml and json files'
 author: "Adam Zabell"
-date: "12/28/2017"
+date: "1/2/2018"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 rootDir <- "/Users/azabell/Dropbox/R/"
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(magrittr)
 library(xml2)
 library(jsonlite)
 ```
 
 # Flat and Structured Files
-read_csv read_tsv and read.xlsx are flat, but not really since we regularly use the first row as a column header, giving structure to the data
-
-for the most part, databases are far more structured than that, where each element in the datbase must contain a value.
-
-the details of database construction are well beyond the scope of this class. But the resulting file from a database query is typically in XML or JSON format. Parsing from that format into a data.frame
+The commands read_csv, read_tsv, and read.xlsx discussed in Lesson 5 open files that are often called 'flat' because there is no inherent structure to the delimited rows and columns. Using the first row as a column header is a common convention, but is not required for the function to work properly. In contrast, most databases have a required structure to each element, and these elements sometimes have a nestest structure within structure. The details of database construction are well beyond the scope of this class, but the return from a database query is typically in XML or JSON format, and working with these files in **R** involve some basic parsing techniques.
 
 ## The extensible markup language (xml)
-Looks a lot like html, because html is (by and large) a subset of xml. But html permits some shortcuts which xml does not, and xml doesn't have a restricted set of tags. 
+When read as a text file, xml looks a lot like html, because html is (by and large) a subset of xml. That's not to say they're interchangable, since html permits some shortcuts which xml does not, and xml doesn't restrict the possible set of tags to only those elements a web browser is programmed to expect. The layout of an xml file expects a nested pair of <key>*value*</key> tags, where that *value* can itself be another nested pair. 
 
+Reading an xml file requires the **xml2** package (or one like it). Consider a short list of album information, where each entry contains the same number of keys, and those keys are always in the same order.
+```{r xml_example}
 cd <- read_xml("https://www.w3schools.com/xml/cd_catalog.xml")
 cd.list <- as_list(cd)
 cd.rows <- length(cd.list)
-cd.names <- list(names(cd.list[[1]]))
-cd.df <- data.frame(matrix(unlist(cd.list), nrow=cd.rows, byrow=TRUE, dimnames=list(NULL,cd.names)),stringsAsFactors=FALSE)
+cd.names <- names(cd.list[[1]])
+cd.df <- data.frame(matrix(unlist(cd.list), 
+                           nrow=cd.rows, 
+                           byrow=TRUE, 
+                           dimnames=list(NULL,cd.names)),
+                    stringsAsFactors=FALSE)
+```
 
 ## The javascript object notation (json)
-A web browser can only send one thing, or retrieve one thing, at a time. The most complex online form has to be reduced to a single string, and then unpacked on the other side. It tends to be more lightweight than xml, and looks very different, but operates on the same principle of first naming a thing, and then giving it a value.
+A web browser can only send one thing, or retrieve one thing, at a time. The most complex online form has to be reduced to a single string, and then unpacked on the other side. Although that string could be sent as xml, virtually every website operates with json because this format is more lightweight than xml and thus takes less time to transmit. The format looks very different, but operates on the same principle of first naming a thing, and then giving it a value. With json, the key and value of a term is separated by a colon, and each term is separated by a comma. Unlike xml, in json any nested terms are explicitly either an array (ordered, and enclosed in square brackets) or an object (unordered, and enclosed in curly brackets). 
 
+Reading a json file requires the **jsonlite** package (or one like it). Consider an enumeartion of named colors and their RGB value.
+```{r json_example}
 colr <- fromJSON("https://raw.githubusercontent.com/corysimmons/colors.json/master/colors.json")
 colr.rows <- length(colr)
-colr.df <- data.frame(matrix(unlist(colr), nrow=colr.rows, byrow=TRUE),stringsAsFactors=FALSE)
-names(colr.df) <- c("R","G","B","T","name")
-colr.df$name <- names(colr.rows)
+colr.df <- data.frame(matrix(unlist(colr), 
+                             nrow=colr.rows, 
+                             byrow=TRUE,
+                             dimnames=list(NULL,c("R","G","B","T"))),
+                      stringsAsFactors=FALSE)
+colr.df$name <- names(colr)
+```
 
 ## Solving problems
-The most common problem is that numbers are now text strings. Jumping ahead to the next lesson, the fix is
-cd.df$PRICE %<>% map_dbl(as.numeric)
+The most common problem is that numbers, even if they were stored as numbers, can become text strings during conversion to a data.frame. Jumping ahead to the next lesson, the simplest fix will invoke a loop on the column of data that should be numeric.
+```{r cd_price}
+cd.df$PRICE %<>% map_dbl(as.numeric) # also invokes a from-and-back-into pipe notation
+```
 
-There are a lot of other problems that could happen, because each entry in the xml or json file is an independent description. There may be an element not present in every entry (not including a price for a CD), or multiple elements within an element (two artists for a CD). Either is disasterous; conversion will now be wildly offset.
+There are many more problems that could happen, ultimately because each entry in the xml or json file is an independent object. There may be an element not present in every entry (e.g. not including a price for a CD), or multiple elements within an element (e.g. two artists for a CD), or the elements may not be retrieved in the same order each time (e.g. all Bob Dylan albums return the artist before the title). All are disasterous; the conversion examples shown here using *matrix* will now be wildly offset.
 
-Most problems should be solved on the query-side of the equation, to confirm the query was built correctly and that the database is populated as expected. But, as with the above "two artists for one CD" it is possible that your data isn't as data.frame friendly as you would like. It might be helpful to troubleshoot the retrieved query with some basic checks on the data that you do have.
-
-every entry (which becomes a 'row' in the data.frame) has the same number of elements (which becomes a 'column').
-every entry has the same names for their elements
-every element has only one value
-
-
+Most problems should be solved on the query-side of the equation, to confirm the query was built correctly and that the database is populated as expected. But, since "two artists for one CD" is at least possible and might even be common, the retrieved data could simply be less data.frame friendly than you would like. Unless you're very sure of what the returned data must looks like, some basic checks now will avoid maddening troubleshooting later. 
+```{r troubleshooting}
+numberOfElements <- c()
+namesForElements <- c()
+for(l in cd.list) {
+  numberOfElements <- c(numberOfElements,length(l))
+  namesForElements <- c(namesForElements,paste(names(l),collapse=":"))
+  for(e in l) {
+    valuesInElement <- length(e)
+    if(valuesInElement!=1) {break}
+  }
+  if(valuesInElement!=1) {break}
+}
+paste(unique(numberOfElements),unique(namesForElements),sep=" | ")
+```
 
 # Summary
+* **xml2** for read/writing xml files
+* **jsonlite** for read/writing json files
+* troubleshoot the returned query result to catch
+    + multiple values where a single was expected
+    + the same key names are in every entry
+    + the key names are always in the same order (or the conversion code robustly adjusts to handle this)
+    + numbers stored as strings
+    + strings stored as factors
