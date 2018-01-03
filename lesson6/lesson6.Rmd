@@ -6,7 +6,13 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-rootDir <- "/Users/azabell/Dropbox/R/MSACL-intermediate-R-course/"
+duringClass <- FALSE
+if(duringClass) {
+  setwd("/full/unzipped/path") # e.g. "C:\Users\johndoe\Desktop\MSACL-intermediate-R-course-master"
+  rootDir <- getwd()
+} else {
+  rootDir <- "/Users/azabell/Dropbox/R/MSACL-intermediate-R-course"
+}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(lattice)
@@ -17,7 +23,7 @@ Default **R** comes with several basic plotting commands -- *plot* to draw an X,
 
 The first major drawback to using these plots is that each requires learning a slightly different syntax to decorate the graph. 
 ```{r plot_color_syntax}
-workingDir <- paste0(rootDir,"class_data")
+workingDir <- file.path(rootDir,"class_data")
 jan.s <- read_csv(file.path(workingDir,"2017-01-06.csv"))
 hasIonRatio <- jan.s$ionRatio > 0
 plot(jan.s$ionRatio[which(hasIonRatio)],col='blue')
