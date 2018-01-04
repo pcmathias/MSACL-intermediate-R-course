@@ -11,7 +11,6 @@
 
 <meta name="author" content="Adam Zabell" />
 
-<meta name="date" content="2017-12-29" />
 
 <title>Lesson 9: Scaling with purrr to loop through a vector</title>
 
@@ -121,32 +120,105 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Lesson 9: Scaling with purrr to loop through a vector</h1>
 <h4 class="author"><em>Adam Zabell</em></h4>
-<h4 class="date"><em>12/29/2017</em></h4>
+<h4 class="date"><em>1/3/2018</em></h4>
 
 </div>
 
 
 <div id="looping-commands" class="section level1">
 <h1>Looping Commands</h1>
-<p>Typing more than once increases the risk of typos, and decreases readability. The easiest way to cycle through an action more than once is with a for..loop or a while..loop</p>
+<p>Reducing duplication in your typed code makes it easier to see the purpose of the code, easier to change the calculation, and easier to remove bugs. The three typical methods in <strong>R</strong> to iterate with a specific piece of code are functions, for-loops, and vector transformations with the <strong>purrr</strong> package.</p>
+<div id="looping-with-user-functions" class="section level2">
+<h2>Looping with user functions</h2>
+<p>Every command in <strong>R</strong> is consistent with the function syntax <em>command(inputA,inputB,…)</em> and writing your own function is no different.</p>
+<pre class="r"><code>tableOfNumbers &lt;- tibble(a=c(53,1,51,23,28,12,87,0,47),
+                         b=floor(100*runif(9)),
+                         c=as.integer(100*rnorm(9)),
+                         d=rep(5,9),
+                         e=seq(1,9))
+medianByColumn &lt;- function(tb) {
+  recordOfValues &lt;- c()
+  for(i in 1:ncol(tb)) {
+    byColumn &lt;- unlist(tb[,i])
+    recordOfValues %&lt;&gt;% append(median(byColumn))
+  }
+  return(recordOfValues)
+}
+medianByRow &lt;- function(tb) {
+  recordOfValues &lt;- c()
+  for(i in 1:nrow(tb.df)) {
+    byRow &lt;- unlist(tb[i,])
+    recordOfValues %&lt;&gt;% append(median(byRow))
+  }
+  return(recordOfValues)
+}</code></pre>
+<p>Both of these functions use a for-loop to cycle through the <em>byColumn</em> or <em>byRow</em> vector of numbers. Additionally, the logic is basically identical except for the placement of a single comma, which means a single function could be written to handle both tasks. Finally, the <em>recordOfValues</em> empty vector needs to be initalized before it can be used, which is slightly confusing. Each of these comments are addressed below.</p>
+</div>
 <div id="looping-with-for-and-while" class="section level2">
 <h2>Looping with <em>for</em> and <em>while</em></h2>
-<p>Loops are explicit. Code looks like it would on a single runthrough.</p>
+<p>These loops are explicitly sequential, showing the input and output of each command in exactly the same way as the primary code that you work with. The <em>for</em> loop follows a three component format: create the output vector, define the looping sequence, and perform the body of work. In our examples, that body is two lines long, but it could be as complex as necessary to produce the intended output. When working with long loops (100s to 1000s), the inefficiency of growing the output vector on each iteration will slow down the code. Instead, the output should be initialized as an empty vector of the expected length.</p>
+<pre class="r"><code>medianByColumn &lt;- function(tb) {
+  recordOfValues &lt;- vector(&quot;double&quot;, ncol(tb))
+  for(i in 1:ncol(tb)) {
+    byColumn &lt;- unlist(tb[,i])
+    recordOfValues[i] &lt;- median(byColumn)
+  }
+  return(recordOfValues)
+}</code></pre>
+<p>The <em>while</em> loop is used when the work being performed should continue until a logical condition occurs. The obvious risk is that the condition never occurs, prompting the need for a failsafe. They are rarely used.</p>
+<pre class="r"><code>numberOfFlips &lt;- 0
+numberOfHeads &lt;- 0
+while(numberOfHeads &lt; 3) { # risky
+  if(sample(c(&quot;H&quot;,&quot;T&quot;),1) == &quot;H&quot;) { numberOfHeads &lt;- numberOfHeads + 1 }
+  numberOfFlips &lt;- numberOfFlips + 1
+}
+
+countedFlips &lt;- 0
+numberOfTails &lt;- 0
+while(numberOfTails &lt; 3 | countedFlips == 1000) { #safer
+  if(sample(c(&quot;H&quot;,&quot;T&quot;),1) == &quot;T&quot;) { numberOfTails &lt;- numberOfTails + 1 }
+  countedFlips &lt;- countedFlips + 1
+}</code></pre>
 </div>
 <div id="looping-with-map" class="section level2">
 <h2>Looping with <em>map</em></h2>
-<p>Loops are better, but require a lot of “bookkeeping” code, decreasing readability. The class of map_* functions accept a vector, apply a command to every element, and return a vector matching the specified type.</p>
+<p>These loops are explicitly vectored, performing the action on every element in that vector. The <strong>purrr</strong> package has five functions which return a vector for each type of output: list, logical, integer, double, and character. It comes with a significant increase in speed and further improved readability, but requires a different seeming workflow. Most notably, for-loops often have bookkeeping variables for the intermediate steps in the body of work, while <em>map</em> functions generate the output vector directly and are designed to work well with pipes.</p>
+<p>The <em>map</em> structure builds on the idea that a solution to “how do I solve for a single set of data” is simpler to conceptualize. After breaking the problem down to small steps on one set, enclosing those steps in the function will iterates on each column of data in the data.frame to report the vector of results.</p>
+<pre class="r"><code>medianByColumn &lt;- function(tb) {
+  recordOfValues &lt;- map_dbl(tb,median) %&gt;% unname()
+  return(recordOfValues)
+}
+medianByRow &lt;- function(tb) {
+  transposedTibble &lt;- as_tibble(t(tb))
+  recordOfValues &lt;- map_dbl(transposedTibble,median) %&gt;% unname()
+  return(recordOfValues)
+}</code></pre>
 </div>
 </div>
 <div id="nested-looping" class="section level1">
 <h1>Nested Looping</h1>
-<div id="looping-with-user-functions" class="section level2">
-<h2>Looping with user functions</h2>
-<p>One of the great reasons for using <strong>R</strong> is that it was designed to accept user-defined functions. User functions help reduce errors, because you’re reusing code. User functions help hide messy parts, letting you read the workflow without getting bogged down in details.</p>
-</div>
+<p>Having built one loop, a second (or more) iteration may still be necessary to do the work.</p>
+<pre class="r"><code>vectorList &lt;- vector(&quot;list&quot;, 10)
+for(i in 1:10) {
+  oneVector &lt;- vector(&quot;double&quot;, 20)
+  for(j in 1:20) {
+    oneVector[j] &lt;- i * j 
+  }
+  vectorList[[i]] &lt;- oneVector
+}
+nestingTibble &lt;- vectorList %&gt;% set_names(map_chr(1:10,paste0,&quot;column&quot;)) %&gt;% bind_cols()
+
+betterNestingTibble &lt;- c(1:10) %&gt;% 
+                       map_dfc( ~ tibble(x = . * 1:20) ) %&gt;% 
+                       set_names(map_chr(1:10,paste0,&quot;column&quot;))</code></pre>
 </div>
 <div id="summary" class="section level1">
 <h1>Summary</h1>
+<ul>
+<li><em>functions( )</em> capture regularly used segments of code so the main workflow can focus on the result instead of the process</li>
+<li><em>for( ) { }</em> loops retain the serial nature of the workflow and avoid the need to copy/paste the iterations</li>
+<li><em>map_*( )</em> functions are incredibly fast and powerful, and the preferred looping mechanism in <strong>R</strong> once the format is understood</li>
+</ul>
 </div>
 
 

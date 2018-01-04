@@ -6,7 +6,13 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-rootDir <- "/Users/azabell/Dropbox/R/MSACL-intermediate-R-course/"
+duringClass <- FALSE
+if(duringClass) {
+  setwd("/full/unzipped/path") # e.g. "C:\Users\johndoe\Desktop\MSACL-intermediate-R-course-master"
+  rootDir <- getwd()
+} else {
+  rootDir <- "/Users/azabell/Dropbox/R/MSACL-intermediate-R-course"
+}
 knitr::opts_chunk$set(echo = TRUE)
 library(openxlsx)
 library(tidyverse)
@@ -16,7 +22,7 @@ library(tidyverse)
 ## Simple *rbind* and *cbind*
 Sometimes, you need data stored across more than one file. For example, managing the QC deviations across twelve separate months of reports. Rather than hold multiple printouts side-by-side to monitor a trend, **R** will allow you to read each file and knit them together either by row, or by column. For most circumstances, that combination involves adding rows to data set.
 ```{r rowbind}
-workingDir <- paste0(rootDir,"class_data")
+workingDir <- file.path(rootDir,"class_data")
 january <- read_csv(file.path(workingDir,"2017-01-06.csv"))
 as.data.frame(january[187195:187200,])
 february <- read_csv(file.path(workingDir,"2017-02-06.csv"))

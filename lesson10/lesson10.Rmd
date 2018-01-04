@@ -1,25 +1,87 @@
 ---
 title: 'Lesson 10: Bringing it all together from import to graph to result'
 author: "Adam Zabell"
-date: "12/29/2017"
+date: "1/3/2018"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
+duringClass <- FALSE
+if(duringClass) {
+  setwd("/full/unzipped/path") # e.g. "C:\Users\johndoe\Desktop\MSACL-intermediate-R-course-master"
+  rootDir <- getwd()
+} else {
+  rootDir <- "/Users/azabell/Dropbox/R/MSACL-intermediate-R-course"
+}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(openxlsx)
+library(lubridate)
+library(magrittr)
 ```
 
-# Import to Graph
-Each of these lessons reinforce the others. You can write purely linear code, but **purrr** makes the code easier to read, and remember, and use again. You can read and examine each csv file as a separate data.frame, but **rbind** and **dplyr** make it much easier to aggregate and discover problems. What follows are the steps to replicate the disocvery of one particular problem in the mock data.
+# From Import to Graph
+These lessons were designed to build and reinforce each other. It's possible to write purely linear code, but **purrr** makes the code easier to read, and remember, and use again. Each csv can be read and examined in isolation, but **rbind** and **dplyr** make it possible to aggregate and discover trends. What follows are the steps to replicate the disocvery of one particular problem in the mock data: excessively good R^2^ data.
 
-read April, May, June
-plot the R2, sort by technician
-discover technician01 has R2=1 for everything in the month of May.
+For this lesson, we're fudging slightly by already knowing what we want to start looking for.
+```{r first_plots}
+workingDir <- file.path(rootDir,"class_data")
+oneYearBatches <- list.files(workingDir,pattern="xlsx$") %>%
+                  file.path(workingDir,.) %>%
+                  map_dfr(read.xlsx) %>%
+                  as_tibble() %>%
+                  type_convert()
+
+ggplot(oneYearBatches, aes(x=calibrationR2,color=compoundName)) +
+  geom_histogram()
+ggplot(oneYearBatches, aes(x=batchCollectedTimestamp,y=calibrationR2,color=compoundName)) +
+  geom_line()
+```
+
+There's something interesting going on with the R^2^ values in the month of May, where a large number of them report a value of 1.0 -- a perfect fit. Let's focus on that month, and spread out the data so we can clarify whether it's all compounds or just oxymorphone.
+
+```{r facets}
+mayPlot <- oneYearBatches %>% 
+             filter(batchCollectedTimestamp > ymd("2017-04-15"), batchCollectedTimestamp < ymd("2017-06-15")) %>%
+             ggplot(aes(x=batchCollectedTimestamp,y=calibrationR2,color=compoundName)) 
+mayPlot +
+  geom_line() +
+  facet_wrap(~ compoundName)
+mayPlot +
+  geom_point() +
+  facet_grid(reviewerName ~ instrumentName)
+```
+
+Whatever is going on, it looks like reviewer 'Dave' is the only person it is happening to. 
 
 # Graph to Result
-So there's something going on here. The question is, what? 
+Based on the batch-level data, we can see that 'Dave' -- and apparently only Dave -- has perfect R^2^ values on every batch of data he reviewed throughout the month of May. Digging deeper will require merging information from the batch level with information at the sample (and possibly peak) level. The following plots of *davesData* provide compelling evidence for what happened: Dave unselected the middle five calibrators in order to draw a straight line and maximize the R^2^ term.
 
-Look at the batches run by technician01 in May.
-Discover that all but the low and high calibrators are being dropped.
-Note that they're being dropped regardless of how good they are.
-The data doesn't say why technician01 is doing this, but there are a couple of good guesses here which revolve around training.
+```{r join}
+oneYearSamples <- list.files(workingDir,pattern="csv$") %>%
+                  file.path(workingDir,.) %>%
+                  map_dfr(read_csv)
+davesData <- oneYearSamples %>%
+               left_join(select(oneYearBatches,-calibrationSlope,-calibrationIntercept)) %>%
+               filter(batchCollectedTimestamp > ymd("2017-04-20"), 
+                      batchCollectedTimestamp < ymd("2017-06-10"),
+                      sampleType == "standard",
+                      reviewerName == "Dave")
+davesData %>% ggplot(aes(x=batchCollectedTimestamp,y=usedForCurve,color=compoundName)) +
+  geom_point() +
+  facet_grid(compoundName ~ expectedConcentration) +
+  geom_vline(xintercept = as.numeric(as_datetime(c("2017-05-01","2017-06-01"))),linetype=1,colour="black")
+
+davesData %<>% mutate(pctDiff = (concentration - expectedConcentration) / expectedConcentration,
+                      within20 = abs(pctDiff) <= 0.2)
+davesData %>% filter(compoundName == "codeine") %>%
+  ggplot(aes(x=batchCollectedTimestamp,y=pctDiff,color=within20)) +
+    geom_point() +
+    facet_wrap(~ expectedConcentration) +
+    ggtitle("Codeine Only") +
+    geom_vline(xintercept = as.numeric(as_datetime(c("2017-05-01","2017-06-01"))),linetype=1,colour="black")
+```
+
+The second plot shows that calibrators were dropped regardless of whether they would be within 20% of the expected concentration, suggesting that they were dropped for some other reason. The data does not say why 'Dave' did this, but there are a couple of good guesses here which revolve around training.
+
+We intentionally included several other issues within the database, which will require aggregation and plotting to discover.
