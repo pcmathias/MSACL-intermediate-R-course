@@ -41,7 +41,7 @@ In their article "Good enough practices in scientific computing", Wilson et al. 
 
 Because we are focusing on using RMarkdown, notebooks, and less complex types of analyses, we are going to focus on the recommendations in bold in this course. All of these practices are recommended and we encourage everyone to read the original article to better understand motivations behind the recommendations.
 
-### Put each project in its own directory, which is named after the project ###
+### Put each project in its own directory, which is named after the project
 
 Putting projects into their own directories helps to ensure that everything you need to run an analysis is in one place. That helps you minimize manual navigation to try and tie everything together (assuming you create the directory as a first step in the project).
 
@@ -80,8 +80,33 @@ So, what exactly does creating a Project in RStudio do for you? In a nutshell, u
 
 Does using a RStudio Project allow someone else to pick up your code and just use it? Or let you come back to a Project 1 year later and have everything work magically? Not by itself, but with a few more tricks you will be able to more easily re-run or share your code.
 
-### Put raw data and metadata in a data directory and files generated during cleanup and analysis in a results directory ###
+### Put raw data and metadata in a data directory and files generated during cleanup and analysis in a results directory
 
 Before we broke up with Excel, it was standard operating procedure to perform our calculations and data manipulations in the same place that our data lived. This is not necessarily incompatible with reproducibility, if we have very careful workflows and make creative use of macros. However, once you have modified your original input file, it may be non-trivial to review what you actually did to your original raw data (particularly if you did not save it as a separate file). Morever, Excel generally lends itself to non-repeatable manual data manipulation that can take extensive detective work to piece together.
 
 Using R alone will not necessarily save you from these patterns but they take a different form. Instead of clicking around, dragging, and entering formulas, you might find yourself throwing different functions at your data in a different order each time you open up R. While it takes some effort to overwrite your original data file in R, other non-ideal patterns of file management that are common in Excel-land can creep up on you if you're not careful.
+
+- data directory
+- output/results directory
+- figures, documents, other useful directories
+- here package
+
+### Name all files (and variables) to reflect their content or function
+
+- file names should be intelligible to others
+- avoid sequential naming (easier if using version control)
+- adopt style conventions (preview of next section)
+
+## Adopt a style convention for coding
+
+- want others to read code, or to be able to come back and quickly understand
+- style guides available: Google R style guide, tidyverse style guide
+- styler and lintr packages help conform to style guide
+
+## Enforce reproducibility for packages
+
+- scenario: write some code, sits on shelf for a year, come back to solve same problem, code doesn't work, or worse, code produces different output
+- packages do change over time: bugs fixed, features added
+- easy for two people to run different versions of packages
+- potential solution = checkpoint package
+- limitations: package retrieval can add to processing time, package updates may lead to more accurate results (if bugs fixed)
