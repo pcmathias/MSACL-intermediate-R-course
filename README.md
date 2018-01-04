@@ -13,6 +13,11 @@ This course is intended for laboratory professionals with a basic command of R a
 - Install the latest version of R by choosing the closest CRAN mirror here at https://cran.r-project.org/mirrors.html and downloading the version for your operating system
 - Install the latest version of RStudio Desktop at https://www.rstudio.com/products/rstudio/download/#download 
 - Open RStudio and confirm you are able to install packages by running `install.packages("tidyverse", dependencies = TRUE)`
+- Download this github repository as a zip file and install it on your computer (e.g. C:\Users\jdoe\Desktop\msacl2018)
+- Download the mock database files from ??? and put that folder within the downloaded respository (e.g. C:\Users\jdoe\Desktop\msacl2018\class_data)
+- Edit the .Rmd files for lessons 5, 6, and 10 so that
+  - the variable 'duringClass' in line 9 is set to TRUE
+  - the path in line 11 is the location of downloaded repository
 
 ## Course content
 
