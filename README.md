@@ -10,6 +10,7 @@ This course is intended for laboratory professionals with a basic command of R a
 
 - A laptop with wifi, access to the internet, and the ability to download files is required
   - Confirm you can connect to conference wifi prior to class
+- Complete the following survey so we can better understand your R experience and what you want out of the course: [MSACL Intermediate R Course Survey](https://goo.gl/forms/3D2RNAb5wkdbZnPd2)
 - Install the latest version of R by choosing the closest CRAN mirror here at https://cran.r-project.org/mirrors.html and downloading the version for your operating system
 - Install the latest version of RStudio Desktop at https://www.rstudio.com/products/rstudio/download/#download 
 - Open RStudio and confirm you are able to install packages by running `install.packages("tidyverse", dependencies = TRUE)`
