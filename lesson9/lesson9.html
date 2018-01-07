@@ -152,11 +152,11 @@ medianByRow &lt;- function(tb) {
   }
   return(recordOfValues)
 }</code></pre>
-<p>Both of these functions use a for-loop to cycle through the <em>byColumn</em> or <em>byRow</em> vector of numbers. Additionally, the logic is basically identical except for the placement of a single comma, which means a single function could be written to handle both tasks. Finally, the <em>recordOfValues</em> empty vector needs to be initalized before it can be used, which is slightly confusing. Each of these comments are addressed below.</p>
+<p>Both of these functions use a for-loop to cycle through the <code>byColumn</code> or <code>byRow</code> vector of numbers. Additionally, the logic is basically identical except for the placement of a single comma, which means a single function could be written to handle both tasks. Finally, the <code>recordOfValues</code> empty vector needs to be initalized before it can be used, which is slightly confusing. Each of these comments are addressed below.</p>
 </div>
 <div id="looping-with-for-and-while" class="section level2">
 <h2>Looping with <em>for</em> and <em>while</em></h2>
-<p>These loops are explicitly sequential, showing the input and output of each command in exactly the same way as the primary code that you work with. The <em>for</em> loop follows a three component format: create the output vector, define the looping sequence, and perform the body of work. In our examples, that body is two lines long, but it could be as complex as necessary to produce the intended output. When working with long loops (100s to 1000s), the inefficiency of growing the output vector on each iteration will slow down the code. Instead, the output should be initialized as an empty vector of the expected length.</p>
+<p>These loops are explicitly sequential, showing the input and output of each command in exactly the same way as the primary code you work with. The <em>for</em> loop follows a three component format: create the output vector, define the looping sequence, and perform the body of work. In our examples, that body is two lines long, but it could be as complex as necessary to produce the intended output. When working with long loops (100s to 1000s of iterations), the inefficiency of growing the output vector at each iteration will slow down the code. Instead, the output should be initialized as an empty vector of the expected length.</p>
 <pre class="r"><code>medianByColumn &lt;- function(tb) {
   recordOfValues &lt;- vector(&quot;double&quot;, ncol(tb))
   for(i in 1:ncol(tb)) {
@@ -164,6 +164,13 @@ medianByRow &lt;- function(tb) {
     recordOfValues[i] &lt;- median(byColumn)
   }
   return(recordOfValues)
+}</code></pre>
+<blockquote>
+<p>Exercise 1: Making a two-variable function that ‘switches’<br />
+Create a function <code>medianBy( )</code> that accepts both the data.frame and a logical value to indicate whether the result should be by row or column.</p>
+</blockquote>
+<pre class="r"><code>medianBy &lt;- function(tb,byRow=FALSE) {
+
 }</code></pre>
 <p>The <em>while</em> loop is used when the work being performed should continue until a logical condition occurs. The obvious risk is that the condition never occurs, prompting the need for a failsafe. They are rarely used.</p>
 <pre class="r"><code>numberOfFlips &lt;- 0
@@ -183,7 +190,7 @@ while(numberOfTails &lt; 3 | countedFlips == 1000) { #safer
 <div id="looping-with-map" class="section level2">
 <h2>Looping with <em>map</em></h2>
 <p>These loops are explicitly vectored, performing the action on every element in that vector. The <strong>purrr</strong> package has five functions which return a vector for each type of output: list, logical, integer, double, and character. It comes with a significant increase in speed and further improved readability, but requires a different seeming workflow. Most notably, for-loops often have bookkeeping variables for the intermediate steps in the body of work, while <em>map</em> functions generate the output vector directly and are designed to work well with pipes.</p>
-<p>The <em>map</em> structure builds on the idea that a solution to “how do I solve for a single set of data” is simpler to conceptualize. After breaking the problem down to small steps on one set, enclosing those steps in the function will iterates on each column of data in the data.frame to report the vector of results.</p>
+<p>The <em>map</em> structure builds on the idea that a solution to “how do I solve for a single set of data” is simpler to visualize. After breaking the problem down to small steps on one set, enclosing those steps in the function will iterates on each column of data in the data.frame to report the result.</p>
 <pre class="r"><code>medianByColumn &lt;- function(tb) {
   recordOfValues &lt;- map_dbl(tb,median) %&gt;% unname()
   return(recordOfValues)
@@ -192,6 +199,12 @@ medianByRow &lt;- function(tb) {
   transposedTibble &lt;- as_tibble(t(tb))
   recordOfValues &lt;- map_dbl(transposedTibble,median) %&gt;% unname()
   return(recordOfValues)
+}</code></pre>
+<blockquote>
+<p>Exercise 2: Improve the <code>medianBy( )</code> function to use map looping.</p>
+</blockquote>
+<pre class="r"><code>medianBy &lt;- function(tb,byRow=FALSE) {
+
 }</code></pre>
 </div>
 </div>
@@ -211,6 +224,7 @@ nestingTibble &lt;- vectorList %&gt;% set_names(map_chr(1:10,paste0,&quot;column
 betterNestingTibble &lt;- c(1:10) %&gt;% 
                        map_dfc( ~ tibble(x = . * 1:20) ) %&gt;% 
                        set_names(map_chr(1:10,paste0,&quot;column&quot;))</code></pre>
+<p>Deciding when to use a function instead of a for-loop is often an aesthetic choice focused on the readability of the code. The <code>betterNestingTibble</code> may not be as clear as code that keeps for-loop(<em>i</em>) and uses the map command to replace the for-loop(<em>j</em>).</p>
 </div>
 <div id="summary" class="section level1">
 <h1>Summary</h1>

@@ -2,7 +2,9 @@
 title: 'Lesson 10: Bringing it all together from import to graph to result'
 author: "Adam Zabell"
 date: "1/3/2018"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -32,13 +34,13 @@ oneYearBatches <- list.files(workingDir,pattern="xlsx$") %>%
                   as_tibble() %>%
                   type_convert()
 
-ggplot(oneYearBatches, aes(x=calibrationR2,color=compoundName)) +
+ggplot(oneYearBatches, aes(x=calibrationR2,color=compoundName,fill=compoundName)) +
   geom_histogram()
 ggplot(oneYearBatches, aes(x=batchCollectedTimestamp,y=calibrationR2,color=compoundName)) +
   geom_line()
 ```
 
-There's something interesting going on with the R^2^ values in the month of May, where a large number of them report a value of 1.0 -- a perfect fit. Let's focus on that month, and spread out the data so we can clarify whether it's all compounds or just oxymorphone.
+There's something interesting going on with the R^2^ values in the month of May, where a large number of them report a value of 1.0 -- a perfect fit. Let's focus on that month, and spread out the data so we can clarify whether it's all compounds or just oxymorphone (the magenta color on top).
 
 ```{r facets}
 mayPlot <- oneYearBatches %>% 
@@ -55,9 +57,9 @@ mayPlot +
 Whatever is going on, it looks like reviewer 'Dave' is the only person it is happening to. 
 
 # Graph to Result
-Based on the batch-level data, we can see that 'Dave' -- and apparently only Dave -- has perfect R^2^ values on every batch of data he reviewed throughout the month of May. Digging deeper will require merging information from the batch level with information at the sample (and possibly peak) level. The following plots of *davesData* provide compelling evidence for what happened: Dave unselected the middle five calibrators in order to draw a straight line and maximize the R^2^ term.
+Based on the batch-level data, we can see that 'Dave' -- and apparently only Dave -- has perfect R^2^ values on every batch of data he reviewed throughout the month of May. Digging deeper will require merging information from the batch level with information at the sample (and possibly peak) level. 
 
-```{r join}
+```{r join, message=FALSE}
 oneYearSamples <- list.files(workingDir,pattern="csv$") %>%
                   file.path(workingDir,.) %>%
                   map_dfr(read_csv)
@@ -67,6 +69,11 @@ davesData <- oneYearSamples %>%
                       batchCollectedTimestamp < ymd("2017-06-10"),
                       sampleType == "standard",
                       reviewerName == "Dave")
+```
+
+The following plots of `davesData` provide compelling evidence for what happened: Dave unselected the middle five calibrators in order to draw a straight line and maximize the R^2^ term.
+
+```{r plot_dave}
 davesData %>% ggplot(aes(x=batchCollectedTimestamp,y=usedForCurve,color=compoundName)) +
   geom_point() +
   facet_grid(compoundName ~ expectedConcentration) +
@@ -85,3 +92,17 @@ davesData %>% filter(compoundName == "codeine") %>%
 The second plot shows that calibrators were dropped regardless of whether they would be within 20% of the expected concentration, suggesting that they were dropped for some other reason. The data does not say why 'Dave' did this, but there are a couple of good guesses here which revolve around training.
 
 We intentionally included several other issues within the database, which will require aggregation and plotting to discover.
+
+> Exercise : Revealing an ion ratio problem  
+> Ion ratios are particularly sensitive to instrument conditions, because the secondary fragmentation pattern requires a highly tuned spectrometer and the selection of two ions which don't change much when the mass spec flucturates. We can look for both outlier spikes and stability trends, and separate those out across instruments, compounds, and sample types. There is one obviously outlying instrument, which is worth investigating later. Excluding that instrument, which compound+instrument shows an outlier pattern? Is there a problem here? What additional variables would help besides the ones captured in the sample data.frame?
+
+```{r ex}
+# 1 #
+oneYearSamples %>% 
+  left_join(oneYearBatches) %>%
+  ggplot(aes(x=batchCollectedTimestamp,y=ionRatio,color=compoundName)) +
+   geom_smooth() +
+   facet_grid(compoundName ~ instrumentName) 
+# 2 #
+
+```

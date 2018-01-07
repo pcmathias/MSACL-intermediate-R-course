@@ -131,7 +131,7 @@ $(document).ready(function () {
 <div id="simple-rbind-and-cbind" class="section level2">
 <h2>Simple <em>rbind</em> and <em>cbind</em></h2>
 <p>Sometimes, you need data stored across more than one file. For example, managing the QC deviations across twelve separate months of reports. Rather than hold multiple printouts side-by-side to monitor a trend, <strong>R</strong> will allow you to read each file and knit them together either by row, or by column. For most circumstances, that combination involves adding rows to data set.</p>
-<pre class="r"><code>workingDir &lt;- paste0(rootDir,&quot;class_data&quot;)
+<pre class="r"><code>workingDir &lt;- file.path(rootDir,&quot;class_data&quot;)
 january &lt;- read_csv(file.path(workingDir,&quot;2017-01-06.csv&quot;))</code></pre>
 <pre><code>## Parsed with column specification:
 ## cols(
@@ -237,7 +237,7 @@ incomplete_data</code></pre>
 </div>
 <div id="joining-relational-data" class="section level1">
 <h1>Joining Relational Data</h1>
-<p>The database example for this class has three different data.frames: one for batch-level information (calibration R<sup>2</sup>, instrument name); one for sample-level information (sample type, calculated concentration); and one for peak-level information (quant peak area, modification flag). Accessing the relationships across these three sources – reporting the quant and qual peak area of only the qc samples, for example – requires the tools of relational data. In the tidyverse, these tools are part of the <strong>dplyr</strong> package and involve three ‘families of verbs’ called <em>mutating joins</em>, <em>filtering joins</em>, and <em>set operations</em>, which in turn expect a unique <em>key</em> in order to correctly correlate the data.</p>
+<p>The database example for this class has three different data.frames: one for batch-level information (calibration R<sup>2</sup>, instrument name); one for sample-level information (sample type, calculated concentration); and one for peak-level information (quant peak area, modification flag). Accessing the relationships across these three sources – reporting the quant and qual peak area of only the qc samples, for example – requires the tools of relational data. In the tidyverse, these tools are part of the <strong>dplyr</strong> package and involve three ‘families of verbs’ called <em>mutating joins</em>, <em>filtering joins</em>, and <em>set operations</em>, which in turn expect a unique key in order to correctly correlate the data.</p>
 <pre class="r"><code>jan.b &lt;- read.xlsx(xlsxFile=file.path(workingDir,&quot;2017-01-06.xlsx&quot;))
 jan.p &lt;- read_tsv(file=file.path(workingDir,&quot;2017-01-06.txt&quot;))
 byBatch &lt;- jan.b[jan.b$batchName==&quot;b802253&quot;|jan.b$batchName==&quot;b252474&quot;,]
@@ -249,14 +249,30 @@ byPeak &lt;- jan.p[jan.p$batchName==&quot;b802253&quot;|jan.p$batchName==&quot;b
 <pre class="r"><code>byBatch$keyB &lt;- paste(byBatch$batchName,byBatch$compoundName,sep=&quot;:&quot;)
 bySample$keyS &lt;- paste(bySample$sampleName,bySample$compoundName,sep=&quot;:&quot;)
 byPeak$keyP &lt;- paste(byPeak$sampleName,byPeak$compoundName,byPeak$chromatogramName,sep=&quot;:&quot;)</code></pre>
-<p>Doing this creates a <strong>primary key</strong>, which is the unique identifier for that data.frame. A <strong>foreign key</strong> by contrast would uniqely identify an item in another table. The following command (explained below) incompletely adds a foreign key to byPeak so that information in byBatch can be intuitively retreived. The second command completes the population of the foreign key variable, but only because the row order in byPeak follows a very specific format. There are safer ways of doing this, which require an understanding of set operations.</p>
+<p>Doing this creates a <strong>primary key</strong>, which is the unique identifier for that data.frame. A <strong>foreign key</strong> by contrast would uniqely identify an item in another table. The following command (explained below) incompletely adds a foreign key to <code>byPeak</code> so that information in <code>byBatch</code> can be intuitively retreived. The second command completes the population of the foreign key variable, but only because the row order in <code>byPeak</code> follows a very specific format. There are safer ways of doing this, which require an understanding of set operations.</p>
 <pre class="r"><code>byPeak &lt;- left_join(byPeak,byBatch)</code></pre>
 <pre><code>## Joining, by = c(&quot;batchName&quot;, &quot;compoundName&quot;)</code></pre>
 <pre class="r"><code>byPeak$keyB[is.na(byPeak$keyB)] &lt;- byPeak$keyB[!is.na(byPeak$keyB)] # dangerous! </code></pre>
+<blockquote>
+<p>Exercise 1: Why didn’t the <em>left_join</em> fully populate <code>byPeak</code>?</p>
+</blockquote>
+<blockquote>
+<p>Exercise 2: Join the batch and sample data using only the batch-specific key<br />
+Partially complete commands are commented out in the following code chunk. Since <code>keyB</code> is already built for one data.frame, creating this variable in <code>bySample</code> is the next step. How would you specify that only this variable which should be used for the join? Notice what that does for all of the variables in the joined data.frame.</p>
+</blockquote>
+<pre class="r"><code>byBatch$keyB</code></pre>
+<pre><code>##  [1] &quot;b802253:morphine&quot;      &quot;b802253:hydromorphone&quot;
+##  [3] &quot;b802253:oxymorphone&quot;   &quot;b802253:codeine&quot;      
+##  [5] &quot;b802253:hydrocodone&quot;   &quot;b802253:oxycodone&quot;    
+##  [7] &quot;b252474:morphine&quot;      &quot;b252474:hydromorphone&quot;
+##  [9] &quot;b252474:oxymorphone&quot;   &quot;b252474:codeine&quot;      
+## [11] &quot;b252474:hydrocodone&quot;   &quot;b252474:oxycodone&quot;</code></pre>
+<pre class="r"><code>#bySample$keyB &lt;- paste( , ,sep=&quot;:&quot;)
+#exerciseTwo &lt;- left_join( , , )</code></pre>
 </div>
 <div id="set-operations-union-intersect-and-setdiff" class="section level2">
 <h2>Set operations <em>union</em>, <em>intersect</em>, and <em>setdiff</em></h2>
-<p>These three commands will return a vector which is the unduplicated combination of the two inputs. <em>union(A,B)</em> includes all the values found in both A and B. <em>intersect(A,B)</em> returns only those values found in both A and B. <em>setdiff(A,B)</em> is order dependent, and returns the values of the first vector which are not also in the second vector.</p>
+<p>These three commands will return a vector which is the unduplicated combination of the two input vectors. <em>union(A,B)</em> includes all the values found in both A and B. <em>intersect(A,B)</em> returns only those values found in both A and B. <em>setdiff(A,B)</em> is order dependent, and returns the values of the first vector which are not also in the second vector.</p>
 <pre class="r"><code>A &lt;- rep(seq(1,10),2)
 B &lt;- seq(2,20,2)
 union(A,B)</code></pre>
@@ -267,16 +283,17 @@ union(A,B)</code></pre>
 <pre><code>## [1] 1 3 5 7 9</code></pre>
 <pre class="r"><code>setdiff(B,A)</code></pre>
 <pre><code>## [1] 12 14 16 18 20</code></pre>
-<p>These commands are good for checking matches between two vectors, and we can use them to rebuild the byPeak$keyB foreign key without the risk of incorrect naming.</p>
-<pre class="r"><code>byPeak &lt;- jan.p[jan.p$batchName==&quot;b802253&quot;|jan.p$batchName==&quot;b252474&quot;,] # reset
-byPeak$keyP &lt;- paste(byPeak$sampleName,byPeak$compoundName,byPeak$chromatogramName,sep=&quot;:&quot;)
+<p>These commands are good for checking matches between two vectors, and we can use them to rebuild the <code>byPeak$keyB</code> foreign key without the risk of incorrect naming.</p>
+<pre class="r"><code>byPeak &lt;- jan.p %&gt;% # reset the byPeak data.frame, add byPeak$keyP
+  filter(batchName %in% c(&quot;b802253&quot;,&quot;b252474&quot;)) %&gt;%
+  unite(keyP, sampleName, compoundName, chromatogramName, sep=&quot;:&quot;, remove=FALSE)
 
 allNames &lt;- unique(byPeak$compoundName)
 byPeak$analyte &lt;- NA
 for(name in allNames[1:6]) {
-  compoundPairIdx &lt;- grep(name,allNames)
-  theCompound &lt;- intersect(allNames[compoundPairIdx],name)
-  theInternalStandard &lt;- setdiff(allNames[compoundPairIdx],name)
+  compoundPairIdx &lt;- grep(name, allNames)
+  theCompound &lt;- intersect(allNames[compoundPairIdx], name)
+  theInternalStandard &lt;- setdiff(allNames[compoundPairIdx], name)
   byPeak$analyte[byPeak$compoundName==theInternalStandard] &lt;- theCompound
   byPeak$analyte[byPeak$compoundName==theCompound] &lt;- theCompound
 }
@@ -285,32 +302,46 @@ byPeak$keyB &lt;- paste(byPeak$batchName,byPeak$analyte,sep=&quot;:&quot;) # alt
 </div>
 <div id="mutating-join-to-add-columns" class="section level2">
 <h2>Mutating join to add columns</h2>
-<p>Mutating joins operate in much the same way as the set operations, but on data.frames instead of vectors, and with one critical difference: repeated values are retained. We took advantage of this earlier when using the <em>left_join</em> command, so that the byBatch$keyB got repeated for both the Quant and the Qual peak entries in byPeak.</p>
+<p>Mutating joins operate in much the same way as the set operations, but on data.frames instead of vectors, and with one critical difference: repeated values are retained. We took advantage of this earlier when using the left_join command, so that the <code>byBatch$keyB</code> got repeated for both the Quant and the Qual peak entries in <code>byPeak</code>.</p>
 <p>There are four kinds of mutating joins, differing in how the rows of the source data.frames are treated. In each case, the matching columns are identified by column name and only one is kept, with row order remaining consistent with the principle (usually the left) source. All non-matching columns are returned, and which rows are returned depends on the type of join. An <em>inner_join(A,B)</em> only returns rows from A which have a column match in B. The <em>full_join(A,B)</em> returns every row of both A and B, using an NA in those columns which don’t have a match. The <em>left_join(A,B)</em> returns every row of A, and either the matching value from B or an NA for columns with don’t have a match. Finally, the <em>right_join(A,B)</em> returns every row of B, keeping the order of B, with either the matching value from columns in A or an NA for columns with no match.</p>
-<p>Because these commands can duplicate rows, there is the potential of breaking things pretty significantly if the key isn’t unique. Here’s are two examples, one where you do, and do not want that duplication:</p>
-<pre class="r"><code>goodDuplication &lt;- inner_join(x=bySample[,c(1:3,7)],y=byBatch[,c(1:6)],by=c(&quot;batchName&quot;,&quot;compoundName&quot;))
-badDuplication &lt;- inner_join(x=bySample[,c(1:3,7)],y=byBatch[,c(1:6)],by=c(&quot;compoundName&quot;))</code></pre>
-<p>Having built the byBatch primary key, and correctly included it as a foreign key in byPeak, correctly joining them into a single data.frame is straightforward.</p>
-<pre class="r"><code>largerByPeak &lt;- left_join(x=byPeak,y=byBatch)</code></pre>
+<p>Because these commands can duplicate rows, the potential for breaking things is pretty significant if the key isn’t unique. Here’s are two examples, one where you do – and one where you do not – want that duplication:</p>
+<pre class="r"><code>goodDuplication &lt;- inner_join(x=bySample[,c(1:3,7)],
+                              y=byBatch[,c(1:6)],
+                              by=c(&quot;batchName&quot;,&quot;compoundName&quot;))
+badDuplication &lt;- inner_join(x=bySample[,c(1:3,7)],
+                             y=byBatch[,c(1:6)],
+                             by=c(&quot;compoundName&quot;))</code></pre>
+<p>Having built the <code>byBatch</code> primary key, and correctly included it as a foreign key in <code>byPeak</code>, correctly joining them into a single data.frame is straightforward.</p>
+<pre class="r"><code>byPeakWide &lt;- left_join(x=byPeak,y=byBatch)</code></pre>
 <pre><code>## Joining, by = c(&quot;batchName&quot;, &quot;compoundName&quot;, &quot;keyB&quot;)</code></pre>
 </div>
 <div id="filtering-join-to-check-the-overlap" class="section level2">
 <h2>Filtering join to check the overlap</h2>
-<p>Note that we created the byBatch$keyB explicitly, but it was already effectively present thanks to the batchName and compoundName columns. The compound naming scheme in byPeak remains problematic since the internal standard isn’t identified in byBatch or bySample, but we fixed this using a new column ‘analyte’. We could have accomplished the same effect in fewer steps using the semi_join and anti_join commands. The <em>semi_join(A,B)</em> returns all rows of A where there is a match from B, but keeps only the columns of A, and does not duplicate a row if there are multiple matches. The <em>anti_join(A,B)</em> is the inverse, returning all rows from A where there is no match from B. To create the ‘analyte’ column as before:</p>
-<pre class="r"><code>#reload the variables, removing the explicit key columns
-byBatch &lt;- jan.b[jan.b$batchName==&quot;b802253&quot;|jan.b$batchName==&quot;b252474&quot;,]
-byPeak &lt;- jan.p[jan.p$batchName==&quot;b802253&quot;|jan.p$batchName==&quot;b252474&quot;,]
+<p>We created the <code>byBatch$keyB</code> explicitly, but it was effectively present already thanks to the <em>batchName</em> and <em>compoundName</em> columns. The compound naming scheme in <code>byPeak</code> remains problematic since the internal standard isn’t identified in <code>byBatch</code> or <code>bySample</code>, but we fixed this using a new column <em>analyte</em>. We could have accomplished the same effect in fewer steps using the semi_join and anti_join commands. The <em>semi_join(A,B)</em> returns all rows of A where there is a match from B, but keeps only the columns of A, and does not duplicate a row if there are multiple matches. The <em>anti_join(A,B)</em> is the inverse, returning all rows from A where there is no match from B. To create the ‘analyte’ column as before:</p>
+<pre class="r"><code>byBatch &lt;- jan.b %&gt;% # reset the byBatch data.frame
+  filter(batchName %in% c(&quot;b802253&quot;,&quot;b252474&quot;))
+byPeak &lt;- jan.p %&gt;% # reset the byPeak data.frame, add byPeak$analyte
+  filter(batchName %in% c(&quot;b802253&quot;,&quot;b252474&quot;)) %&gt;%
+  mutate(analyte=compoundName)
 
 noMatch &lt;- anti_join(byPeak,byBatch)</code></pre>
 <pre><code>## Joining, by = c(&quot;batchName&quot;, &quot;compoundName&quot;)</code></pre>
-<pre class="r"><code>noMatch$analyte &lt;- sub(&quot;-.*$&quot;,&quot;&quot;,noMatch$compoundName) 
-byPeak$analyte &lt;- byPeak$compoundName
-byPeak$analyte[byPeak$compoundName%in%unique(noMatch$compoundName)] &lt;- noMatch$analyte
+<pre class="r"><code>unique(byPeak$analyte)</code></pre>
+<pre><code>##  [1] &quot;morphine&quot;         &quot;hydromorphone&quot;    &quot;oxymorphone&quot;     
+##  [4] &quot;codeine&quot;          &quot;hydrocodone&quot;      &quot;oxycodone&quot;       
+##  [7] &quot;morphine-13C&quot;     &quot;hydromorphone-d3&quot; &quot;oxymorphone-d3&quot;  
+## [10] &quot;codeine-d6&quot;       &quot;hydrocodone-d3&quot;   &quot;oxycodone-d3&quot;</code></pre>
+<pre class="r"><code>byPeak$analyte &lt;- sub(&quot;-.*$&quot;, &quot;&quot;, byPeak$analyte) 
+
 noMatch &lt;- anti_join(byPeak,byBatch,by=c(&quot;batchName&quot;,&quot;analyte&quot;=&quot;compoundName&quot;))
 justMatch &lt;- semi_join(byPeak,byBatch,by=c(&quot;batchName&quot;,&quot;analyte&quot;=&quot;compoundName&quot;))
 c(nrow(noMatch),nrow(justMatch),nrow(byPeak))</code></pre>
 <pre><code>## [1]    0 2496 2496</code></pre>
-<pre class="r"><code>byPeak &lt;- left_join(byPeak,byBatch,by=c(&quot;batchName&quot;,&quot;analyte&quot;=&quot;compoundName&quot;))</code></pre>
+<blockquote>
+<p>Exercise 3: Join the batch and peak data<br />
+Partially complete commands are commented out in the following code chunk.</p>
+</blockquote>
+<pre class="r"><code>#exerciseThree &lt;- left_join( , ,by=c( ) )</code></pre>
 </div>
 </div>
 <div id="summary" class="section level1">
