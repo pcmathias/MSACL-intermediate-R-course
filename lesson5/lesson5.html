@@ -304,7 +304,7 @@ byPeak$keyB &lt;- paste(byPeak$batchName,byPeak$analyte,sep=&quot;:&quot;) # alt
 <h2>Mutating join to add columns</h2>
 <p>Mutating joins operate in much the same way as the set operations, but on data.frames instead of vectors, and with one critical difference: repeated values are retained. We took advantage of this earlier when using the left_join command, so that the <code>byBatch$keyB</code> got repeated for both the Quant and the Qual peak entries in <code>byPeak</code>.</p>
 <p>There are four kinds of mutating joins, differing in how the rows of the source data.frames are treated. In each case, the matching columns are identified by column name and only one is kept, with row order remaining consistent with the principle (usually the left) source. All non-matching columns are returned, and which rows are returned depends on the type of join. An <em>inner_join(A,B)</em> only returns rows from A which have a column match in B. The <em>full_join(A,B)</em> returns every row of both A and B, using an NA in those columns which don’t have a match. The <em>left_join(A,B)</em> returns every row of A, and either the matching value from B or an NA for columns with don’t have a match. Finally, the <em>right_join(A,B)</em> returns every row of B, keeping the order of B, with either the matching value from columns in A or an NA for columns with no match.</p>
-<p>Because these commands can duplicate rows, the potential for breaking things is pretty significant if the key isn’t unique. Here’s are two examples, one where you do – and one where you do not – want that duplication:</p>
+<p>Because these commands can duplicate rows, the potential for breaking things is pretty significant if the key isn’t unique. Here are two examples, one where you do – and one where you do not – want that duplication:</p>
 <pre class="r"><code>goodDuplication &lt;- inner_join(x=bySample[,c(1:3,7)],
                               y=byBatch[,c(1:6)],
                               by=c(&quot;batchName&quot;,&quot;compoundName&quot;))
@@ -339,7 +339,7 @@ c(nrow(noMatch),nrow(justMatch),nrow(byPeak))</code></pre>
 <pre><code>## [1]    0 2496 2496</code></pre>
 <blockquote>
 <p>Exercise 3: Join the batch and peak data<br />
-Partially complete commands are commented out in the following code chunk.</p>
+Start from the reset data.frames built in the prior code chunk, so the <code>keyB</code> and <code>keyP</code> variables are not present. Partially complete commands are commented out in the following code chunk.</p>
 </blockquote>
 <pre class="r"><code>#exerciseThree &lt;- left_join( , ,by=c( ) )</code></pre>
 </div>

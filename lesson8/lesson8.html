@@ -130,7 +130,7 @@ $(document).ready(function () {
 <p>The commands <em>read_csv</em>, <em>read_tsv</em>, and <em>read.xlsx</em> (discussed in Lesson 5) open files that are often called ‘flat’ because there is no inherent structure to the delimited rows and columns. Using the first row as a column header is a common convention, but is not required for the function to work properly. In contrast, most databases have a required structure to each element, and these elements sometimes have a nestest structure within structure. The details of database construction are well beyond the scope of this class, but the return from a database query is typically in XML or JSON format, and working with these files in <strong>R</strong> involve some basic parsing techniques.</p>
 <div id="the-extensible-markup-language-xml" class="section level2">
 <h2>The extensible markup language (xml)</h2>
-<p>When read as a text file, xml looks a lot like html, because html is (by and large) a subset of xml. That’s not to say they’re interchangable, since html permits some shortcuts which xml does not, and xml isn’t restricted to web browser tags. The format of an xml file is built on the declaration and closing of a <em>key</em>, with the <em>value</em> enclosed between them: <code>&lt;key&gt;value&lt;/key&gt;</code>. tags, where that <em>value</em> can itself be another nested pair.</p>
+<p>When read as a text file, xml looks a lot like html, because html is (by and large) a subset of xml. That’s not to say they’re interchangable, since html permits some shortcuts which xml does not, and xml isn’t restricted to web browser tags. The xml format declares and closes a <em>key</em>, with the <em>value</em> enclosed between them: <code>&lt;key&gt;value&lt;/key&gt;</code>. That value can itself be one or more nested key-value statements.</p>
 <p>Reading an xml file requires the <strong>xml2</strong> package (or one like it). Consider a short list of album information, where each entry contains the same number of keys, and those keys are always in the same order.</p>
 <pre class="r"><code>cd &lt;- read_xml(&quot;https://www.w3schools.com/xml/cd_catalog.xml&quot;)
 cd.list &lt;- as_list(cd)
@@ -144,7 +144,7 @@ cd.df &lt;- data.frame(matrix(unlist(cd.list),
 </div>
 <div id="the-javascript-object-notation-json" class="section level2">
 <h2>The javascript object notation (json)</h2>
-<p>A web browser can only send one thing, or retrieve one thing, at a time. The most complex online form has to be reduced to a single string, and then unpacked on the other side. Although that string could be sent as xml, virtually every website operates with json because this format is more lightweight than xml and thus takes less time to transmit. The format looks very different, but operates on the same principle of first naming a thing, and then giving it a value. With json, the key and value of a term is separated by a colon, and each term is separated by a comma. Unlike xml, in json any nested terms are explicitly either an array (ordered, and enclosed in square brackets) or an object (unordered, and enclosed in curly brackets).</p>
+<p>A web browser can only send one thing, or retrieve one thing, at a time. The most complex online form has to be reduced to a single string, and then unpacked on the other side. Although that string could be sent as xml, virtually every website operates with json because this format is more lightweight than xml and thus takes less time to transmit. The format looks very different, but operates on the same principle of first naming a thing, and then giving it a value. With json, the key-value statements are separated by a colon, and each statement is separated by a comma: <code>{&quot;key&quot;:value}</code>. Nested terms are explicitly either an array (ordered, and enclosed in square brackets) or an object (unordered, and enclosed in curly brackets).</p>
 <p>Reading a json file requires the <strong>jsonlite</strong> package (or one like it). Consider an enumeartion of named colors and their RGB value.</p>
 <pre class="r"><code>colr &lt;- fromJSON(&quot;https://raw.githubusercontent.com/corysimmons/colors.json/master/colors.json&quot;)
 colr.rows &lt;- length(colr)
@@ -157,8 +157,13 @@ colr.df$name &lt;- names(colr)</code></pre>
 </div>
 <div id="solving-problems" class="section level2">
 <h2>Solving problems</h2>
-<p>The most common problem is that numbers, even if they were stored as numbers, can become text strings during conversion to a data.frame. Jumping ahead to the next lesson, the simplest fix will invoke a loop on the column of data that should be numeric.</p>
+<p>The most common problem is that numbers, even if they were stored as numbers, can become text strings during conversion to a data.frame. Jumping ahead to the next lesson, the simplest fix will loop on the column of data that should be numeric.</p>
 <pre class="r"><code>cd.df$PRICE %&lt;&gt;% map_dbl(as.numeric) # also invokes a from-and-back-into pipe notation</code></pre>
+<blockquote>
+<p>Exercise 1: Renumbering Redux<br />
+Will reading the xml into a tibble (instead of a data.frame) solve this number recognition? First, try it. Then, even if it did work, construct a ‘standard pipe’ mechanism using only <code>%&gt;%</code> to change both <em>PRICE</em> and <em>YEAR</em> to double precision numbers.</p>
+</blockquote>
+<pre class="r"><code>#cd.tibble &lt;- as_tibble( )</code></pre>
 <p>There are many more problems that could happen, ultimately because each entry in the xml or json file is an independent object. There may be an element not present in every entry (e.g. not including a price for a CD), or multiple elements within an element (e.g. two artists for a CD), or the elements may not be retrieved in the same order each time (e.g. all Bob Dylan albums return the artist before the title). All are disasterous; the conversion examples shown here using <em>matrix</em> will now be wildly offset.</p>
 <p>Most problems should be solved on the query-side of the equation, to confirm the query was built correctly and that the database is populated as expected. But, since “two artists for one CD” is at least possible and might even be common, the retrieved data could simply be less data.frame friendly than you would like. Unless you’re very sure of what the returned data must looks like, some basic checks now will avoid maddening troubleshooting later.</p>
 <pre class="r"><code>numberOfElements &lt;- c()
@@ -174,6 +179,21 @@ for(l in cd.list) {
 }
 paste(unique(numberOfElements),unique(namesForElements),sep=&quot; | &quot;)</code></pre>
 <pre><code>## [1] &quot;6 | TITLE:ARTIST:COUNTRY:COMPANY:PRICE:YEAR&quot;</code></pre>
+<blockquote>
+<p>Exercise 2: Fixing a known misordered data.frame<br />
+Add this next line to <code>cd.list</code> and rerun the troubleshooting code section. What changed in the output from the <em>paste</em> command? How would you fix the list so the columns are correct while still using the <em>matrix</em> method described in Exercise 1?</p>
+</blockquote>
+<pre class="r"><code>cd.list[[27]] &lt;- list(ARTIST=list(&quot;Benny Andersson&quot;,&quot;Tim Rice&quot;,&quot;Bjorn Ulvaeus&quot;),
+                      TITLE=list(&quot;Chess&quot;),
+                      COUNTRY=list(&quot;Sweden&quot;),
+                      COMPANY=list(&quot;RCA Victor&quot;),
+                      PRICE=list(&quot;19.95&quot;),
+                      YEAR=list(&quot;1984&quot;))</code></pre>
+<blockquote>
+<p>Exercise 3: Preventing a misordered data.frame<br />
+Propose another way to convert the xml file so it automatically adjusts for inconsistent ordering of the keyword pairs.</p>
+</blockquote>
+<pre class="r"><code>cd &lt;- read_xml(&quot;https://www.w3schools.com/xml/cd_catalog.xml&quot;)</code></pre>
 </div>
 </div>
 <div id="summary" class="section level1">

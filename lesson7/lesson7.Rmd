@@ -3,8 +3,8 @@ title: 'Lesson 7: Modelling the data'
 author: "Adam Zabell"
 date: "1/2/2018"
 output:
-  word_document: default
   html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}

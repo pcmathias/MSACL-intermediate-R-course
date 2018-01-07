@@ -146,7 +146,7 @@ medianByColumn &lt;- function(tb) {
 }
 medianByRow &lt;- function(tb) {
   recordOfValues &lt;- c()
-  for(i in 1:nrow(tb.df)) {
+  for(i in 1:nrow(tb)) {
     byRow &lt;- unlist(tb[i,])
     recordOfValues %&lt;&gt;% append(median(byRow))
   }
@@ -190,7 +190,7 @@ while(numberOfTails &lt; 3 | countedFlips == 1000) { #safer
 <div id="looping-with-map" class="section level2">
 <h2>Looping with <em>map</em></h2>
 <p>These loops are explicitly vectored, performing the action on every element in that vector. The <strong>purrr</strong> package has five functions which return a vector for each type of output: list, logical, integer, double, and character. It comes with a significant increase in speed and further improved readability, but requires a different seeming workflow. Most notably, for-loops often have bookkeeping variables for the intermediate steps in the body of work, while <em>map</em> functions generate the output vector directly and are designed to work well with pipes.</p>
-<p>The <em>map</em> structure builds on the idea that a solution to “how do I solve for a single set of data” is simpler to visualize. After breaking the problem down to small steps on one set, enclosing those steps in the function will iterates on each column of data in the data.frame to report the result.</p>
+<p>The <em>map</em> structure builds on the idea that a solution to “how do I solve for a single set of data” is simpler to visualize. After breaking the problem down to small steps on one set, enclosing those steps in the function will iterate on each column of data in the data.frame to report the result.</p>
 <pre class="r"><code>medianByColumn &lt;- function(tb) {
   recordOfValues &lt;- map_dbl(tb,median) %&gt;% unname()
   return(recordOfValues)
