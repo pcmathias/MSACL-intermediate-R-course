@@ -2,7 +2,9 @@
 title: 'Lesson 7: Modelling the data'
 author: "Adam Zabell"
 date: "1/2/2018"
-output: html_document
+output:
+  html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -14,7 +16,7 @@ library(lubridate)
 ```
 
 # Data Modelling
-After enough measurements have been made to consider your data a dataset, the next step is to explore that dataset to find trends and outliers. Modelling reduces the complexity from individual observations but can only operate within the limits of the model. The linear model shown below doesn't fit as well as the quadratic model, but deciding whether the quadratic model makes physical sense is not something the model can understand.
+After enough measurements have been made to consider your data a dataset, the next step is exploring that dataset to find trends and outliers. Most often, this includes a graph as well as a computational model which fits the data to a trendline. Modelling reduces the complexity of individual observations, which is good. However, it can only operate within the limits of the model. The linear model shown below doesn't fit as well as the quadratic model, but deciding whether the quadratic model makes physical sense is not something the model can demonstrate.
 ```{r drawing_two_models}
 # data taken from http://www.theanalysisfactor.com/r-tutorial-4/
 y <- c(126.6, 101.8, 71.6, 101.6, 68.1, 62.9, 45.5, 41.9, 46.3, 34.1, 38.2, 41.7, 24.7, 41.5, 36.6, 19.6, 22.8, 29.6, 23.5, 15.3, 13.4, 26.8, 9.8, 18.8, 25.9, 19.3)
@@ -32,12 +34,25 @@ lines(sequenceX,sequenceYL,col='blue',lwd=2)
 lines(sequenceX,sequenceYQ,col='darkgreen',lwd=2)
 ```
 
+> Exercise 1: Rebuild this plot using ggplot  
+Partially complete commands are commented out in the following code chunk.
+
+```{r ex1}
+modeldata <- modeldata %>%
+  mutate(linear=sequenceYL,quadratic=sequenceYQ)
+
+g <- ggplot(data=raw,aes(x=x,y=y)) + geom_point()
+#g + 
+#  geom_point(data= ,aes(x=x,y= ),color= ) +
+#  geom_point( , , )
+```
+
 ## Parsing dates and times with *lubridate*
-The context for most of the data being discussed in this class involves a time series, where each batch is collected at a specific date and knowing that order of collection is a necessary component of the analysis. Dates within **R** are interpreted using the IEEE "POSIX" format, but reading data from an exterior source such as a CSV means this information arrives as a string. The **lubridate** package helps to convert strings to POSIX, or combine information from multiple columns of a data.frame into a usable date format. 
+The context for most of the data we'll encounter involve a time series, where each batch is collected at a specific date and that order of collection is a necessary component of the analysis. Dates within **R** are interpreted using the IEEE "POSIX" format, but reading data from an exterior source such as a CSV means this information arrives as a string. Functions in the **lubridate** package help to convert strings to POSIX, or combine information from multiple columns of a data.frame into a usable date format. 
 ```{r lubridate, error=TRUE}
 stringOfDates <- c("2017-12-15","2017-Dec-16","2017-12-17","2017-12-18","2017-12-19","2017-12-20","2017-12-21")
-oneWeek <- ymd(stringOfDates)
 stringOfDates + 7 
+oneWeek <- ymd(stringOfDates)
 oneWeek + 7
 tableOfDates <- tibble(year=rep(2017,8),
                        month=c(rep(4,3),rep(5,5)),
@@ -56,15 +71,15 @@ Formula Notation  | Common Understanding
 ---------------- | --------------------
 y ~ x | y = *a0* + *a1*x
 y ~ x - 1 | y = *a1*x
-y ~ x + z | y = *a0* + *a1*x + *a2*z 
+y ~ x + z | y = *a0* + *a1*x + *a2*z
 y ~ x * z | y = *a0* + *a1*x + *a2*z + *a3*xz
 y ~ x + I(x^2) | y = *a0* + *a1*x + *a2*x^2^
 y ~ Gauss(amplitude,mu,sigma,x) | fit the data to a formula, defined elsewhere
 
-Wilkinson-Rogers notation comes into it's own when looking for interactions (and their relative importance) between the dependent variable and a collection of independent ones: the formula _y ~ Height * Weight * Age_ would solve for eight coefficients, the linear combination for each of the three terms and the intercept. By comparison, the formula _y ~ Height + Weight + Age_ would solve four coefficients, ignoring any interaction between Height, Weight, and Age.
+Wilkinson-Rogers notation comes into it's own when looking for generalized interactions (and their relative importance) between the dependent variable and a collection of independent ones: the formula _y ~ Height * Weight * Age_ would solve for eight coefficients, the linear combination for each of the three terms and the intercept. By comparison, the formula _y ~ Height + Weight + Age_ would solve four coefficients, ignoring any interaction between Height, Weight, and Age.
 
 ## Linear modelling 
-Most of time a linear model, or transforming the data into a linear model, is sufficient to establish the key relationships between variables. First, expand the *raw* data.frame with additional observations and two more descriptors for the data.
+Most of time a linear model, or transforming the data into a linear model, is sufficient to establish the key relationships between variables. Let's start by expanding the `raw` data.frame with additional observations and two more descriptors for the data.
 ```{r linear_modelling_setup}
 newraw <- raw %>% 
           mutate(y = raw$y * rnorm(nrow(raw),mean=1,sd=0.3)) %>% 
@@ -91,6 +106,14 @@ ggplot(newraw, aes(x,y,shape=factor(date))) +
   facet_wrap(~ instrument)
 ```
 
+> Exercise 2: Modelling with categorical variables  
+> Revise `newraw` so that the last 40 observations include a third instrument called "Ultrafine," and rerun the models. How does this affect the regression and your interpretation?
+
+```{r ex2}
+newraw$instrument[13:52] <- rep(c(rep("Fine",2),rep("Ultrafine",2)),10)
+
+```
+
 ## Nonlinear modelling
 Although not common when looking for relationships between variables, nonlinear models are a concern for other aspects of data evaluation (e.g. fitting a chromatogram to a Gaussian curve) or assay validation (e.g. instrument response as a function of concentration). Unlike linear modelling, which will find a single solution starting from the data itself, a nonlinear model must iterate from a starting guess for each variable. A well formed guess should converge on the correct value, but there is no general method for finding that guess. 
 ```{r nonlinear_modelling, error=TRUE}
@@ -113,17 +136,19 @@ grid <- forPlot %>%
   data_grid(x=seq_range(x,100),y) %>%
   gather_predictions(perfectGuess,okayGuess)
 ggplot(forPlot, aes(x,y)) +
-  geom_line(data=grid, aes(y=pred,color=model,linetype=model), size=1) +
   geom_point(aes(shape=yType)) +
-  scale_shape_manual(values=c(20,1),name="data source")
+  scale_shape_manual(values=c(3,20),name="data source") +
+  geom_line(data=grid, aes(y=pred,color=model,linetype=model), size=1) 
 summary(perfectGuess)
 ```
 
 Understanding the reasoning for nonlinear model selection is a critical step before attempting that fit. The risk of non-convergence means the nonlinear model should be avoided, if possible.
 
 # Summary
-* **lubridate** functions convert a text string to a date
+* **lubridate** functions will convert a text string to a date
 * statistial modelling with Wilkinson-Rogers notation builds possible interactions into the analysis
 * scientific modelling with Wilkinson-Rogers notation requires careful understanding of terms
-* linear models are strongly recommended whenever possible, and may require data transformation to achieve
+* linear models are strongly recommended whenever possible
+    + this may require a transformation of the data
+    + 'linear' doesn't mean 'straight line' when you draw the plot
 * nonlinear models are dependant on a starting guess
