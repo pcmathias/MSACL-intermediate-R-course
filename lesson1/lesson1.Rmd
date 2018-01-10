@@ -26,7 +26,7 @@ There are three practices we will cover in this lesson to help get your code to 
 
 - Develop a standardized but easy-to-use project structure
 - Adopt a style convention for coding
-- Enforce reproducibility when working with packages
+- Enforce reproducibility when working with projects and packages
 
 ## Develop a standard project structure
 
@@ -49,6 +49,7 @@ What is a project? Wilson et al. suggest dividing projects based on "overlap in 
 
 Now that we're thinking about creating directories for projects and directory structure in general, let's take the opportunity to review some basic commands and configuration related to directories in R.
 
+***Exercise***
 1. Navigate to your **Preferences** for the RStudio application and note the *Default working directory (when not in a project)*
 2. Navigate to your Console and get the working directory using `getwd()`
 3. Review the contents of your current folder using `list.files()`
@@ -88,6 +89,7 @@ Using R alone will not necessarily save you from these patterns but they take a 
 
 One solution to help avoid these issues in maintaining the separation of church and state (if I may use a poor analogy) is to explicitly organize your analysis so that raw data lives in one directory (the *data* directory) and the results of running your R code are placed in another directory (eg. *results* or *output*). You can take this concept a little further and include other directories within your project folder to better organize work such as *figures*, *documents* (for manuscripts), or *processed_data*/*munge* (if you want to create intermediate data sets). You have a lot of flexibility and there are multiple resources that provide some guidance [(Parzakonis 2017)](https://statsravingmad.com/measure/sample-r-project-structure/), [(Muller 2017)](http://blog.jom.link/implementation_basic_reproductible_workflow.html), [(Software Carpentry 2016)](https://swcarpentry.github.io/r-novice-gapminder/02-project-intro/). 
 
+***Exercise***
 Let's go ahead and create a minimal project structure:
 ```{r}
 dir.create("data") # raw data
@@ -111,6 +113,7 @@ Reading other people's code can be extremely difficult. Actually, reading your o
 Some highlights:
 - Use underscores to separate words in a name (see above comments for file names)
 - Put a space before and after operators (such as `==`, `+`, `<-`), but there are a few exceptions such as `^` or `:`
+- Use `<-` rather than `=` for assignment
 - Try to limit code to 80 characters per line & if a function call is too long, separate arguments to use one line each for function, arguements, and closing parenthesis.
 ```{r}
 # Good
@@ -125,7 +128,6 @@ do_something_very_complicated("that", requires, many, arguments,
                               "some of which may be long"
                               )
 ```
-- Use `<-` rather than `=` for assignment
 
 While we're talking about style conventions, let's take a little diversion to discuss a common element of code in the tidyverse that you may not be familiar with: the almighty pipe `%>%`. The pipe allows you to chain together functions sequentially so that you can be much more efficient with your code and make it readable. Here is an example (with imaginary functions) adapted from the tidyverse style guide:
 ```{r}
@@ -152,8 +154,46 @@ So, if you have some old scripts you want to make more readable, you can unleash
 
 ## Enforce reproducibility of the directories and packages
 
-- scenario: write an insightful analysis, share with colleague, nothing works
-- description of here package
+### Scenario 1: Sharing your project with a colleague
+
+Let's think about a happy time a couple months from now. You've completed this R course, have learned some new tricks, and you have written an analysis of your mass spec data, bundled as a nice project in a directory named "mass_spec_analysis". You're very proud of the analysis you've written and your colleague wants to run the analysis on similar data. You send them your analysis project (the whole directory) and when they run it they immediately get the following error when trying to load the data file with the `read.csv("file.csv")` command:
+Error in file(file, "rt") : cannot open the connection
+In addition: Warning message:
+In file(file, "rt") :
+  cannot open file 'file.csv': No such file or directory
+  
+Hmmm, R can't find the file, even though you set the working directory for your folder using `setwd("/Users/username/path/to/mass_spec_analysis")`.
+
+What is the problem? Setting your working directory is actually the problem here, because it is almost guaranteed that the path to a directory on your computer does not match the path to the directory on another computer. That path may not even work on your own computer a couple years from now!
+
+Fear not, there is a package for that! Let's install the [here package](https://cran.r-project.org/web/packages/here/index.html) to help solve this problem and explore how it works.
+
+***Exercise***
+1. Install the package
+2. Load the package. What does the output tell you?
+3. Run the command `here()`. What does the output tell you?
+```{r}
+install.packages("here")
+library(here)
+here()
+```
+
+
+The here package uses a pretty straightforward syntax to help you point to the file you want. In the example above, where file.csv is a data file in the root directory (I know, not ideal practice per our discussion on project structure above), then you can reference the file using `here("file.csv")`, where `here()` indicates the current directory. So reading the file could be accomplished with `read.csv(here("file.csv"))` and it could be run by any who you share the project with.
+
+The here package couples well with an RStudio Project because there is an algorithm that determines which directory is the top-level directory by looking for specific files
+- creating an RStudio Project creates an .Rproj file that tells here which is the project top-level directory
+- if you don't create a Project in RStudio, you can create an empty file named .here in the top-level directory to tell here where to go
+- there are a variety of other file types the package looks for (including a .git file which is generated if you have a project on Github)
+
+Moral of the story: avoid using `setwd()` and complicated paths to your file - use `here()` instead!
+
+### Scenario 2: Running your 2018 code in 2019
+
+Now imagine you've written a nice analysis for your mass spec data but let it sit on the shelf for 6 months or a year. In the meantime, you've updated R and your packages multiple times. You rerun your analysis on the same old data set and either (a) one or more lines of code longer works or (b) the output of your analysis is different than the first time you ran it. Very often these problems arise because one or more of the packages you use in your code have been updated since the first time you ran your analysis. Sometimes package updates change the input or output specific functions expect or produce or alter the behavior of packages in unexpected ways. These problems also arise when sharing code with colleagues because different users may have different versions of packages loaded.
+
+Don't worry, there is a package for that! Probably the most lightweight solution to this problem is the [checkpoint package](https://cran.r-project.org/web/packages/checkpoint/index.html). The basic premise behind checkpoint is that it allows you use the package as it existed at a specific date. There is a snapshot for all packages in CRAN (the R package repository) each day, dating back to 2017-09-17. By using checkpoint you can be confident that the version of the package you reference in your code is the same version that anyone else running your code will be using.
+
 - scenario: write some code, sits on shelf for a year, come back to solve same problem, code doesn't work, or worse, code produces different output
 - packages do change over time: bugs fixed, features added
 - easy for two people to run different versions of packages
