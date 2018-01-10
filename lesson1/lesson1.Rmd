@@ -86,10 +86,19 @@ Before we broke up with Excel, it was standard operating procedure to perform ou
 
 Using R alone will not necessarily save you from these patterns but they take a different form. Instead of clicking around, dragging, and entering formulas, you might find yourself throwing different functions at your data in a different order each time you open up R. While it takes some effort to overwrite your original data file in R, other non-ideal patterns of file management that are common in Excel-land can creep up on you if you're not careful.
 
-- data directory
-- output/results directory
-- figures, documents, other useful directories
-- here package
+One solution to help avoid these issues in maintaining the separation of church and state (if I may use a poor analogy) is to explicitly organize your analysis so that raw data lives in one directory (the *data* directory) and the results of running your R code are placed in another directory (eg. *results* or *output*). You can take this concept a little further and include other directories within your project folder to better organize work such as *figures*, *documents* (for manuscripts), or *processed_data*/*munge* (if you want to create intermediate data sets). You have a lot of flexibility and there are multiple resources that provide some guidance [(Parzakonis 2017)](https://statsravingmad.com/measure/sample-r-project-structure/), [(Muller 2017)](http://blog.jom.link/implementation_basic_reproductible_workflow.html), [(Software Carpentry 2016)](https://swcarpentry.github.io/r-novice-gapminder/02-project-intro/). 
+
+Let's go ahead and create a minimal project structure:
+```{r}
+dir.create("data") # raw data
+dir.create("output") # output from analysis
+dir.create("cache") # intermediate data (after processing raw data)
+dir.create("src") # code goes into this folder
+```
+
+This is a bare bones structure that should work for our purposes. 
+
+*Further exploration/tools for creating projects*: There is also a dedicated Project Template package that has a nice "minimal project layout" that can be a good starting point if you want R to do more of the work for you: [Project Template](http://projecttemplate.net/index.html). This package duplicates some functionality that the RStudio Project does for you, so you probably want to run it outside of an RStudio Project but it is a good tool to be aware of.
 
 ### Name all files (and variables) to reflect their content or function
 
@@ -103,8 +112,10 @@ Using R alone will not necessarily save you from these patterns but they take a 
 - style guides available: Google R style guide, tidyverse style guide
 - styler and lintr packages help conform to style guide
 
-## Enforce reproducibility for packages
+## Enforce reproducibility of the directories and packages
 
+- scenario: write an insightful analysis, share with colleague, nothing works
+- description of here package
 - scenario: write some code, sits on shelf for a year, come back to solve same problem, code doesn't work, or worse, code produces different output
 - packages do change over time: bugs fixed, features added
 - easy for two people to run different versions of packages
