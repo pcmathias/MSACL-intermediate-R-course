@@ -94,15 +94,10 @@ The second plot shows that calibrators were dropped regardless of whether they w
 We intentionally included several other issues within the database, which will require aggregation and plotting to discover.
 
 > Exercise : Revealing an ion ratio problem  
-> Ion ratios are particularly sensitive to instrument conditions, because the secondary fragmentation pattern requires a highly tuned spectrometer and the selection of two ions which don't change much when the mass spec flucturates. We can look for both outlier spikes and stability trends, and separate those out across instruments, compounds, and sample types. There is one obviously outlying instrument, which is worth investigating later. Excluding that instrument, which compound+instrument shows an outlier pattern? Is there a problem here? What additional variables would help besides the ones captured in the sample data.frame?
+> Ion ratios can be particularly sensitive to instrument conditions, and variability is a significant problem in mass spec based assays which use qualifying ions. With the tools that have been demonstrated in this course, we can look for outlier spikes and stability trends, and separate them out across instruments, or compounds, or sample types. First, plot the ion ratio as a function of instrument name. What trends are most obvious, and what is the reason for each of them? What additional variables would help besides the ones captured in the sample data.frame?
 
 ```{r ex}
-# 1 #
-oneYearSamples %>% 
-  left_join(oneYearBatches) %>%
-  ggplot(aes(x=batchCollectedTimestamp,y=ionRatio,color=compoundName)) +
-   geom_smooth() +
-   facet_grid(compoundName ~ instrumentName) 
-# 2 #
+#oneYearSamples %>% 
+#  left_join(oneYearBatches) %>%
 
 ```
