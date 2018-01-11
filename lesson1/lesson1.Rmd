@@ -186,6 +186,8 @@ The here package couples well with an RStudio Project because there is an algori
 - if you don't create a Project in RStudio, you can create an empty file named .here in the top-level directory to tell here where to go
 - there are a variety of other file types the package looks for (including a .git file which is generated if you have a project on Github)
 
+I encourage you to read the following post by Jenny Bryan that includes her strong opinions about setting your working directory: [Project-oriented workflow](https://www.tidyverse.org/articles/2017/12/workflow-vs-script/).
+
 Moral of the story: avoid using `setwd()` and complicated paths to your file - use `here()` instead!
 
 ### Scenario 2: Running your 2018 code in 2019
@@ -193,6 +195,25 @@ Moral of the story: avoid using `setwd()` and complicated paths to your file - u
 Now imagine you've written a nice analysis for your mass spec data but let it sit on the shelf for 6 months or a year. In the meantime, you've updated R and your packages multiple times. You rerun your analysis on the same old data set and either (a) one or more lines of code longer works or (b) the output of your analysis is different than the first time you ran it. Very often these problems arise because one or more of the packages you use in your code have been updated since the first time you ran your analysis. Sometimes package updates change the input or output specific functions expect or produce or alter the behavior of packages in unexpected ways. These problems also arise when sharing code with colleagues because different users may have different versions of packages loaded.
 
 Don't worry, there is a package for that! Probably the most lightweight solution to this problem is the [checkpoint package](https://cran.r-project.org/web/packages/checkpoint/index.html). The basic premise behind checkpoint is that it allows you use the package as it existed at a specific date. There is a snapshot for all packages in CRAN (the R package repository) each day, dating back to 2017-09-17. By using checkpoint you can be confident that the version of the package you reference in your code is the same version that anyone else running your code will be using.
+
+Let's run through some basics of using the package.
+
+***Exercise***
+
+1. Install the checkpoint package
+```{r}
+install.packages("checkpoint")
+```
+2. Load the checkpoint package
+3. Load dplyr & lubridate packages from January 1, 2016
+```{r}
+library(checkpoint)
+checkpoint("2018-01-01", checkpointLocation = tempdir()) # checkpoint function takes the date of the package you want as the primary argument and a location for the directory to load the packages into
+library(dplyr)
+library(lubridate)
+```
+
+In the next lesson we will dive into more detail about how to use checkpoint in the context of an R Markdown document, so this is just a brief introduction
 
 - scenario: write some code, sits on shelf for a year, come back to solve same problem, code doesn't work, or worse, code produces different output
 - packages do change over time: bugs fixed, features added
