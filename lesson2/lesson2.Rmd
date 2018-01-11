@@ -1,0 +1,13 @@
+---
+title: 'Lesson 2: Getting cozy with R Markdown'
+author: "Patrick Mathias"
+output: html_document
+---
+
+## Why integrate your analysis and documentation in one place?
+
+## Basics of knitr and rmarkdown
+
+## Flexibility in reporting: types of knitr output
+
+## Creating an R Markdown document that integrates best practices in reproducible research
