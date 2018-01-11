@@ -217,11 +217,11 @@ library(checkpoint)
 # library(lubridate)
 ```
 
-The behavior checkpoint makes it complicated to test out in this section: the package is tied to a project and by default searches for every package called within your project (via `library()` or `require()`).
+The behavior of checkpoint makes it complicated to test out in this section: the package is tied to a project and by default searches for every package called within your project (via `library()` or `require()`). However, as soon as we get oriented with R Markdown, we will be able to hit the ground running with checkpoint.
 
 The checkpoint package is very helpful in writing reproducible analyses, but there are some limitations/considerations with using it:
 - retrieving and installing packages adds to the amount of time it takes to run your analysis
 - package updates over time may fix bugs so changes in output may be more accurate
 - checkpoint is tied to projects, so alternate structures that don't use projects may not able to utilize the package
 
-In the next lesson we will dive into more detail about how to use checkpoint in the context of an R Markdown document, so this is just a brief introduction to the concept of checkpoint and how to prevent your code from breaking.
+In the next lesson we will dive into more detail about how to use checkpoint in the context of an R Markdown document, so this is just a brief introduction to the concept of using checkpoint to make your code reproducible.
