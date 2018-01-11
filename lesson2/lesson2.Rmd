@@ -6,6 +6,12 @@ output: html_document
 
 ## Why integrate your analysis and documentation in one place?
 
+The short answer is that it will be easier for you to understand what you did and easier for anyone else to understand what you did when you analyzed your data. This aligns nicely with the principles of reproducible research and is arguably just as important for any analysis that occurs in a clinical laboratory for operational or test validation purposes. The analysis and the explanation of the analysis live in one place so if you or someone else signs off on the work, what was done is very clear.
+
+The more philosophical answer to this question lies in the principles of [literate programming](https://en.wikipedia.org/wiki/Literate_programming), where code is written to align with the programmer's flow of thinking. This is expected to produce better code because the program is considering and writing out logic while they are writing the code. So the advantages lie in both communication of code to others, and that communication is expected to produce better programming (analysis of data in our case).
+
+There is another advantage of using this framework with the tools we discuss below: the output that you generate from your analysis can be very flexible. You can choose to show others the code you ran for the analysis or you can show them only text, figures, and tables. You can produce a webpage, a pdf, a Word document, or even a set of slides from the same analysis or chunks of code.
+
 ## Basics of knitr and rmarkdown
 
 ## Flexibility in reporting: types of knitr output
