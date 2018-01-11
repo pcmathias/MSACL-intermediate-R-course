@@ -205,18 +205,23 @@ Let's run through some basics of using the package.
 install.packages("checkpoint")
 ```
 2. Load the checkpoint package
-3. Load dplyr & lubridate packages from January 1, 2016
+3. Read the help for the checkpoint function
 ```{r}
 library(checkpoint)
-checkpoint("2018-01-01", checkpointLocation = tempdir()) # checkpoint function takes the date of the package you want as the primary argument and a location for the directory to load the packages into
-library(dplyr)
-library(lubridate)
+?checkpoint
+
+# below is sample code but we're not quite ready to run it (yet)
+# library(checkpoint)
+# checkpoint("2018-01-01", checkpointLocation = tempdir()) # checkpoint function takes the date of the package you want as the primary argument and a location for the directory to load the packages into
+# library(dplyr)
+# library(lubridate)
 ```
 
-In the next lesson we will dive into more detail about how to use checkpoint in the context of an R Markdown document, so this is just a brief introduction to the concept of checkpoint and how to prevent your code from breaking.
+The behavior checkpoint makes it complicated to test out in this section: the package is tied to a project and by default searches for every package called within your project (via `library()` or `require()`).
 
-- scenario: write some code, sits on shelf for a year, come back to solve same problem, code doesn't work, or worse, code produces different output
-- packages do change over time: bugs fixed, features added
-- easy for two people to run different versions of packages
-- potential solution = checkpoint package
-- limitations: package retrieval can add to processing time, package updates may lead to more accurate results (if bugs fixed)
+The checkpoint package is very helpful in writing reproducible analyses, but there are some limitations/considerations with using it:
+- retrieving and installing packages adds to the amount of time it takes to run your analysis
+- package updates over time may fix bugs so changes in output may be more accurate
+- checkpoint is tied to projects, so alternate structures that don't use projects may not able to utilize the package
+
+In the next lesson we will dive into more detail about how to use checkpoint in the context of an R Markdown document, so this is just a brief introduction to the concept of checkpoint and how to prevent your code from breaking.
