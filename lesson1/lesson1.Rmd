@@ -213,7 +213,7 @@ library(dplyr)
 library(lubridate)
 ```
 
-In the next lesson we will dive into more detail about how to use checkpoint in the context of an R Markdown document, so this is just a brief introduction
+In the next lesson we will dive into more detail about how to use checkpoint in the context of an R Markdown document, so this is just a brief introduction to the concept of checkpoint and how to prevent your code from breaking.
 
 - scenario: write some code, sits on shelf for a year, come back to solve same problem, code doesn't work, or worse, code produces different output
 - packages do change over time: bugs fixed, features added
