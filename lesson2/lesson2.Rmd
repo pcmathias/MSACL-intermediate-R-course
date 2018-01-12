@@ -14,28 +14,53 @@ There is another advantage of using this framework with the tools we discuss bel
 
 ## Basics of knitr and rmarkdown
 
-The theme of the course so far is "there's a package for that!" and this of course is no exception. The [knitr package](https://yihui.name/knitr/) and closely related [rmarkdown package](https://cran.rstudio.com/web/packages/rmarkdown/index.html) were built to make it easier for users to generate reports with integrated R code. The package documentation is very detailed but the good news is that RStudio inherently utilizes knitr and rmarkdown to "knit" documents and allows for a simple, streamlined workflow to create these documents.
-
-These packages work on a simple formatting language called markdown that makes it easy to format text using a plain text syntax. For example, asterisks can be used to `*italicize*`/*italicize* or `**bold**`/**bold** text and hyphens can be used to create bullet points:
-```{r, eval = FALSE}
-- point 1
-- point 2
-- point 3
-```
-- point 1
-- point 2
-- point 3
+The theme of the course so far is "there's a package for that!" and this of course is no exception. The [knitr package](https://yihui.name/knitr/) and closely related [rmarkdown package](https://cran.rstudio.com/web/packages/rmarkdown/index.html) were built to make it easier for users to generate reports with integrated R code. The package documentation is very detailed but the good news is that RStudio inherently utilizes [knitr and rmarkdown](http://rmarkdown.rstudio.com/authoring_quick_tour.html) to "knit" documents and allows for a simple, streamlined workflow to create these documents.
 
 There are 3 components of a typical R Markdown document:
 - header
 - text
 - code chunks
 
-### Headers
+### Header
+
+The header includes metadata about the document that can help populate useful information such as title and author. This information is included in a YAML (originally *Yet Another Markup Language*, now *YAML Ain't Markup Language*) format that is pretty easy to read. For example, the header for this document is:
+```{r, eval = FALSE}
+---
+title: 'Lesson 2: Getting cozy with R Markdown'
+author: "Patrick Mathias"
+output: html_document
+---
+```
+
+The output field dictates the output once the document is knit, and users can add other data such as the date or even [parameters](http://rmarkdown.rstudio.com/lesson-6.html) for a report.
 
 ### Text
 
+Text is written in whitespace sections using [R Markdown syntax](), which is a variant of a simple formatting language called markdown that makes it easy to format text using a plain text syntax. For example, asterisks can be used to *italicize* (`*italicize*`) or **bold** (`**bold**`) text and hyphens can be used to create bullet points:
+- point 1
+- point 2
+- point 3
+```{r, eval = FALSE}
+- point 1
+- point 2
+- point 3
+```
+
+
 ### Code chunks
+
+Interspersed within your text you can integrate "chunks" of R code, and each code chunk can be named. You can supply certain parameters to instruct R what to do with each code chunk. The formatting used to separate a code chunk from text uses a rarely utilized character called the backtick ` that typically can be found on the very top left of your keyboard. The formatting for a code chunk includes 3 backticks to open or close a chunk and curly brackets with the opening backticks to supply information about the chunk. Here I show the general formatting in quotes:
+"```{r}"
+"mean(c(10,20,30))"
+"```"
+
+And if I actually write those lines without quoting:
+```{r}
+mean(c(10,20,30))
+```
+
+In addition code can be integrated within text by using a single backtick to open and close the integrated code. Surrounding "mean(c(10,20,30))" with backticks gives you the result in line: `mean(c(10,20,30))`.
+
 
 ## Flexibility in reporting: types of knitr output
 
