@@ -50,6 +50,8 @@ Text is written in whitespace sections using [R Markdown syntax](http://rmarkdow
 ### Code chunks
 
 Interspersed within your text you can integrate "chunks" of R code, and each code chunk can be named. You can supply certain parameters to instruct R what to do with each code chunk. The formatting used to separate a code chunk from text uses a rarely utilized character called the backtick ` that typically can be found on the very top left of your keyboard. The formatting for a code chunk includes 3 backticks to open or close a chunk and curly brackets with the opening backticks to supply information about the chunk. Here is the general formatting, including the backticks and the curly braces that indicate the code should be evaluated in R:  
+  
+  
     ```{r}
     mean(c(10,20,30))
     ```
@@ -61,7 +63,7 @@ mean(c(10,20,30))
 
 There are shortcuts for adding chunks rather than typing out backticks: the `Insert` button near the top right of your script window or the `Ctrl+Alt+i`/`Command+Option+i`(Windows/Mac) shortcut.
 
-In addition code can be integrated within text by using a single backtick to open and close the integrated code, and listing "r" at the beginning of the code (to indicate the language to be evaluated: `r mean(c(10,20,30))`.
+In addition code can be integrated within text by using a single backtick to open and close the integrated code, and listing "r" at the beginning of the code (to indicate the language to be evaluated): `r mean(c(10,20,30))`.
 
 ## Flexibility in reporting: types of knitr output
 
