@@ -49,12 +49,12 @@ Text is written in whitespace sections using [R Markdown syntax](), which is a v
 
 ### Code chunks
 
-Interspersed within your text you can integrate "chunks" of R code, and each code chunk can be named. You can supply certain parameters to instruct R what to do with each code chunk. The formatting used to separate a code chunk from text uses a rarely utilized character called the backtick ` that typically can be found on the very top left of your keyboard. The formatting for a code chunk includes 3 backticks to open or close a chunk and curly brackets with the opening backticks to supply information about the chunk. Here I show the general formatting in quotes:
-
-(3 backticks go here){r}
-mean(c(10,20,30))
-(3 backticks go here)
-
+Interspersed within your text you can integrate "chunks" of R code, and each code chunk can be named. You can supply certain parameters to instruct R what to do with each code chunk. The formatting used to separate a code chunk from text uses a rarely utilized character called the backtick ` that typically can be found on the very top left of your keyboard. The formatting for a code chunk includes 3 backticks to open or close a chunk and curly brackets with the opening backticks to supply information about the chunk. Here I show the general formatting in quotes:  
+  
+  (3 backticks go here){r}
+  mean(c(10,20,30))
+  (3 backticks go here)  
+  
 And if I actually write those lines with the backticks you see the code separated out:
 ```{r}
 mean(c(10,20,30))
