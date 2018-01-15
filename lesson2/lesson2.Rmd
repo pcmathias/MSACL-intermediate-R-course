@@ -71,5 +71,24 @@ Under the hood, the knitting functionality in RStudio takes advantage of a unive
 
 There is additional functionality in RStudio that allows you to create an R Notebook, which is a useful variant of an R Markdown document. Traditionally you might put together an R Markdown document, with all its glorious text + code, and then knit the entire document to produce some output. The R Notebook is a special execution mode that allows you to run individual code chunks separately and interactively. This allows you to rapidly interact with your code and see the output without having to run all the code in the entire document. As with inserting a chunk, there are multiple options for running a chunk: the `Run` button near the top right of your script window or the `Ctrl+Shift+Enter`/`Command+Shift+Enter` (Windows/Mac) shortcut. Within a code chunk, if you just want to run an individual line of code, the `Ctrl+Enter`/`Command+Enter` (Windows/Mac) shortcut while run only the line your cursor is currently on.
 
+***Exercise***
+
+Let's use the built-in functionality in RStudio to create an R Markdown document.
+
+1. Add a file by selecting the add file button on the top left of your screen
+1. Select R Markdown... as the file type
+1. Title the document "Data Science 201" and select OK
+
+RStudio already provides you with an outline of a useful document, including interspersed code chunks. The header is completed based on the data that was entered into the document creation wizard. The first code chunk below the header is a useful practice to adopt: use your first code chunk as a setup chunk to set output options and load packages you will use in the rest of the document. The `knitr::opts_chunk$set(echo = TRUE)` command in the setup chunk tells R to display (or echo) the source code you write in your output document. A detailed list of various options can be found under the R Markdown cheatsheet here: https://www.rstudio.com/resources/cheatsheets/.
+
+Now let's knit this file and create some output.
+
+1. Click the **Knit** button
+1. You are being prompted to save the .Rmd file. Choose any location of your liking (this is just for testing but remember where you save it) and name the file data_science_201
+1. RStudio should produce output in .html format and display
+1. Click the Open in Browser window and the same output should open in your default internet browser
+1. If you find the folder you saved the .Rmd file there should also be a .html file you can open as well
+1. Now, instead of hitting the **Knit** button, select the down arrow adjacent to it and click Knit to PDF
+1. Repeat the previous step but knit to a Word document
 
 ## Creating an R Markdown document that integrates best practices in reproducible research
