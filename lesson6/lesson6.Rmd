@@ -1,6 +1,6 @@
 ---
 title: 'Lesson 6: Stronger visualizations with ggplot2 and lattice'
-author: "Adam Zabell"
+author: "Randall Julian"
 date: "12/28/2017"
 output:
   html_document: default
