@@ -1,9 +1,8 @@
 ---
 title: 'Lesson 5: Blending data from multiple files and sources'
-author: "Adam Zabell"
+author: "Randall Julian"
 date: "12/27/2017"
 output:
-  word_document: default
   html_document: default
 ---
 

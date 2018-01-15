@@ -1,10 +1,10 @@
 ---
 title: 'Lesson 8: Beyond the csv -- parsing xml and json files'
-author: "Adam Zabell"
+author: "Randall Julian"
 date: "1/2/2018"
 output:
-  html_document: default
   word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
