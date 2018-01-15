@@ -1,10 +1,10 @@
 ---
 title: 'Lesson 7: Modelling the data'
-author: "Adam Zabell"
+author: "Randall Julian"
 date: "1/2/2018"
 output:
-  html_document: default
   word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -120,7 +120,7 @@ Although not common when looking for relationships between variables, nonlinear 
 Gauss = function(amplitude,mu,sigma,x){ amplitude*exp(-0.5*((x - mu)/sigma)^2) }
 x <- seq(1,5,by=0.1)
 yExact <- Gauss(10000,3,0.4,x)
-yNoisy <- yExact * rnorm(length(yExact),mean=1,sd=0.3)
+yNoisy <- yExact * rnorm(length(yExact),mean=1,sd=0.125)
 noisyCurve <- tibble(x=x,y=yNoisy)
 perfectGuess <- nls(y ~ Gauss(a,m,s,x), 
                     start=list(a=10000,m=3,s=0.4),
