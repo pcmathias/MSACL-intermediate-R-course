@@ -18,7 +18,7 @@ This course is intended for laboratory professionals with a basic command of R a
 
 - Please make an effort to complete the following Introduction to GitHub: https://services.github.com/on-demand/intro-to-github/
 - Download this github repository as a zip file and install it on your computer (e.g. C:\Users\jdoe\Desktop\msacl2018)
-- Download the mock database files from ??? and put that folder within the downloaded respository (e.g. C:\Users\jdoe\Desktop\msacl2018\class_data)
+- Download the mock database zip file from [this link](https://indigobio.egnyte.com/fl/rjfI054C48), uncompress, and put the folder within the downloaded respository (e.g. C:\Users\jdoe\Desktop\msacl2018\class_data)
 - Edit the .Rmd files for lessons 5, 6, and 10 so that
   - the variable 'duringClass' in line 9 is set to TRUE
   - the path in line 11 is the location of downloaded repository
