@@ -1,0 +1,15 @@
+---
+title: 'Lesson 3: Reading and writing files - beyond the basics'
+author: "Patrick Mathias"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Base functions for reading and writing files
+
+## Speeding things up with the *readr* package
+
+## Dealing with Excel files (gracefully)
