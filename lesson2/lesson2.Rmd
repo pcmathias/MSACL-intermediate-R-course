@@ -78,8 +78,13 @@ Let's use the built-in functionality in RStudio to create an R Markdown document
 1. Add a file by selecting the add file button on the top left of your screen
 1. Select R Markdown... as the file type
 1. Title the document "Data Science 201" and select OK
+1. Put the cursor in the "cars" code chunk (should be the 2nd chunk) and hit `Ctrl+Shift+Enter`/`Command+Shift+Enter`. What happened?
+1. Insert a code chunk under the cars code chunk by using the `Ctrl+Alt+i`/`Command+Option+i`(Windows/Mac) shortcut
+1. Create output for the first lines of the cars data frame using the `head(cars)` command and execute the code chunk
 
-RStudio already provides you with an outline of a useful document, including interspersed code chunks. The header is completed based on the data that was entered into the document creation wizard. The first code chunk below the header is a useful practice to adopt: use your first code chunk as a setup chunk to set output options and load packages you will use in the rest of the document. The `knitr::opts_chunk$set(echo = TRUE)` command in the setup chunk tells R to display (or echo) the source code you write in your output document. A detailed list of various options can be found under the R Markdown cheatsheet here: https://www.rstudio.com/resources/cheatsheets/.
+RStudio sets up the document to be run as an R Notebook so you can interactively run chunks separately and immediately view the output.
+
+RStudio also already provides you with an outline of a useful document, including interspersed code chunks. The header is completed based on the data that was entered into the document creation wizard. The first code chunk below the header is a useful practice to adopt: use your first code chunk as a setup chunk to set output options and load packages you will use in the rest of the document. The `knitr::opts_chunk$set(echo = TRUE)` command in the setup chunk tells R to display (or echo) the source code you write in your output document. A detailed list of various options can be found under the R Markdown cheatsheet here: https://www.rstudio.com/resources/cheatsheets/.
 
 Now let's knit this file and create some output.
 
@@ -91,4 +96,42 @@ Now let's knit this file and create some output.
 1. Now, instead of hitting the **Knit** button, select the down arrow adjacent to it and click Knit to PDF
 1. Repeat the previous step but knit to a Word document
 
+The add file options also allow you to create a presentation in R Markdown. This can be a handy alternative to Powerpoint, especially if you want to share code and/or many figures within a presentation. You can find more information about these presentations and the syntax used to set up slides at the RStudio site on [Authoring R Presentations](https://support.rstudio.com/hc/en-us/articles/200486468-Authoring-R-Presentations).
+
 ## Creating an R Markdown document that integrates best practices in reproducible research
+
+Let's review the components of a project according to the take home points from Lesson 1:
+- a directory for each project
+- a folder structure the separates raw data, output, documents, etc.
+- clear file naming
+- code written with a style convention
+- code portability/reproducibility with help from here and checkpoint packages
+
+How can we integrate R Markdown documents within the context of these requirements? We already created a project and associated directories for this course so most of our work is done. Now we are going to add our R Markdown file to the project and set it up so we can be efficient and reproducible.
+
+***Exercise***
+
+1. Before we jump into creating our R Markdown file, we need to create a file that will allow us to run checkpoint together with knitr - click the Add File button and select "R Script"
+1. Add the following code to your R script
+```{r}
+library("formatR")
+library("htmltools")
+library("caTools")
+library("bitops")
+library("base64enc")
+library("rprojroot")
+library("rmarkdown")
+library("evaluate")
+library("stringi")
+```
+1. Save as "knitr-packages.R" in the src folder of your project (explanation of why you did this below)
+1. Now add a new R Markdown file, title it "Data Science 201 Exercises", and leave as the default .html ouptut selection
+1. Go ahead and save the .Rmd by clicking the Save button (disk button) or selecing Save under the File menu: save the file to your src folder within your project and name according to the principles we disucssed in lesson 1
+1. In the setup code chunk for the document, load the checkpoint package
+1. Add the checkpoint command to load packages from today: `checkpoint("2018-01-21")`
+1. Load the here package below the checkpoint command
+1. Modify the header of the first block of text to "Lesson 3 Exercises"
+
+So why did you have to go through the first 3 steps before starting your R Markdown document? When RStudio knits a document, it calls certain packages behind the scenes to create the document. However, when you are using checkpoint, the package only looks for packages within your project folders and does not see those hidden RStudio folders. So adding knitr-packages.R is a workaround to allow checkpoint to see those packages and knit the document.
+
+Now we're ready to jump into lesson 3!
