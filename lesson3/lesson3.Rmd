@@ -1,11 +1,13 @@
 ---
-title: 'Lesson 3: Reading and writing files - beyond the basics'
+title: 'Lesson 3: Reading files - beyond the basics'
 author: "Patrick Mathias"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readxl)
 ```
 
 This is a much shorter and less philosophical lesson than the previous lessons but hopefully is very useful when considering how to pull data into R.
@@ -25,6 +27,31 @@ Problem #2 will come back to haunt you if you are not careful. The brute force d
 To be safe, the best practice is arguably to explicitly define column types when you read in a file. It is a little extra work up front but can save you some pain later on.
 
 For the curious, additional information about the history of of stringsAsFactors can be found [here](https://simplystatistics.org/2015/07/24/stringsasfactors-an-unauthorized-biography/).
+
+***Exercise***
+
+Let's run through the base reading function with a csv.
+
+1. OK, let's get in the habit of working within our project structure. Copy the class data you downloaded into the data folder of your project.
+1. Use the base `read.csv()` function to read the "2017-01-06.csv" file into a data frame.
+1. What is the internal structure of the object? (Recall the `str()` command to quickly view the structure.)
+1. What does the data look like? (Recall the `summary()` function to view column types and characteristics about the data.)
+
+```{r base_load}
+base_load <- read.csv(here("data", "2017-01-06.csv"))
+str(base_load)
+summary(base_load)
+```
+
+Repeat the previous steps starting with #2, but include the argument `stringsAsFactors = FALSE` when you read in the data.
+
+```{r base_load_nofactors}
+base_load_nofactors <- read.csv(here("data", "2017-01-06.csv"), stringsAsFactors = FALSE)
+str(base_load_nofactors)
+summary(base_load_nofactors)
+```
+
+For this data set, which fields should be strings and which should be factors?
 
 ### Writing files
 
@@ -63,8 +90,61 @@ Another advantage of these functions is that they actually explicitly tell you h
 
 Readr also offers equivalent write functions such as `write_csv()` and `write_tsv()`. There is a variant of `write_csv()` specifically for csv files intended to be read with Excel: `write_excel_csv()`. These functions do not write row names by default.
 
+***Exercise***
+
+Now let's run through using the readr function for a csv:
+
+1. Use the `read_csv()` function to read the "2017-01-06.csv" file into a data frame.
+1. What is the internal structure of the object? (Recall the `str()` command to quickly view the structure.)
+1. What does the data look like? (Recall the `summary()` function to view column types and characteristics about the data.)
+```{r readr_load}
+readr_load <- read_csv(here("data", "2017-01-06.csv"))
+str(readr_load)
+summary(readr_load)
+```
+
+Now compare the time required to run the base `read.csv()` function with the readr `read_csv()` function using `system.time()`.
+
+**Time to read with base:** `r system.time(base_load <- read.csv(here("data", "2017-01-06.csv")))`
+
+**Time to read with readr:** `r system.time(readr_load <- read_csv(here("data", "2017-01-06.csv")))`
+
+Finally, let's follow some best practices and explicitly define columns with the `col_types` argument. We want to explicitly define batchName, compoundName, and sampleType as factors. Note that the `col_factor()` expects a definition of the factor levels but you can get around this by supplying a `NULL`. Then run a summary to review the data
+```{r col_types}
+readr_load_factors <- read_csv(
+  here("data", "2017-01-06.csv"),
+  col_types = cols(
+    batchName = col_factor(NULL),
+    compoundName = col_factor(NULL),
+    sampleType = col_factor(NULL)
+    )
+  )
+summary(readr_load_factors)
+```
+
+
 ## Dealing with Excel files (gracefully)
 
 You may have broken up with Excel, but unfortunately many of your colleagues have not. You may be using a little Excel on the side. (Don't worry, we don't judge!) So Excel files will continue to be a part of your life. The [readxl package](http://readxl.tidyverse.org/) makes it easy to read in data from these files and also offers additional useful functionality. As with the other file reading functions, the syntax is pretty straightforward: `read_excel("file_name.xlsx")`. Excel files have an added layer of complexity in that one file may have multiple worksheets, so the `sheet = "worksheet_name"` argument can be added to specify the desired worksheet. Different portions of the spreadsheet can be read using the `range` arugment. For example a subset of rows and columns can be selected via cell coordinates: `read_excel("file_name.xlsx", range = "B1:D6")`.
 
 If you are dealing with Excel data that is not a traditional tabular format, the [tidyxl package](https://cran.r-project.org/web/packages/tidyxl/vignettes/tidyxl.html) is useful to be aware of. We will not cover it in this course but it is worth reading up on if you ever have to analyze a pivot table or some other product of an Excel analysis.
+
+***Exercise***
+
+You might be able to guess what comes next: we'll read in an Excel file.
+
+1. Use the `read_excel()` function to read the "2017-01-06.xlsx" file into a data frame
+1. View a summary of the imported data
+1. Now read in only the first 6 columns using the `range` parameter
+1. Review the first 6 lines of the imported data
+
+```{r readxl}
+readxl_load <- read_excel(here("data", "2017-01-06.csv"))
+summary(readxl_load)
+readxl_load_subset <- read_excel(here("data", "2017-01-06.csv"), range = cell_cols("A:F"))
+head(readxl_load_subset)
+```
+
+## Importing dirty data
+
+To close out the discussion on reading files, there is one more useful package to introduce that helps with a variety of data cleaning functions. Since this is R, the package is cleverly and appropriately named [janitor](https://github.com/sfirke/janitor).
