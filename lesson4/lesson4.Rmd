@@ -8,9 +8,10 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(janitor)
+library(readxl)
 ```
 
-## Brief primer on the tidyverse
+## A brief diversion to discuss the tidyverse
 
 According to the official tidyverse [website](https://www.tidyverse.org/), "the tidyverse is an *opinionated* collection of R packages designed for data science." We've gotten a flavor of tidyverse functionality by using the readr packages and will wade deeper into the tidyverse in the next lessons. Because the tidyverse was not a component of the introductory MSACL data science course in previous years, we are going to cover basic functionality of many tidyverse packages throughout the rest of the course. Many of the data manipulation concepts will probably be familiar but the tidyverse offers a consistent interface for functions. Data is consistently the first argument for functions, and that enables compatibility with pipes. The tidyverse includes its own version of a data frame, the [tibble](http://tibble.tidyverse.org/articles/tibble.html), with the primary advantages being nicer printing of output and more predictable behavior with subsetting.
 
@@ -59,7 +60,7 @@ samples_jan %>%
   filter(compound_name == "morphine")
 ```
 
-Or we want to examine only the unknown samples with a concentration greater than 0:
+Or maybe we want to examine only the unknown samples with a concentration greater than 0:
 ```{r}
 samples_jan %>%
   filter(sample_type == "unknown", concentration > 0)
@@ -82,6 +83,41 @@ summary()
 ```
 
 ### Expanding your data set
+
+Another common data manipulation task is adding or replacing columns that are derived from data in other columns. The `mutate()` function provides a quick and clean way to add additional variables that can include calculations, evaluating some logic, string manipulation, etc. You provide the function with the following argument(s): name of the new column = value. For example, if we continue with our January sample data set that includes concentrations and expected concentrations for standards, we can calculate the ratio of concentration to expected:
+```{r}
+samples_jan %>%
+  filter(sample_type == "standard", expected_concentration > 0) %>%
+  mutate(conc_ratio = concentration/expected_concentration) %>%
+  select(batch_name:compound_name, concentration, expected_concentration, conc_ratio)
+```
+
+Notice that we got around the issue of dividing by 0 by filtering for expected concentrations above 0. However, you may want to include these yet don't want R to throw an error. How can you deal with edge cases like this? `mutate()` borrows from SQL (Structured Query Language) and offers a `case_when` syntax for dealing with different cases. The [syntax](http://dplyr.tidyverse.org/reference/case_when.html) takes some getting used to but this can be an invaluable tool. Let's do the same calculation but spell out the case when expected_concentration is 0 and add a small number to numerator and denominator in that case:
+```{r}
+samples_jan %>%
+  filter(sample_type == "standard") %>%
+  mutate(
+    conc_ratio = case_when(
+      expected_concentration == 0 ~ (concentration + 0.001)/(expected_concentration + 0.001),
+      TRUE ~ concentration/expected_concentration
+    )
+  ) %>%
+  select(batch_name:compound_name, concentration, expected_concentration, conc_ratio)
+```
+
+Another common operation manipulation is wrangling dates. The [lubridate package](http://lubridate.tidyverse.org/) offers a helpful toolset to quickly parse dates and times. The bread and butter parsing functions are named intuitively based on the order of year, month, date, and time elements. For example, `mdy("1/20/2018")` will convert the string into a date that R can use. There are other useful functions like `month()` and `wday()` that pull out a single element of the date to use for grouping operations, for example. Let's work with a different January data set that has batch data and parse the collection dates in a variety of ways:
+```{r}
+batch_jan <- read_excel(here("data", "2017-01-06.xlsx")) %>%
+  clean_names()
+batch_jan %>%
+  mutate(
+    collect_month = month(batch_collected_timestamp),
+    collect_day_of_week = wday(batch_colllected_timestamp),
+    collect_week = week(batch_collected_timestamp),
+    collect_week_alt = floor_date(batch_collected_timestamp, unit = "week")
+  )
+```
+
 
 ### Collapse (summarize) your data set
 
