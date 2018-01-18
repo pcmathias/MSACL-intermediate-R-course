@@ -109,12 +109,11 @@ Now compare the time required to run the base `read.csv()` function with the rea
 
 **Time to read with readr:** `r system.time(readr_load <- read_csv(here("data", "2017-01-06.csv")))`
 
-Finally, let's follow some best practices and explicitly define columns with the `col_types` argument. We want to explicitly define batchName, compoundName, and sampleType as factors. Note that the `col_factor()` expects a definition of the factor levels but you can get around this by supplying a `NULL`. Then run a summary to review the data
+Finally, let's follow some best practices and explicitly define columns with the `col_types` argument. We want to explicitly define compoundName and sampleType as factors. Note that the `col_factor()` expects a definition of the factor levels but you can get around this by supplying a `NULL`. Then run a summary to review the data
 ```{r col_types}
 readr_load_factors <- read_csv(
   here("data", "2017-01-06.csv"),
   col_types = cols(
-    batchName = col_factor(NULL),
     compoundName = col_factor(NULL),
     sampleType = col_factor(NULL)
     )
@@ -139,9 +138,9 @@ You might be able to guess what comes next: we'll read in an Excel file.
 1. Review the first 6 lines of the imported data
 
 ```{r readxl}
-readxl_load <- read_excel(here("data", "2017-01-06.csv"))
+readxl_load <- read_excel(here("data", "2017-01-06.xlsx"))
 summary(readxl_load)
-readxl_load_subset <- read_excel(here("data", "2017-01-06.csv"), range = cell_cols("A:F"))
+readxl_load_subset <- read_excel(here("data", "2017-01-06.xlsx"), range = cell_cols("A:F"))
 head(readxl_load_subset)
 ```
 
@@ -160,7 +159,7 @@ devtools::install_github("sfirke/janitor")
 library(janitor)
 readr_load_cleaned <- readr_load %>%
   clean_names()
-head(read_load_cleaned)
+head(readr_load_cleaned)
 ```
 
 Now we'll do a quick tabulation to count the number of rows:
