@@ -147,4 +147,23 @@ head(readxl_load_subset)
 
 ## Importing dirty data
 
-To close out the discussion on reading files, there is one more useful package to introduce that helps with a variety of data cleaning functions. Since this is R, the package is cleverly and appropriately named [janitor](https://github.com/sfirke/janitor).
+To close out the discussion on reading files, there is one more useful package to introduce that helps with a variety of data cleaning functions. Since this is R, the package is cleverly and appropriately named [janitor](https://github.com/sfirke/janitor). The quick take home in terms of useful functions from this package:
+- `clean_names()` will reformat column names to conform to the tidyverse style guide: spaces are replaced with underscores & uppercase letters are converted to lowercase
+- empty rows and columns are removed with `remove_empty_rows()` or `remove_empty_columns()`
+- `tabyl(variable)` will tabulate into a data frame based on 1-3 variables supplied to it
+
+Let's take these functions for a spin using our data set. We are going to use the development version of the package because there is new, additional functionality. I will chain the commands together with pipes (which we'll discuss in more detail in the next lesson).
+
+First let's review the first few lines of data after cleaning the columns names:
+```{r janitor}
+devtools::install_github("sfirke/janitor")
+library(janitor)
+readr_load_cleaned <- readr_load %>%
+  clean_names()
+head(read_load_cleaned)
+```
+
+Now we'll do a quick tabulation to count the number of rows:
+```{r tabyl}
+readr_load_cleaned %>% tabyl(compound_name)
+```
