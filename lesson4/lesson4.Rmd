@@ -6,10 +6,83 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
 ```
 
 ## Brief primer on the tidyverse
 
+According to the official tidyverse [website](https://www.tidyverse.org/), "the tidyverse is an *opinionated* collection of R packages designed for data science." We've gotten a flavor of tidyverse functionality by using the readr packages and will wade deeper into the tidyverse in the next lessons. Because the tidyverse was not a component of the introductory MSACL data science course in previous years, we are going to cover basic functionality of many tidyverse packages throughout the rest of the course. Many of the data manipulation concepts will probably be familiar but the tidyverse offers a consistent interface for functions. Data is consistently the first argument for functions, and that enables compatibility with pipes. The tidyverse includes its own version of a data frame, the [tibble](http://tibble.tidyverse.org/articles/tibble.html), with the primary advantages being nicer printing of output and more predictable behavior with subsetting.
+
+One advantage of using the tidyverse packages is the relatively robust support documentation around these packages. Stack Overflow is often a go to for troubleshooting but many tidyverse packages have nice vignettes and other online resources to help orient you to how the package functions work. There is a freely available online book, [R for Data Science](http://r4ds.had.co.nz/) that covers the tidyverse (and more). [Cheat Sheets](https://www.rstudio.com/resources/cheatsheets/) provided by RStudio also provide great quick references for tidyverse and other packages.
+
+You can load the core tidyverse packages by loading tidyverse: `library(tidyverse)`. [ggplot2](http://ggplot2.tidyverse.org/) is probably the most popular tidyverse package and arguably the go to for sophisticated visualizations in R, but inevitably data will need to be manipulated prior to plotting. So the two workhorse packages for many applications are [dplyr](http://dplyr.tidyverse.org/) and [tidyr](http://tidyr.tidyverse.org/), which we will cover in this lesson.
+
 ## Manipulating data with dplyr
+
+The [dplyr package](http://dplyr.tidyverse.org/) provides functions to carve, expand, and collapse a data frame (or tibble).
+
+### Carving your data set
+
+Reducing a data set to a subset of columns and/or rows are common operations, particularly on the path to answering a specific set of questions about a data set. If you need to go from a large number of columns (variables) to a smaller set, `select()` allows you to select specific columns by name. If you need only a subset of rows from your data set, `filter()` allows you to pick rows (cases) based on values, ie. you can subset your data based on logic.
+
+Let's take these for a spin using the data we started examining in the last lesson.
+
+Review the type of data we were working with:
+```{r}
+samples_jan <- read_csv(
+  here("data", "2017-01-06.csv"),
+  col_types = cols(
+    compoundName = col_factor(NULL),
+    sampleType = col_factor(NULL)
+    )
+  ) %>% 
+  clean_names()
+str(samples_jan)
+```
+
+Let's say we don't need the last two logical columns and want to get rid of them. We can use `select()` and provide a range of adjacent variables:
+```{r}
+samples_jan %>%
+  select(batch_name:expected_concentration)
+```
+
+Or we only care about the first 3 variables plus the concentration:
+```{r}
+samples_jan %>%
+  select(batch_name:compound_name, concentration)
+```
+
+Now let's carve the data set in the other direction. If we only care about the morphine data, we can use `filter()` to pick those rows based on a logical condition:
+```{r}
+samples_jan %>%
+  filter(compound_name == "morphine")
+```
+
+Or we want to examine only the unknown samples with a concentration greater than 0:
+```{r}
+samples_jan %>%
+  filter(sample_type == "unknown", concentration > 0)
+```
+
+Note that a comma in the filter state implies a logical AND - condition A and condition B. You could include an OR condition as well using the pipe character | - condition A | condition B.
+```{r}
+samples_jan %>%
+  filter(sample_type == "unknown" | concentration > 0)
+```
+
+***Exercise***
+Carve the January data set in both directions. We want sample information (batch, sample, compound) and ion ratio data for only oxycodone measurements in unknown sample types. Provide a summary of the data.
+
+```{r}
+samples_jan_oxy_ir <- samples_jan %>%
+  filter() %>%
+  select()
+summary()
+```
+
+### Expanding your data set
+
+### Collapse (summarize) your data set
 
 ## Shaping and tidying data with tidyr
