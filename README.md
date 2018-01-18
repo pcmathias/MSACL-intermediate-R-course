@@ -28,7 +28,7 @@ This course is intended for laboratory professionals with a basic command of R a
 - **Lesson 1**: [Adopting principles of reproducible research](lesson1/lesson1.Rmd)
 - **Lesson 2**: [Getting cozy with R Markdown](lesson2/lesson2.Rmd)
 - **Lesson 3**: [Reading files - beyond the basics](lesson3/lesson3.Rmd)
-- **Lesson 4**: Data manipulation in the tidyverse
+- **Lesson 4**: [Data manipulation in the tidyverse](lesson4/lesson4.Rmd)
 - **Lesson 5**: [Blending data sets](lesson5/lesson5.Rmd)
 - **Lesson 6**: [Taking plotting to the next level](lesson6/lesson6.Rmd)
 - **Lesson 7**: [Modelling data](lesson7/lesson7.Rmd)
