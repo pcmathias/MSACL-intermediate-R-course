@@ -1,0 +1,15 @@
+---
+title: 'Lesson 4: Data manipulation in the tidyverse'
+author: "Patrick Mathias"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Brief primer on the tidyverse
+
+## Manipulating data with dplyr
+
+## Shaping and tidying data with tidyr
