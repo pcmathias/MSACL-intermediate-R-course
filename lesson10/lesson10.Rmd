@@ -8,13 +8,13 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-duringClass <- FALSE
-if(duringClass) {
-  setwd("/full/unzipped/path") # e.g. "C:\Users\johndoe\Desktop\MSACL-intermediate-R-course-master"
-  rootDir <- getwd()
-} else {
-  rootDir <- "/Users/azabell/Dropbox/R/MSACL-intermediate-R-course"
-}
+# duringClass <- FALSE
+# if(duringClass) {
+#   setwd("/full/unzipped/path") # e.g. "C:\Users\johndoe\Desktop\MSACL-intermediate-R-course-master"
+#   rootDir <- getwd()
+# } else {
+#   rootDir <- "/Users/azabell/Dropbox/R/MSACL-intermediate-R-course"
+# }
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(openxlsx)
@@ -27,10 +27,11 @@ These lessons were designed to build and reinforce each other. It's possible to 
 
 For this lesson, we're fudging slightly by already knowing what we want to start looking for.
 ```{r first_plots}
-workingDir <- file.path(rootDir,"class_data")
-oneYearBatches <- list.files(workingDir,pattern="xlsx$") %>%
-                  file.path(workingDir,.) %>%
-                  map_dfr(read.xlsx) %>%
+#workingDir <- file.path(rootDir,"class_data")
+oneYearBatches <- list.files(here::here("class_data"), pattern="xlsx$") %>%
+                  file.path(here::here("class_data"), .) %>%
+                  #map_dfr(read.xlsx) %>%
+                  map_dfr(read_excel) %>%
                   as_tibble() %>%
                   type_convert()
 
@@ -60,8 +61,8 @@ Whatever is going on, it looks like reviewer 'Dave' is the only person it is hap
 Based on the batch-level data, we can see that 'Dave' -- and apparently only Dave -- has perfect R^2^ values on every batch of data he reviewed throughout the month of May. Digging deeper will require merging information from the batch level with information at the sample (and possibly peak) level. 
 
 ```{r join, message=FALSE}
-oneYearSamples <- list.files(workingDir,pattern="csv$") %>%
-                  file.path(workingDir,.) %>%
+oneYearSamples <- list.files(here::here("class_data"),pattern="csv$") %>%
+                  file.path(here::here("class_data"),.) %>%
                   map_dfr(read_csv)
 davesData <- oneYearSamples %>%
                left_join(select(oneYearBatches,-calibrationSlope,-calibrationIntercept)) %>%
@@ -79,7 +80,7 @@ davesData %>% ggplot(aes(x=batchCollectedTimestamp,y=usedForCurve,color=compound
   facet_grid(compoundName ~ expectedConcentration) +
   geom_vline(xintercept = as.numeric(as_datetime(c("2017-05-01","2017-06-01"))),linetype=1,colour="black")
 
-davesData %<>% mutate(pctDiff = (concentration - expectedConcentration) / expectedConcentration,
+davesData %>% mutate(pctDiff = (concentration - expectedConcentration) / expectedConcentration,
                       within20 = abs(pctDiff) <= 0.2)
 davesData %>% filter(compoundName == "codeine") %>%
   ggplot(aes(x=batchCollectedTimestamp,y=pctDiff,color=within20)) +
