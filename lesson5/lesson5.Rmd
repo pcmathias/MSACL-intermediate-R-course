@@ -7,16 +7,18 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-duringClass <- FALSE
-if(duringClass) {
-  setwd("/full/unzipped/path") # e.g. "C:\Users\johndoe\Desktop\MSACL-intermediate-R-course-master"
-  rootDir <- getwd()
-} else {
-  rootDir <- "/Users/azabell/Dropbox/R/MSACL-intermediate-R-course"
-}
+# duringClass <- FALSE
+# if(duringClass) {
+#   setwd("/full/unzipped/path") # e.g. "C:\Users\johndoe\Desktop\MSACL-intermediate-R-course-master"
+#   rootDir <- getwd()
+# } else {
+#   rootDir <- "/Users/azabell/Dropbox/R/MSACL-intermediate-R-course"
+# }
 knitr::opts_chunk$set(echo = TRUE)
 library(openxlsx)
 library(tidyverse)
+library(readxl)
+library(here)
 ```
 
 # Blending Data
@@ -24,9 +26,9 @@ library(tidyverse)
 Sometimes, you need data stored across more than one file. For example, managing the QC deviations across twelve separate months of reports. Rather than hold multiple printouts side-by-side to monitor a trend, **R** will allow you to read each file and knit them together either by row, or by column. For most circumstances, that combination involves adding rows to data set.
 ```{r rowbind}
 workingDir <- file.path(rootDir,"class_data")
-january <- read_csv(file.path(workingDir,"2017-01-06.csv"))
+january <- read_csv(here::here("class_data", "2017-01-06.csv"))
 as.data.frame(january[187195:187200,])
-february <- read_csv(file.path(workingDir,"2017-02-06.csv"))
+february <- read_csv(here::here("class_data","2017-02-06.csv"))
 as.data.frame(february[1:5,])
 twoMonths <- rbind(january,february)
 twoMonths[187195:187204,]
@@ -54,7 +56,8 @@ incomplete_data
 The database example for this class has three different data.frames: one for batch-level information (calibration R^2^, instrument name); one for sample-level information (sample type, calculated concentration); and one for peak-level information (quant peak area, modification flag). Accessing the relationships across these three sources -- reporting the quant and qual peak area of only the qc samples, for example -- requires the tools of relational data. In the tidyverse, these tools are part of the **dplyr** package and involve three 'families of verbs' called *mutating joins*, *filtering joins*, and *set operations*, which in turn expect a unique key in order to correctly correlate the data. 
 ```{r one_batch_three_tables, message=FALSE}
 jan.b <- read.xlsx(xlsxFile=file.path(workingDir,"2017-01-06.xlsx"))
-jan.p <- read_tsv(file=file.path(workingDir,"2017-01-06.txt"))
+jan.b <- read_excel(here::here("class_data", "2017-01-06.xlsx"))
+jan.p <- read_tsv(here::here("class_data","2017-01-06.txt"))
 byBatch <- jan.b[jan.b$batchName=="b802253"|jan.b$batchName=="b252474",]
 bySample <- january[january$batchName=="b802253"|january$batchName=="b252474",]
 byPeak <- jan.p[jan.p$batchName=="b802253"|jan.p$batchName=="b252474",]
