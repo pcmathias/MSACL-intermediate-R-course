@@ -17,11 +17,14 @@ This course is intended for laboratory professionals with a basic command of R a
 - Go to Github at https://github.com and sign up for an account (if you don't have one already)
 
 - Please make an effort to complete the following Introduction to GitHub: https://services.github.com/on-demand/intro-to-github/
-- Download this github repository as a zip file and install it on your computer (e.g. C:\Users\jdoe\Desktop\msacl2018)
-- Download the mock database zip file from [this link](https://indigobio.egnyte.com/fl/rjfI054C48), uncompress, and put the folder within the downloaded respository (e.g. C:\Users\jdoe\Desktop\msacl2018\class_data)
-- Edit the .Rmd files for lessons 5, 6, and 10 so that
-  - the variable 'duringClass' in line 9 is set to TRUE
-  - the path in line 11 is the location of downloaded repository
+- Download the mock database zip file from [this link](https://figshare.com/s/8d9798a03faf7c191013), park it someplace you will remember for the course, and uncompress. If you have problems with that link, the data is also available [here](https://indigobio.egnyte.com/fl/rjfI054C48) and [here](https://drive.google.com/file/d/1ruGqmwp_jfT8_wUCtMmC9hVyoZtT5aR7/view?usp=sharing). We will also have a copy on hand on a thumb drive as well.
+
+## Accessing/interacting with the course content
+
+There are multiple ways to access and interact with the course content. We want to minimize any headaches with setting up the course and grappling with finicky work computers, but also hope this is a good opportunity to get oriented with version control and git.
+- **Preferred** Use git functionality in RStudio by creating a project from version control that is "cloned" from the class repository. *We will run through how to do this at the beginning of class.* The advantage of this approach: we will make updates to the repository during class and you will be able to easily pull those to your computer without re-downloading.
+- Alternately, you can download this github repository as a zip file and install it on your computer (e.g. C:\Users\jdoe\Desktop\msacl2018).
+- In the event that there are issues with downloading files, we will have a local copy of the course repository that we can share.
 
 ## Course content
 
