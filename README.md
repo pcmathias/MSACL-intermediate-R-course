@@ -35,3 +35,10 @@ This course is intended for laboratory professionals with a basic command of R a
 - **Lesson 8**: [Beyond flat files](lesson8/lesson8.Rmd)
 - **Lesson 9**: [Scaling - don't make me repeat myself](lesson9/lesson9.Rmd)
 - **Lesson 10**: [End-to-end - from file import to communication](lesson10/lesson10.Rmd)
+
+## Notes/Disclaimers/Acknowledgments
+
+This course is our attempt to integrate a number of already existing outstanding resources for learning R and put a bit of a mass spec spin on them. We have tried to include as many links to relevant resources as we can and hopefully have not missed relevant sources of material and inspiration. We should call out a number of people and resources that directly or indirectly have provided content and inspiration for this course:
+- [R for Data Science](http://r4ds.had.co.nz/index.html), the online textbook by Garrett Grolemund and Hadley Wickham, is invaluable in navigating the tidyverse and learning R in general
+- Blog posts and documentation by [Jenny Bryan](https://github.com/jennybc) helped steer the project content and as well as some discussion about packages
+- Amy Willis' [Advanced R Course repository](https://github.com/adw96/biostat561) as a resource for understanding content in a longer, advanced R course
