@@ -22,7 +22,7 @@ This course is intended for laboratory professionals with a basic command of R a
 ## Accessing/interacting with the course content
 
 There are multiple ways to access and interact with the course content. We want to minimize any headaches with setting up the course and grappling with finicky work computers, but also hope this is a good opportunity to get oriented with version control and git.
-- **Preferred** Use git functionality in RStudio by creating a project from version control that is "cloned" from the class repository. *We will run through how to do this at the beginning of class.* The advantage of this approach: we will make updates to the repository during class and you will be able to easily pull those to your computer without re-downloading.
+- **Preferred:** Use git functionality in RStudio by creating a project from version control that is "cloned" from the class repository. *We will run through how to do this at the beginning of class.* The advantage of this approach: we will make updates to the repository during class and you will be able to easily pull those to your computer without re-downloading.
 - Alternately, you can download this github repository as a zip file and install it on your computer (e.g. C:\Users\jdoe\Desktop\msacl2018).
 - In the event that there are issues with downloading files, we will have a local copy of the course repository that we can share.
 
