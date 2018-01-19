@@ -25,24 +25,28 @@ library(here)
 ## Simple *rbind* and *cbind*
 Sometimes, you need data stored across more than one file. For example, managing the QC deviations across twelve separate months of reports. Rather than hold multiple printouts side-by-side to monitor a trend, **R** will allow you to read each file and knit them together either by row, or by column. For most circumstances, that combination involves adding rows to data set.
 ```{r rowbind}
-#workingDir <- file.path(rootDir,"class_data")
+# workingDir <- file.path(rootDir,"class_data")
 january <- read_csv(here::here("class_data", "2017-01-06.csv"))
-as.data.frame(january[187195:187200,])
-february <- read_csv(here::here("class_data","2017-02-06.csv"))
-as.data.frame(february[1:5,])
-twoMonths <- rbind(january,february)
-twoMonths[187195:187204,]
-c(nrow(january),nrow(february),nrow(twoMonths))
+as.data.frame(january[187195:187200, ])
+february <- read_csv(here::here("class_data", "2017-02-06.csv"))
+as.data.frame(february[1:5, ])
+twoMonths <- rbind(january, february)
+twoMonths[187195:187204, ]
+c(nrow(january), nrow(february), nrow(twoMonths))
 ```
 
 There is an equivalent but less useful command in **R** which will append columns.
 ```{r cbind}
-incomplete_data <- tibble(sampleName="123456",
-                          compoundName=c("morphine","hydromorphone","codeine","hydrocodone"),
-                          concentration=c(34,35,44,45))
-additional_columns <- tibble(expectedConcentration=c(20,20,20,20),
-                             sampleType="standard")
-incomplete_data <- cbind(incomplete_data,additional_columns)
+incomplete_data <- tibble(
+  sampleName = "123456",
+  compoundName = c("morphine", "hydromorphone", "codeine", "hydrocodone"),
+  concentration = c(34, 35, 44, 45)
+)
+additional_columns <- tibble(
+  expectedConcentration = c(20, 20, 20, 20),
+  sampleType = "standard"
+)
+incomplete_data <- cbind(incomplete_data, additional_columns)
 incomplete_data
 ```
 
@@ -55,26 +59,26 @@ incomplete_data
 # Joining Relational Data
 The database example for this class has three different data.frames: one for batch-level information (calibration R^2^, instrument name); one for sample-level information (sample type, calculated concentration); and one for peak-level information (quant peak area, modification flag). Accessing the relationships across these three sources -- reporting the quant and qual peak area of only the qc samples, for example -- requires the tools of relational data. In the tidyverse, these tools are part of the **dplyr** package and involve three 'families of verbs' called *mutating joins*, *filtering joins*, and *set operations*, which in turn expect a unique key in order to correctly correlate the data. 
 ```{r one_batch_three_tables, message=FALSE}
-jan.b <- read.xlsx(xlsxFile=file.path(workingDir,"2017-01-06.xlsx"))
+jan.b <- read.xlsx(xlsxFile = file.path(workingDir, "2017-01-06.xlsx"))
 jan.b <- read_excel(here::here("class_data", "2017-01-06.xlsx"))
-jan.p <- read_tsv(here::here("class_data","2017-01-06.txt"))
-byBatch <- jan.b[jan.b$batchName=="b802253"|jan.b$batchName=="b252474",]
-bySample <- january[january$batchName=="b802253"|january$batchName=="b252474",]
-byPeak <- jan.p[jan.p$batchName=="b802253"|jan.p$batchName=="b252474",]
+jan.p <- read_tsv(here::here("class_data", "2017-01-06.txt"))
+byBatch <- jan.b[jan.b$batchName == "b802253" | jan.b$batchName == "b252474", ]
+bySample <- january[january$batchName == "b802253" | january$batchName == "b252474", ]
+byPeak <- jan.p[jan.p$batchName == "b802253" | jan.p$batchName == "b252474", ]
 ```
 
 ## Primary and foreign keys
 A key is the variable in a data.frame -- or combination of variables in a data.frame -- that uniquely defines every row. In our data, *batchName* is present in each data.frame but always insufficient to define a specific row. In fact, no single column in our data operates as a key. We can build a key by combinging two (or three) columns.
 ```{r uniquify}
-byBatch$keyB <- paste(byBatch$batchName,byBatch$compoundName,sep=":")
-bySample$keyS <- paste(bySample$sampleName,bySample$compoundName,sep=":")
-byPeak$keyP <- paste(byPeak$sampleName,byPeak$compoundName,byPeak$chromatogramName,sep=":")
+byBatch$keyB <- paste(byBatch$batchName, byBatch$compoundName, sep = ":")
+bySample$keyS <- paste(bySample$sampleName, bySample$compoundName, sep = ":")
+byPeak$keyP <- paste(byPeak$sampleName, byPeak$compoundName, byPeak$chromatogramName, sep = ":")
 ```
 
 Doing this creates a **primary key**, which is the unique identifier for that data.frame. A **foreign key** by contrast would uniqely identify an item in another table. The following command (explained below) incompletely adds a foreign key to `byPeak` so that information in `byBatch` can be intuitively retreived. The second command completes the population of the foreign key variable, but only because the row order in `byPeak` follows a very specific format. There are safer ways of doing this, which require an understanding of set operations.
 ```{r byPeak_foreign_key}
-byPeak <- left_join(byPeak,byBatch)
-byPeak$keyB[is.na(byPeak$keyB)] <- byPeak$keyB[!is.na(byPeak$keyB)] # dangerous! 
+byPeak <- left_join(byPeak, byBatch)
+byPeak$keyB[is.na(byPeak$keyB)] <- byPeak$keyB[!is.na(byPeak$keyB)] # dangerous!
 ```
 
 > Exercise 1: Why didn't the *left_join* fully populate `byPeak`?  
@@ -84,38 +88,38 @@ byPeak$keyB[is.na(byPeak$keyB)] <- byPeak$keyB[!is.na(byPeak$keyB)] # dangerous!
 
 ```{r ex2}
 byBatch$keyB
-#bySample$keyB <- paste( , ,sep=":")
-#exerciseTwo <- left_join( , , )
+# bySample$keyB <- paste( , ,sep=":")
+# exerciseTwo <- left_join( , , )
 ```
 
 ## Set operations *union*, *intersect*, and *setdiff*
 These three commands will return a vector which is the unduplicated combination of the two input vectors. *union(A,B)* includes all the values found in both A and B. *intersect(A,B)* returns only those values found in both A and B. *setdiff(A,B)* is order dependent, and returns the values of the first vector which are not also in the second vector. 
 ```{r set_operations}
-A <- rep(seq(1,10),2)
-B <- seq(2,20,2)
-union(A,B)
-intersect(A,B)
-setdiff(A,B)
-setdiff(B,A)
+A <- rep(seq(1, 10), 2)
+B <- seq(2, 20, 2)
+union(A, B)
+intersect(A, B)
+setdiff(A, B)
+setdiff(B, A)
 ```
 
 These commands are good for checking matches between two vectors, and we can use them to rebuild the `byPeak$keyB` foreign key without the risk of incorrect naming.
 ```{r byPeak_better_foreign_key}
 byPeak <- jan.p %>% # reset the byPeak data.frame, add byPeak$keyP
-  filter(batchName %in% c("b802253","b252474")) %>%
-  unite(keyP, sampleName, compoundName, chromatogramName, sep=":", remove=FALSE)
+  filter(batchName %in% c("b802253", "b252474")) %>%
+  unite(keyP, sampleName, compoundName, chromatogramName, sep = ":", remove = FALSE)
 
 allNames <- unique(byPeak$compoundName)
 byPeak$analyte <- NA
-for(name in allNames[1:6]) {
+for (name in allNames[1:6]) {
   compoundPairIdx <- grep(name, allNames)
   theCompound <- intersect(allNames[compoundPairIdx], name)
   theInternalStandard <- setdiff(allNames[compoundPairIdx], name)
-  byPeak$analyte[byPeak$compoundName==theInternalStandard] <- theCompound
-  byPeak$analyte[byPeak$compoundName==theCompound] <- theCompound
+  byPeak$analyte[byPeak$compoundName == theInternalStandard] <- theCompound
+  byPeak$analyte[byPeak$compoundName == theCompound] <- theCompound
 }
 
-byPeak$keyB <- paste(byPeak$batchName,byPeak$analyte,sep=":") # alternative build of keyB
+byPeak$keyB <- paste(byPeak$batchName, byPeak$analyte, sep = ":") # alternative build of keyB
 ```
 
 ## Mutating join to add columns 
@@ -125,43 +129,47 @@ There are four kinds of mutating joins, differing in how the rows of the source 
 
 Because these commands can duplicate rows, the potential for breaking things is pretty significant if the key isn't unique. Here are two examples, one where you do -- and one where you do not -- want that duplication:
 ```{r good_and_bad_duplication}
-goodDuplication <- inner_join(x=bySample[,c(1:3,7)],
-                              y=byBatch[,c(1:6)],
-                              by=c("batchName","compoundName"))
-badDuplication <- inner_join(x=bySample[,c(1:3,7)],
-                             y=byBatch[,c(1:6)],
-                             by=c("compoundName"))
+goodDuplication <- inner_join(
+  x = bySample[, c(1:3, 7)],
+  y = byBatch[, c(1:6)],
+  by = c("batchName", "compoundName")
+)
+badDuplication <- inner_join(
+  x = bySample[, c(1:3, 7)],
+  y = byBatch[, c(1:6)],
+  by = c("compoundName")
+)
 ```
 
 Having built the `byBatch` primary key, and correctly included it as a foreign key in `byPeak`, correctly joining them into a single data.frame is straightforward. 
 ```{r using_primary_and_foreign_keys}
-byPeakWide <- left_join(x=byPeak,y=byBatch)
+byPeakWide <- left_join(x = byPeak, y = byBatch)
 ```
 
 ## Filtering join to check the overlap
 We created the `byBatch$keyB` explicitly, but it was effectively present already thanks to the *batchName* and *compoundName* columns. The compound naming scheme in `byPeak` remains problematic since the internal standard isn't identified in `byBatch` or `bySample`, but we fixed this using a new column *analyte*. We could have accomplished the same effect in fewer steps using the semi_join and anti_join commands. The *semi_join(A,B)* returns all rows of A where there is a match from B, but keeps only the columns of A, and does not duplicate a row if there are multiple matches. The *anti_join(A,B)* is the inverse, returning all rows from A where there is no match from B. To create the 'analyte' column as before:
 ```{r filtering_joins}
 byBatch <- jan.b %>% # reset the byBatch data.frame
-  filter(batchName %in% c("b802253","b252474"))
+  filter(batchName %in% c("b802253", "b252474"))
 byPeak <- jan.p %>% # reset the byPeak data.frame, add byPeak$analyte
-  filter(batchName %in% c("b802253","b252474")) %>%
-  mutate(analyte=compoundName)
+  filter(batchName %in% c("b802253", "b252474")) %>%
+  mutate(analyte = compoundName)
 
-noMatch <- anti_join(byPeak,byBatch)
+noMatch <- anti_join(byPeak, byBatch)
 unique(byPeak$analyte)
 
-byPeak$analyte <- sub("-.*$", "", byPeak$analyte) 
+byPeak$analyte <- sub("-.*$", "", byPeak$analyte)
 
-noMatch <- anti_join(byPeak,byBatch,by=c("batchName","analyte"="compoundName"))
-justMatch <- semi_join(byPeak,byBatch,by=c("batchName","analyte"="compoundName"))
-c(nrow(noMatch),nrow(justMatch),nrow(byPeak))
+noMatch <- anti_join(byPeak, byBatch, by = c("batchName", "analyte" = "compoundName"))
+justMatch <- semi_join(byPeak, byBatch, by = c("batchName", "analyte" = "compoundName"))
+c(nrow(noMatch), nrow(justMatch), nrow(byPeak))
 ```
 
 > Exercise 3: Join the batch and peak data  
 > Start from the reset data.frames built in the prior code chunk, so the `keyB` and `keyP` variables are not present. Partially complete commands are commented out in the following code chunk.
 
 ```{r ex3}
-#exerciseThree <- left_join( , ,by=c( ) )
+# exerciseThree <- left_join( , ,by=c( ) )
 ```
 
 # Summary

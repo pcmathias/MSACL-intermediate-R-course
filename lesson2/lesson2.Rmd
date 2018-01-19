@@ -57,7 +57,7 @@ Interspersed within your text you can integrate "chunks" of R code, and each cod
     ```
   
 And this is how the code chunk looks by default:
-```{r}
+```{r, eval = FALSE}
 mean(c(10,20,30))
 ```
 
@@ -112,7 +112,7 @@ How can we integrate R Markdown documents within the context of these requiremen
 ***Exercise***
 
 1. Before we jump into creating our R Markdown file, we need to create a file that will allow us to run checkpoint together with knitr - click the Add File button and select "R Script"
-2. Add the following code to your R script
+2. Add the following code to your R script (minus the code chunk delimiters)
 ```{r}
 library("formatR")
 library("htmltools")

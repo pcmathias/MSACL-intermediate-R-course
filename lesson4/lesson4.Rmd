@@ -22,7 +22,7 @@ One of the key concepts of the tidyverse philosophy is maintaing "tidy" data. [T
 2. Each observation must have its own row.
 3. Each value must have its own cell.
 
-As an example straight out of the [R for Data Science]((http://r4ds.had.co.nz/tidy-data.html) text, consider a data set displaying 4 variables: country, year, population, and cases. One representation might split cases and population on different rows, even though each observation is a country and year:
+As an example straight out of the [R for Data Science](http://r4ds.had.co.nz/tidy-data.html) text, consider a data set displaying 4 variables: country, year, population, and cases. One representation might split cases and population on different rows, even though each observation is a country and year:
 ```{r}
 table2
 ```

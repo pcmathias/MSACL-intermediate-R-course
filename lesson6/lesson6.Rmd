@@ -25,26 +25,30 @@ Default **R** comes with several basic plotting commands -- *plot* to draw an X,
 
 The first major drawback to using these plots is that each requires learning a slightly different syntax to decorate the graph. 
 ```{r plot_color_syntax}
-#workingDir <- file.path(rootDir,"class_data")
-jan.s <- read_csv(here::here("class_data","2017-01-06.csv"))
+# workingDir <- file.path(rootDir,"class_data")
+jan.s <- read_csv(here::here("class_data", "2017-01-06.csv"))
 jan.s$idx <- c(1:nrow(jan.s))
 hasIonRatio <- jan.s$ionRatio > 0
-plot(jan.s$ionRatio[which(hasIonRatio)],col='blue')
-hist(jan.s$ionRatio[which(hasIonRatio)],col='blue')
-hist(jan.s$ionRatio[which(hasIonRatio)],border='blue',main='Histogram')
+plot(jan.s$ionRatio[which(hasIonRatio)], col = "blue")
+hist(jan.s$ionRatio[which(hasIonRatio)], col = "blue")
+hist(jan.s$ionRatio[which(hasIonRatio)], border = "blue", main = "Histogram")
 ```
 
 The second drawback is that these plots, while drawn quickly, require detailed sort and select mechanisms in order to display complex data on a single graph. Plotting a matrix of graphs (as shown below) is even more difficult and you may spend more time troubleshooting the graph than actually analyzing the data.
 ```{r plot_by_compound}
 compounds <- unique(jan.s$compoundName)
-for(i in 1:length(compounds)) {
-  if(i==1) {
-    plot(jan.s$ionRatio[hasIonRatio & jan.s$compoundName==compounds[i]],
-         col=i,
-         main="color by compound")
+for (i in 1:length(compounds)) {
+  if (i == 1) {
+    plot(
+      jan.s$ionRatio[hasIonRatio & jan.s$compoundName == compounds[i]],
+      col = i,
+      main = "color by compound"
+    )
   } else {
-    points(jan.s$ionRatio[hasIonRatio & jan.s$compoundName==compounds[i]],
-           col=i)
+    points(
+      jan.s$ionRatio[hasIonRatio & jan.s$compoundName == compounds[i]],
+      col = i
+    )
   }
 }
 ```
@@ -52,17 +56,23 @@ for(i in 1:length(compounds)) {
 # Plotting Data with *lattice*
 Working with large datasets, especially data you want to slice by one or more variables, may require moving to another graphing package. Using **lattice** provides a simplified faceting functionality, with syntax more typical of the default graphics package.
 ```{r lattice_plotting}
-xyplot(ionRatio ~ idx | compoundName, 
-       data=jan.s[hasIonRatio,], 
-       groups=sampleType, 
-       auto.key=TRUE)
-xyplot(ionRatio ~ idx | compoundName, 
-       data=jan.s[hasIonRatio,], 
-       groups=sampleType, 
-       auto.key=TRUE, 
-       type=c("l","spline"))
-histogram( ~ ionRatio | compoundName + sampleType, 
-           data=jan.s[hasIonRatio,])
+xyplot(
+  ionRatio ~ idx | compoundName,
+  data = jan.s[hasIonRatio, ],
+  groups = sampleType,
+  auto.key = TRUE
+)
+xyplot(
+  ionRatio ~ idx | compoundName,
+  data = jan.s[hasIonRatio, ],
+  groups = sampleType,
+  auto.key = TRUE,
+  type = c("l", "spline")
+)
+histogram(
+  ~ ionRatio | compoundName + sampleType,
+  data = jan.s[hasIonRatio, ]
+)
 ```
 
 ## Benchmarks for running time within **R**
@@ -71,8 +81,8 @@ Sometimes there is a need to optimize code for timing as well as readability, an
 system.time(print("Anything seen as a single function can be tested in this way"))
 
 anyUserFunction <- function(someText) {
-  hasNumber <- grepl("[:digit:]",someText)
-  if(hasNumber) {
+  hasNumber <- grepl("[:digit:]", someText)
+  if (hasNumber) {
     editedText <- "including their pros and cons"
     unusedVariable <- rnorm(1e6)
   } else {
@@ -94,10 +104,10 @@ Syntax follows the format of {'define the data' {+ 'describe the visualization'}
 ```{r gg_plotting}
 g <- jan.s %>%
   filter(ionRatio > 0) %>%
-  ggplot(aes(x=idx,y=ionRatio,colour=sampleType))
-g + geom_point() + facet_wrap(~compoundName) + scale_x_continuous(labels=NULL)
+  ggplot(aes(x = idx, y = ionRatio, colour = sampleType))
+g + geom_point() + facet_wrap(~compoundName) + scale_x_continuous(labels = NULL)
 g + geom_smooth() + facet_wrap(~compoundName)
-g + geom_histogram(mapping=aes(x=ionRatio,colour=sampleType),inherit.aes=FALSE) + facet_wrap(~compoundName)
+g + geom_histogram(mapping = aes(x = ionRatio, colour = sampleType), inherit.aes = FALSE) + facet_wrap(~compoundName)
 ```
 
 We could easily spend the whole class session on this package, but the above plots showcase the basic syntax. The cheatsheet downloadable from the link at the end of this lesson provides additional examples of what can be done.
@@ -108,40 +118,42 @@ We could easily spend the whole class session on this package, but the above plo
 ```{r ex1}
 g <- jan.s %>%
   filter(ionRatio > 0) %>%
-  ggplot(aes(x=ionRatio,colour=sampleType,fill=sampleType))
-#g + geom_histogram(position='dodge', bins= ) + facet_wrap(~compoundName)
-#g + geom_histogram(aes(y=..density..), bins= ) + facet_grid(sampleType~compoundName)
+  ggplot(aes(x = ionRatio, colour = sampleType, fill = sampleType))
+# g + geom_histogram(position='dodge', bins= ) + facet_wrap(~compoundName)
+# g + geom_histogram(aes(y=..density..), bins= ) + facet_grid(sampleType~compoundName)
 ```
 
 > Exercise 2: Plot timing  
 > There is a longstanding community opinion that ggplot "takes longer" than the other two plotting mechanisms, but how much longer is it really? Is the time savings from **lattice** worth learning the new syntax?
 
 ```{r ex2, message=FALSE}
-oneYearSamples <- list.files(here::here("class_data"), pattern="csv$") %>%
-                  file.path(here::here("class_data"), .) %>%
-                  map_dfr(read_csv)
+oneYearSamples <- list.files(here::here("class_data"), pattern = "csv$") %>%
+  file.path(here::here("class_data"), .) %>%
+  map_dfr(read_csv)
 oneYearSamples$idx <- 1:nrow(oneYearSamples)
 coreR <- function(oneYearSamples) {
   sampleTypes <- unique(oneYearSamples$sampleType)
-  for(i in 4:1) {
-    oneType <- which(oneYearSamples$sampleType==sampleTypes[i])
-    if(i==4) {
-      plot(oneYearSamples$idx[oneType],oneYearSamples$concentration[oneType],col=i)
+  for (i in 4:1) {
+    oneType <- which(oneYearSamples$sampleType == sampleTypes[i])
+    if (i == 4) {
+      plot(oneYearSamples$idx[oneType], oneYearSamples$concentration[oneType], col = i)
     } else {
-      points(oneYearSamples$idx[oneType],oneYearSamples$concentration[oneType],col=i)
+      points(oneYearSamples$idx[oneType], oneYearSamples$concentration[oneType], col = i)
     }
   }
 }
-g <- ggplot(oneYearSamples,aes(x=idx,y=concentration,color=sampleType)) + geom_point()
-l <- xyplot(concentration ~ idx , 
-       data=oneYearSamples, 
-       groups=sampleType, 
-       auto.key=TRUE)
-#system.time(coreR(oneYearSamples))
-#dev.off()
-#system.time(print(g))
-#dev.off()
-#system.time(print(l))
+g <- ggplot(oneYearSamples, aes(x = idx, y = concentration, color = sampleType)) + geom_point()
+l <- xyplot(
+  concentration ~ idx,
+  data = oneYearSamples,
+  groups = sampleType,
+  auto.key = TRUE
+)
+# system.time(coreR(oneYearSamples))
+# dev.off()
+# system.time(print(g))
+# dev.off()
+# system.time(print(l))
 ```
 
 # Summary

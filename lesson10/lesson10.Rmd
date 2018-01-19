@@ -20,7 +20,7 @@ library(tidyverse)
 library(readxl)
 #library(openxlsx)
 library(lubridate)
-#library(magrittr)
+library(magrittr)
 ```
 
 # From Import to Graph
@@ -84,7 +84,7 @@ davesData %>%
   facet_grid(compoundName ~ expectedConcentration) +
   geom_vline(xintercept = as.numeric(as_datetime(c("2017-05-01", "2017-06-01"))), linetype = 1, colour = "black")
 
-davesData %>% mutate(
+davesData %<>% mutate(
   pctDiff = (concentration - expectedConcentration) / expectedConcentration,
   within20 = abs(pctDiff) <= 0.2
 )
