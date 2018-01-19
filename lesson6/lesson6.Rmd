@@ -8,14 +8,14 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-duringClass <- FALSE
-if(duringClass) {
-  setwd("/full/unzipped/path") # e.g. "C:\Users\johndoe\Desktop\MSACL-intermediate-R-course-master"
-  rootDir <- getwd()
-} else {
-  rootDir <- "/Users/azabell/Dropbox/R/MSACL-intermediate-R-course"
-}
-knitr::opts_chunk$set(echo = TRUE)
+# duringClass <- FALSE
+# if(duringClass) {
+#   setwd("/full/unzipped/path") # e.g. "C:\Users\johndoe\Desktop\MSACL-intermediate-R-course-master"
+#   rootDir <- getwd()
+# } else {
+#   rootDir <- "/Users/azabell/Dropbox/R/MSACL-intermediate-R-course"
+# }
+# knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(lattice)
 ```
@@ -25,8 +25,8 @@ Default **R** comes with several basic plotting commands -- *plot* to draw an X,
 
 The first major drawback to using these plots is that each requires learning a slightly different syntax to decorate the graph. 
 ```{r plot_color_syntax}
-workingDir <- file.path(rootDir,"class_data")
-jan.s <- read_csv(file.path(workingDir,"2017-01-06.csv"))
+#workingDir <- file.path(rootDir,"class_data")
+jan.s <- read_csv(here::here("class_data","2017-01-06.csv"))
 jan.s$idx <- c(1:nrow(jan.s))
 hasIonRatio <- jan.s$ionRatio > 0
 plot(jan.s$ionRatio[which(hasIonRatio)],col='blue')
@@ -117,8 +117,8 @@ g <- jan.s %>%
 > There is a longstanding community opinion that ggplot "takes longer" than the other two plotting mechanisms, but how much longer is it really? Is the time savings from **lattice** worth learning the new syntax?
 
 ```{r ex2, message=FALSE}
-oneYearSamples <- list.files(workingDir,pattern="csv$") %>%
-                  file.path(workingDir,.) %>%
+oneYearSamples <- list.files(here::here("class_data"), pattern="csv$") %>%
+                  file.path(here::here("class_data"), .) %>%
                   map_dfr(read_csv)
 oneYearSamples$idx <- 1:nrow(oneYearSamples)
 coreR <- function(oneYearSamples) {

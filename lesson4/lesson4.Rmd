@@ -222,7 +222,7 @@ sample_means_jan
 
 Data in the real world are not always tidy. Consider a variant of the January sample data we've reviewed previously in the "2017-01-06-messy.csv" file.
 ```{r}
-samples_jan_messy <- read_csv(here::here("data", "2017-01-06-messy.csv"))
+samples_jan_messy <- read_csv(here::here("data", "messy", "2017-01-06-messy.csv"))
 head(samples_jan_messy)
 ```
 
@@ -244,12 +244,12 @@ There are other useful tidyr functions such as `separate()` and `unite()` to spl
 
 ***Exercise***
 
-The "2017-01-06-batch-messy.csv" file is related to the "2017-01-06.xlsx" batch file you have worked with before. Unfortunately, it is not set up to have a single observation per row. There are two problems that need to be solved:
+The "2017-01-06-batch-messy.csv" file in the messy subdirectory of class_data is related to the "2017-01-06.xlsx" batch file you have worked with before. Unfortunately, it is not set up to have a single observation per row. There are two problems that need to be solved:
 1. Each parameter in a batch is represented with a distinct column per compound, but all compounds appear on the same row. Each compound represents a distinct observation, so these should appear on their own rows.
 2. There are 3 parameters per obsevation (compound) - calibration slope, intercept, and R^2. However these appear on different lines. All 3 paramters need to appear on the same row.
 After solving these problems, each row should contain a single compound with all three parameters appearing on that single row. Use `gather()` and `spread()` to tidy this data.
 ```{r tidyr_exercise}
-batch_jan_messy <- read_csv(here::here())
+batch_jan_messy <- read_csv(here::here("class_data", "messy", ))
 batch_jan_gathered <- batch_jan_messy %>%
   gather()
 batch_jan_tidy <- batch_jan_gathered %>%
