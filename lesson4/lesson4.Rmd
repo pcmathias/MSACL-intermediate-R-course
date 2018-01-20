@@ -6,6 +6,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(checkpoint)
+checkpoint("2018-01-19")
 library(tidyverse)
 library(janitor)
 library(readxl)
@@ -22,7 +24,7 @@ One of the key concepts of the tidyverse philosophy is maintaing "tidy" data. [T
 2. Each observation must have its own row.
 3. Each value must have its own cell.
 
-As an example straight out of the [R for Data Science]((http://r4ds.had.co.nz/tidy-data.html) text, consider a data set displaying 4 variables: country, year, population, and cases. One representation might split cases and population on different rows, even though each observation is a country and year:
+As an example straight out of the [R for Data Science](http://r4ds.had.co.nz/tidy-data.html) text, consider a data set displaying 4 variables: country, year, population, and cases. One representation might split cases and population on different rows, even though each observation is a country and year:
 ```{r}
 table2
 ```
@@ -96,9 +98,9 @@ samples_jan %>%
 ```
 
 ***Exercise***
-Carve the January data set in both directions. We want sample information (batch, sample, compound) and ion ratio data for only oxycodone measurements in unknown sample types. Provide a summary of the data.
+Carve the January data set in both directions. We want sample information (batch, sample, compound) and ion ratio data for only oxycodone measurements in unknown sample types with a concentration > 0. Provide a summary of the data.
 
-```{r carving_exercise}
+```{r carving_exercise, eval = FALSE}
 samples_jan_oxy_ir <- samples_jan %>%
   filter() %>%
   select()
@@ -222,7 +224,7 @@ sample_means_jan
 
 Data in the real world are not always tidy. Consider a variant of the January sample data we've reviewed previously in the "2017-01-06-messy.csv" file.
 ```{r}
-samples_jan_messy <- read_csv(here::here("data", "2017-01-06-messy.csv"))
+samples_jan_messy <- read_csv(here::here("data", "messy", "2017-01-06-messy.csv"))
 head(samples_jan_messy)
 ```
 
@@ -244,15 +246,23 @@ There are other useful tidyr functions such as `separate()` and `unite()` to spl
 
 ***Exercise***
 
-The "2017-01-06-batch-messy.csv" file is related to the "2017-01-06.xlsx" batch file you have worked with before. Unfortunately, it is not set up to have a single observation per row. There are two problems that need to be solved:
+The "2017-01-06-batch-messy.csv" file in the messy subdirectory of class_data is related to the "2017-01-06.xlsx" batch file you have worked with before. Unfortunately, it is not set up to have a single observation per row. There are two problems that need to be solved:
 1. Each parameter in a batch is represented with a distinct column per compound, but all compounds appear on the same row. Each compound represents a distinct observation, so these should appear on their own rows.
 2. There are 3 parameters per obsevation (compound) - calibration slope, intercept, and R^2. However these appear on different lines. All 3 paramters need to appear on the same row.
 After solving these problems, each row should contain a single compound with all three parameters appearing on that single row. Use `gather()` and `spread()` to tidy this data.
 ```{r tidyr_exercise}
-batch_jan_messy <- read_csv(here::here())
+batch_jan_messy <- read_csv(here::here("class_data", "messy", ))
 batch_jan_gathered <- batch_jan_messy %>%
   gather()
 batch_jan_tidy <- batch_jan_gathered %>%
   spread()
 ```
 
+## Summary
+
+* The dplyr package offers a number of useful functions for manipulating data sets
+  - `select()` subsets columns by name and `filter()` subset rows by condition
+  - `mutate()` adds additional columns, typically with calculations or logic based on other columns
+  - `group_by()` and `summarize()` allow grouping by one or more variables and performing calculations within the group
+* Manipulating dates and times with the lubridate package can make grouping by time periods easier
+* The tidyr package provides functions to tidy and untidy data
