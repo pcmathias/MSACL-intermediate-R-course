@@ -57,25 +57,33 @@ Now that we're thinking about creating directories for projects and directory st
 5. Create a new test directory using `dir.create("test_dir")`
 6. Review your current directory
 7. Set your directory to the test directory you just created
-8. Using the Files window (bottom right in RStudio, click on **Files** tab if on another tab), navigate to the test directory you just created. *Pro tip: The More menu here has shortcuts to set the currently displayed directory as your working directory and to navigate to the current working directory*
-9. Navigate back to one level above the directory you created using `setwd("..")`
+8. Using the Files window (bottom right in RStudio, click on **Files** tab if on another tab), navigate to the test directory you just created and list the files. *Pro tip: The More menu here has shortcuts to set the currently displayed directory as your working directory and to navigate to the current working directory*
+9. Navigate back to one level above the directory you created using `setwd("..")` and list the files
 10. Delete the directory you created using the `unlink()` function. Learn more about how to use the function by reviewing the documentation: `?unlink`. Pay special attention to comments about deleting directories.
 
+***Optional Exercise*** (If you do not already have a project directory)
+
 Now that you're warmed up with navigating through directories using R, let's use functionality that's built into RStudio to make our project-oriented lives easier. To enter this brave new world of project directories, let's make a home for our projects. (Alternately, if you already have a directory that's a home for your projects, set your working directory there.)
+
+1. Using the Files navigation window (bottom right, Files tab), navigate to your home directory or any directory you'd like to place your future RStudio projects
+2. Create a "Projects" directory
+3. Set your directory to the "Projects" directory
 
 ```{r}
 dir.create("Projects")
 setwd("/Projects")
 ```
 
-You can do the above steps within your operating system (eg. on a Mac, open Finder window and create a folder) or if you are comfortable working at the command line, you can make a directory there. In the newest version of RStudio (version 1.1), you have the option of opening up a command line prompt under the Terminal tab (on the left side, next to the Console tab).
+Alternately, you can do the above steps within your operating system (eg. on a Mac, open Finder window and create a folder) or if you are comfortable working at the command line, you can make a directory there. In the newest version of RStudio (version 1.1), you have the option of opening up a command line prompt under the Terminal tab (on the left side, next to the Console tab).
+
+***Exercise***
 
 Let's start a new project :
 1. Navigate to the **File** menu and select **New Project...** OR Select the **Create a project** button on the global toolbar (2nd from the left)
 2. Select **New Directory** option
 3. In the Project Type prompt, select **New Project**
 4. In the Directory Name prompt under Create New Project, enter "intermediate-R-course"
-5. In the Create Project as a Subdirectory of prompt under Create New Project, navigate to the Projects folder you just created (if it is not already there). You can type in the path or hit the **Browse** button to find the directory.
+5. In the Create Project as a Subdirectory of prompt under Create New Project, navigate to the Projects folder you just created (or another directory of your choosing). You can type in the path or hit the **Browse** button to find the directory. Check the option for "Open in a new session" and create your project.
 
 So, what exactly does creating a Project in RStudio do for you? In a nutshell, using these Projects allows you to drop what you're doing, close RStudio, and then open the Project to pick up where you left off. Your data, history, settings, open tabs, etc. will be saved for you automatically.
 
