@@ -6,6 +6,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(checkpoint)
+checkpoint("2018-01-19")
 library(tidyverse)
 library(janitor)
 library(readxl)
@@ -96,9 +98,9 @@ samples_jan %>%
 ```
 
 ***Exercise***
-Carve the January data set in both directions. We want sample information (batch, sample, compound) and ion ratio data for only oxycodone measurements in unknown sample types. Provide a summary of the data.
+Carve the January data set in both directions. We want sample information (batch, sample, compound) and ion ratio data for only oxycodone measurements in unknown sample types with a concentration > 0. Provide a summary of the data.
 
-```{r carving_exercise}
+```{r carving_exercise, eval = FALSE}
 samples_jan_oxy_ir <- samples_jan %>%
   filter() %>%
   select()
@@ -256,3 +258,11 @@ batch_jan_tidy <- batch_jan_gathered %>%
   spread()
 ```
 
+## Summary
+
+* The dplyr package offers a number of useful functions for manipulating data sets
+  - `select()` subsets columns by name and `filter()` subset rows by condition
+  - `mutate()` adds additional columns, typically with calculations or logic based on other columns
+  - `group_by()` and `summarize()` allow grouping by one or more variables and performing calculations within the group
+* Manipulating dates and times with the lubridate package can make grouping by time periods easier
+* The tidyr package provides functions to tidy and untidy data

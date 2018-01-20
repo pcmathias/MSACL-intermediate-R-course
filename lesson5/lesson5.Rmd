@@ -15,7 +15,7 @@ output:
 #   rootDir <- "/Users/azabell/Dropbox/R/MSACL-intermediate-R-course"
 # }
 knitr::opts_chunk$set(echo = TRUE)
-library(openxlsx)
+#library(openxlsx)
 library(tidyverse)
 library(readxl)
 library(here)
