@@ -111,8 +111,12 @@ How can we integrate R Markdown documents within the context of these requiremen
 
 ***Exercise***
 
-1. Before we jump into creating our R Markdown file, we need to create a file that will allow us to run checkpoint together with knitr - click the Add File button and select "R Script"
-2. Add the following code to your R script (minus the code chunk delimiters)
+1. From within the course directory (MSACL-intermediate-R-course), create a new directory called "coursework" & set your working directory to there
+2. Load the here package from within your console and use the `set_here()` command to set your "coursework" directory to be the primary point of reference for your project. (This creates an empty file named ".here", which is the first thing the here package looks for when trying to set its point of reference.)
+3. Create the directory structure we discussed in the last lesson, **with the exception of the data directory***
+4. Go to your operating system and copy the "class_data" directory you unzipped prior to the course (per the pre-course instructions) into your "coursework" directory 
+5. Before we jump into creating our R Markdown file, we need to create a file that will allow us to run checkpoint together with knitr - click the Add File button and select "R Script"
+6. Add the following code to your R script (minus the code chunk delimiters)
 ```{r}
 library("formatR")
 library("htmltools")
@@ -124,13 +128,13 @@ library("rmarkdown")
 library("evaluate")
 library("stringi")
 ```
-3. Save as "knitr-packages.R" in the src folder of your project (explanation of why you did this below)
-4. Now add a new R Markdown file, title it "Data Science 201 Exercises", and leave as the default .html ouptut selection
-5. Go ahead and save the .Rmd by clicking the Save button (disk button) or selecing Save under the File menu: save the file to your src folder within your project and name according to the principles we disucssed in lesson 1
-6. In the setup code chunk for the document, load the checkpoint package
-7. Add the checkpoint command to load packages from today: `checkpoint("2018-01-21")`
-8. Load the here package below the checkpoint command
-9. Modify the header of the first block of text to "Lesson 3 Exercises"
+7. Save as "knitr-packages.R" in the src folder of your project (explanation of why you did this below)
+8. Now add a new R Markdown file, title it "Data Science 201 Exercises", and leave as the default .html ouptut selection
+9. Go ahead and save the .Rmd by clicking the Save button (disk button) or selecing Save under the File menu: save the file to your src folder within your project and name according to the principles we disucssed in lesson 1
+10. In the setup code chunk for the document, load the checkpoint package
+11. Add the checkpoint command to load packages from today: `checkpoint("2018-01-21")`
+12. Load the here package below the checkpoint command
+13. Modify the header of the first block of text to "Lesson 3 Exercises"
 
 So why did you have to go through the first 3 steps before starting your R Markdown document? When RStudio knits a document, it calls certain packages behind the scenes to create the document. However, when you are using checkpoint, the package only looks for packages within your project folders and does not see those hidden RStudio folders. So adding knitr-packages.R is a workaround to allow checkpoint to see those packages and knit the document.
 
