@@ -121,6 +121,7 @@ How can we integrate R Markdown documents within the context of these requiremen
 1. Find your RStudio window with your "MSACL-intermediate-R-course" project (look in upper right). If you cannot find it, within RStudio, click the arrow to the right of the project name (it will say Project: (None) if you are not in a project) and select your "MSACL-intermediate-R-course" project.
 1. From within the course directory ("MSACL-intermediate-R-course"), create a new directory called "coursework" & set your working directory to there
 1. Load the here package from within your console and use the `set_here()` command to set your "coursework" directory to be the primary point of reference for your project. (This creates an empty file named ".here", which is the first thing the here package looks for when trying to set its point of reference.)
+1. Restart your R session by navigating to the Session menu and selecting Restart R. This is required to reinitialize the here package and point it to the .here file you just created in your "coursework" directory
 1. Create the directory structure we discussed in the last lesson, **with the exception of the data directory**
 1. Go to your operating system and copy the "class_data" directory you unzipped prior to the course (per the pre-course instructions) into your "coursework" directory
 1. At this point we will want to include our individual lesson .Rmd files in the "src" directory. You have a couple options:
