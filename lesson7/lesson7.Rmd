@@ -1,6 +1,6 @@
 ---
 title: 'Lesson 7: Modelling the data'
-author: "Randall Julian"
+author: "Randall Julian, Adam Zabell"
 date: "1/2/2018"
 output:
   word_document: default
@@ -9,10 +9,13 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(checkpoint)
+#checkpoint("2018-01-20")
 library(tidyverse)
 library(modelr)
 library(magrittr)
 library(lubridate)
+library(here)
 ```
 
 # Data Modelling
@@ -35,7 +38,7 @@ lines(sequenceX,sequenceYQ,col='darkgreen',lwd=2)
 ```
 
 > Exercise 1: Rebuild this plot using ggplot  
-Partially complete commands are commented out in the following code chunk.
+Partially complete commands are commented out in the following code chunk. Start by looking at the data.frame `modeldata` before and after the *mutate* command, to see what changed. Then, use these new columns as values for the two geoms.
 
 ```{r ex1}
 modeldata <- modeldata %>%
@@ -48,7 +51,7 @@ g <- ggplot(data=raw,aes(x=x,y=y)) + geom_point()
 ```
 
 ## Parsing dates and times with *lubridate*
-The context for most of the data we'll encounter involve a time series, where each batch is collected at a specific date and that order of collection is a necessary component of the analysis. Dates within **R** are interpreted using the IEEE "POSIX" format, but reading data from an exterior source such as a CSV means this information arrives as a string. Functions in the **lubridate** package help to convert strings to POSIX, or combine information from multiple columns of a data.frame into a usable date format. 
+The context for most of the data we'll encounter involve a time series, where each batch is collected at a specific date and that order of collection is a necessary component of the analysis. Dates within **R** are interpreted using the IEEE "POSIX" format, but reading data from an exterior source such as a CSV means this information arrives as a string. Functions in the **lubridate** package like `ymd` help to convert strings to POSIX, or combine information from multiple columns of a data.frame into a usable date format. 
 ```{r lubridate, error=TRUE}
 stringOfDates <- c("2017-12-15","2017-Dec-16","2017-12-17","2017-12-18","2017-12-19","2017-12-20","2017-12-21")
 stringOfDates + 7 
@@ -76,7 +79,7 @@ y ~ x * z | y = *a0* + *a1*x + *a2*z + *a3*xz
 y ~ x + I(x^2) | y = *a0* + *a1*x + *a2*x^2^
 y ~ Gauss(amplitude,mu,sigma,x) | fit the data to a formula, defined elsewhere
 
-Wilkinson-Rogers notation comes into it's own when looking for generalized interactions (and their relative importance) between the dependent variable and a collection of independent ones: the formula _y ~ Height * Weight * Age_ would solve for eight coefficients, the linear combination for each of the three terms and the intercept. By comparison, the formula _y ~ Height + Weight + Age_ would solve four coefficients, ignoring any interaction between Height, Weight, and Age.
+Wilkinson-Rogers notation comes into it's own when looking for generalized interactions (and their relative importance) between the dependent variable and a collection of independent ones: the formula _y ~ Height * Weight * Age_ would solve for eight coefficients, the linear combination for each of the three terms and the intercept. By comparison, the formula _y ~ Height + Weight + Age_ would solve four coefficients, ignoring any interaction between Height, Weight, and Age. We'll draw a plot in the next section which will hopefully help this to make more sense.
 
 ## Linear modelling 
 Most of time a linear model, or transforming the data into a linear model, is sufficient to establish the key relationships between variables. Let's start by expanding the `raw` data.frame with additional observations and two more descriptors for the data.
@@ -88,14 +91,21 @@ newraw <- raw %>%
 newraw$instrument <- c(rep("Coarse",12),rep("Fine",40))
 newraw$date <- c("07-08-2017","10-08-2017") %>%
                rep(times=26) %>%
-               dmy() # as a single line without pipes: ymd( rep(c("2017-08-07","2017-08-10"),times=26) )
+               dmy() 
+# this could haslo have been done on a single line without pipes: 
+# newraw$date <- dmy( rep(c("07-08-2017","10-08-2017"), times=26) )
 ```
 
-Now we can explore the simple linear model in context of the instrument or the date of collection.
+Now we can explore the simple linear model in context of the instrument or the date of collection. Using the `summary` command on each linear model will provide basic statistical results assocaited with that model.  
 ```{r linear_modelling_run}
 fullModel <- lm(y ~ x * date * instrument, data=newraw)
 interactingTerms <- lm(y ~ x * instrument, data=newraw)
 noninteractingTerms <- lm(y ~ x + instrument, data=newraw)
+summary(interactingTerms)
+```
+
+We can now bulid the `grid` data.frame for plotting both the data and the models. Breaking down the pipe sequence of commands, we begin with our `newraw` data set and restructure it to work as an evenly spaced grid of points using *data_grid*, and then use *gather_predictions* to attach the prediction (y-value) at each obsevation point (x-value) from two of our linear models.
+```{r plot_linear_models}
 grid <- newraw %>%
   data_grid(x,date,instrument) %>%
   gather_predictions(interactingTerms,noninteractingTerms)
@@ -115,7 +125,9 @@ newraw$instrument[13:52] <- rep(c(rep("Fine",2),rep("Ultrafine",2)),10)
 ```
 
 ## Nonlinear modelling
-Although not common when looking for relationships between variables, nonlinear models are a concern for other aspects of data evaluation (e.g. fitting a chromatogram to a Gaussian curve) or assay validation (e.g. instrument response as a function of concentration). Unlike linear modelling, which will find a single solution starting from the data itself, a nonlinear model must iterate from a starting guess for each variable. A well formed guess should converge on the correct value, but there is no general method for finding that guess. 
+Although not common when looking for relationships between variables, nonlinear models are a concern for other aspects of data evaluation (e.g. fitting a chromatogram to a Gaussian curve) or assay validation (e.g. instrument response as a function of concentration). Unlike linear modelling, which will find a single solution starting from the data itself, a nonlinear model must iterate from a starting guess for each variable. A well formed guess should converge on the correct value, but there is no general method for finding that guess.
+
+Below are three nonlinear fits to noisy Gaussian data, each starting from a different initial guess of the parameters. Because the noise is randomly applied, your graph shouldn't be an exact match to the plot made by anybody else. Not all the fits are going to look great!  
 ```{r nonlinear_modelling, error=TRUE}
 Gauss = function(amplitude,mu,sigma,x){ amplitude*exp(-0.5*((x - mu)/sigma)^2) }
 x <- seq(1,5,by=0.1)
@@ -131,7 +143,10 @@ okayGuess <- nls(y ~ Gauss(a,m,s,x),
 badGuess <- nls(y ~ Gauss(a,m,s,x), 
                 start=list(a=1,m=1,s=1),
                 data=noisyCurve)
-forPlot <- noisyCurve %>% rename(yNoisy=y) %>% cbind(yExact) %>% gather(yType,y,-x)
+forPlot <- noisyCurve %>% 
+  rename(yNoisy=y) %>% 
+  cbind(yExact) %>% 
+  gather(yType,y,-x)
 grid <- forPlot %>%
   data_grid(x=seq_range(x,100),y) %>%
   gather_predictions(perfectGuess,okayGuess)
