@@ -107,9 +107,9 @@ readr_load <- read_csv()
 
 Now compare the time required to run the base `read.csv()` function with the readr `read_csv()` function using `system.time()`.
 
-**Time to read with base:** `r system.time(base_load <- read.csv(here("data", "2017-01-06.csv")))`
+**Time to read with base:** `r system.time(base_load <- read.csv(here("class_data", "2017-01-06.csv")))`
 
-**Time to read with readr:** `r system.time(readr_load <- read_csv(here("data", "2017-01-06.csv")))`
+**Time to read with readr:** `r system.time(readr_load <- read_csv(here("class_data", "2017-01-06.csv")))`
 
 Finally, let's follow some best practices and explicitly define columns with the `col_types` argument. We want to explicitly define compoundName and sampleType as factors. Note that the `col_factor()` expects a definition of the factor levels but you can get around this by supplying a `NULL`. Then run a summary to review the data
 ```{r col_types}

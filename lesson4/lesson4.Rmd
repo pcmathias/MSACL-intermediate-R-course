@@ -55,7 +55,7 @@ Let's take these for a spin using the data we started examining in the last less
 Review the type of data we were working with:
 ```{r}
 samples_jan <- read_csv(
-  here::here("data", "2017-01-06.csv"),
+  here::here("class_data", "2017-01-06.csv"),
   # note that we added the package name to the front of the function
   # why? unfortunately lubridate has a deprecated here function, so we have to tell R which here to use
   col_types = cols(
@@ -132,7 +132,7 @@ samples_jan %>%
 
 Another common operation manipulation is wrangling dates. The [lubridate package](http://lubridate.tidyverse.org/) offers a helpful toolset to quickly parse dates and times. The bread and butter parsing functions are named intuitively based on the order of year, month, date, and time elements. For example, `mdy("1/20/2018")` will convert the string into a date that R can use. There are other useful functions like `month()` and `wday()` that pull out a single element of the date to use for grouping operations, for example. Let's work with a different January data set that has batch data and parse the collection dates in a variety of ways:
 ```{r}
-batch_jan <- read_excel(here::here("data", "2017-01-06.xlsx")) %>%
+batch_jan <- read_excel(here::here("class_data", "2017-01-06.xlsx")) %>%
   clean_names()
 # note: here is also a function in lubridate so you must specify the package explicitly before calling the function
 # syntax for specifying package is "package"::"function"
@@ -224,7 +224,7 @@ sample_means_jan
 
 Data in the real world are not always tidy. Consider a variant of the January sample data we've reviewed previously in the "2017-01-06-messy.csv" file.
 ```{r}
-samples_jan_messy <- read_csv(here::here("data", "messy", "2017-01-06-messy.csv"))
+samples_jan_messy <- read_csv(here::here("class_data", "messy", "2017-01-06-sample-messy.csv"))
 head(samples_jan_messy)
 ```
 
@@ -233,6 +233,7 @@ This certainly isn't impossible to work with, but there are some challenges with
 samples_jan_tidy <- samples_jan_messy %>%
   gather("morphine", "hydromorphone", "oxymorphone", "codeine", "hydrocodone", "oxycodone",
          key = "compound_name", value = "concentration")
+head(samples_jan_tidy)
 ```
 The syntax takes some getting used to, so it's important to remember that you are taking column names and shoving those into rows, so you have name that variable (the key), and you are also putting values across multiple columns into one column, whose variable also needs to be named (the value).
 
@@ -240,6 +241,7 @@ Sometimes other people want your data and they prefer non-tidy data. Sometimes y
 ```{r}
 samples_jan_remessy <- samples_jan_tidy %>%
   spread(key = "compound_name", value = "concentration")
+head(samples_jan_remessy)
 ```
 
 There are other useful tidyr functions such as `separate()` and `unite()` to split one column into multiple columns or combine multiple columns into one column, respectively. These are pretty straightforward to pick up so can be an independent exercise if you are intereted.
