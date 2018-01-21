@@ -1,21 +1,15 @@
 ---
 title: 'Lesson 10: Bringing it all together from import to graph to result'
 author: "Randall Julian"
-date: "1/3/2018"
 output:
   word_document: default
   html_document: default
 ---
 
 ```{r setup, include=FALSE}
-# duringClass <- FALSE
-# if(duringClass) {
-#   setwd("/full/unzipped/path") # e.g. "C:\Users\johndoe\Desktop\MSACL-intermediate-R-course-master"
-#   rootDir <- getwd()
-# } else {
-#   rootDir <- "/Users/azabell/Dropbox/R/MSACL-intermediate-R-course"
-# }
 knitr::opts_chunk$set(echo = TRUE)
+library(checkpoint)
+checkpoint("2018-01-20")
 library(tidyverse)
 library(readxl)
 #library(openxlsx)
@@ -23,12 +17,12 @@ library(lubridate)
 library(magrittr)
 ```
 
-# From Import to Graph
-These lessons were designed to build and reinforce each other. It's possible to write purely linear code, but **purrr** makes the code easier to read, and remember, and use again. Each csv can be read and examined in isolation, but **rbind** and **dplyr** make it possible to aggregate and discover trends. What follows are the steps to replicate the disocvery of one particular problem in the mock data: excessively good R^2^ data.
+## From Import to Graph
+
+These lessons were designed to build and reinforce each other. It's possible to write purely linear code, but `purrr` makes the code easier to read, and remember, and use again. Each csv can be read and examined in isolation, but `rbind` and `dplyr` make it possible to aggregate and discover trends. What follows are the steps to replicate the disocvery of one particular problem in the mock data: excessively good R^2^ data.
 
 For this lesson, we're fudging slightly by already knowing what we want to start looking for.
 ```{r first_plots}
-# workingDir <- file.path(rootDir,"class_data")
 oneYearBatches <- list.files(here::here("class_data"), pattern = "xlsx$") %>%
   file.path(here::here("class_data"), .) %>%
   # map_dfr(read.xlsx) %>%
@@ -58,7 +52,8 @@ mayPlot +
 
 Whatever is going on, it looks like reviewer 'Dave' is the only person it is happening to. 
 
-# Graph to Result
+## Graph to Result
+
 Based on the batch-level data, we can see that 'Dave' -- and apparently only Dave -- has perfect R^2^ values on every batch of data he reviewed throughout the month of May. Digging deeper will require merging information from the batch level with information at the sample (and possibly peak) level. 
 
 ```{r join, message=FALSE}

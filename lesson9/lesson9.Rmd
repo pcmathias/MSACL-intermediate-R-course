@@ -1,7 +1,6 @@
 ---
 title: 'Lesson 9: Scaling with purrr to loop through a vector'
 author: "Randall Julian"
-date: "1/3/2018"
 output:
   word_document: default
   html_document: default
@@ -9,14 +8,18 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(checkpoint)
+checkpoint("2018-01-20")
 library(tidyverse)
 ```
 
-# Looping Commands
-Reducing duplication in your typed code makes it easier to see the purpose of the code, easier to change the calculation, and easier to remove bugs. The three typical methods in **R** to iterate with a specific piece of code are functions, for-loops, and vector transformations with the **purrr** package.
+## Looping Commands
 
-## Looping with user functions
-Every command in **R** is consistent with the function syntax *command(inputA,inputB,...)* and writing your own function is no different.
+Reducing duplication in your typed code makes it easier to see the purpose of the code, easier to change the calculation, and easier to remove bugs. The three typical methods in R to iterate with a specific piece of code are functions, for-loops, and vector transformations with the **purrr** package.
+
+### Looping with user functions
+
+Every command in R is consistent with the function syntax `command(inputA,inputB,...)` and writing your own function is no different.
 ```{r function_example}
 tableOfNumbers <- tibble(
   a = c(53, 1, 51, 23, 28, 12, 87, 0, 47),
@@ -45,8 +48,8 @@ medianByRow <- function(tb) {
 
 Both of these functions use a for-loop to cycle through the `byColumn` or `byRow` vector of numbers. Additionally, the logic is basically identical except for the placement of a single comma, which means a single function could be written to handle both tasks. Finally, the `recordOfValues` empty vector needs to be initalized before it can be used, which is slightly confusing. Each of these comments are addressed below.
 
-## Looping with *for* and *while*
-These loops are explicitly sequential, showing the input and output of each command in exactly the same way as the primary code you work with. The *for* loop follows a three component format: create the output vector, define the looping sequence, and perform the body of work. In our examples, that body is two lines long, but it could be as complex as necessary to produce the intended output. When working with long loops (100s to 1000s of iterations), the inefficiency of growing the output vector at each iteration will slow down the code. Instead, the output should be initialized as an empty vector of the expected length.
+### Looping with *for* and *while*
+These loops are explicitly sequential, showing the input and output of each command in exactly the same way as the primary code you work with. The `for` loop follows a three component format: create the output vector, define the looping sequence, and perform the body of work. In our examples, that body is two lines long, but it could be as complex as necessary to produce the intended output. When working with long loops (100s to 1000s of iterations), the inefficiency of growing the output vector at each iteration will slow down the code. Instead, the output should be initialized as an empty vector of the expected length.
 ```{r for_loop}
 medianByColumn <- function(tb) {
   recordOfValues <- vector("double", ncol(tb))
@@ -67,7 +70,7 @@ medianBy <- function(tb, byRow=FALSE) {
 }
 ```
 
-The *while* loop is used when the work being performed should continue until a logical condition occurs. The obvious risk is that the condition never occurs, prompting the need for a failsafe. They are rarely used.
+The `while` loop is used when the work being performed should continue until a logical condition occurs. The obvious risk is that the condition never occurs, prompting the need for a failsafe. They are rarely used.
 ```{r while_loop}
 numberOfFlips <- 0
 numberOfHeads <- 0
@@ -89,9 +92,9 @@ while (numberOfTails < 3 | countedFlips == 1000) { # safer
 ```
 
 ## Looping with *map*
-These loops are explicitly vectored, performing the action on every element in that vector. The **purrr** package has five functions which return a vector for each type of output: list, logical, integer, double, and character. It comes with a significant increase in speed and further improved readability, but requires a different seeming workflow. Most notably, for-loops often have bookkeeping variables for the intermediate steps in the body of work, while *map* functions generate the output vector directly and are designed to work well with pipes.
+These loops are explicitly vectored, performing the action on every element in that vector. The **purrr** package has five functions which return a vector for each type of output: list, logical, integer, double, and character. It comes with a significant increase in speed and further improved readability, but requires a different seeming workflow. Most notably, for-loops often have bookkeeping variables for the intermediate steps in the body of work, while `map` functions generate the output vector directly and are designed to work well with pipes.
 
-The *map* structure builds on the idea that a solution to "how do I solve for a single set of data" is simpler to visualize. After breaking the problem down to small steps on one set, enclosing those steps in the function will iterate on each column of data in the data.frame to report the result.
+The `map` structure builds on the idea that a solution to "how do I solve for a single set of data" is simpler to visualize. After breaking the problem down to small steps on one set, enclosing those steps in the function will iterate on each column of data in the data.frame to report the result.
 ```{r map_function}
 medianByColumn <- function(tb) {
   recordOfValues <- map_dbl(tb, median) %>% unname()
@@ -112,7 +115,8 @@ medianBy <- function(tb, byRow=FALSE) {
 }
 ```
 
-# Nested Looping 
+## Nested Looping 
+
 Having built one loop, a second (or more) iteration may still be necessary to do the work.
 ```{r nested_loops}
 vectorList <- vector("list", 10)
@@ -132,7 +136,8 @@ betterNestingTibble <- c(1:10) %>%
 
 Deciding when to use a function instead of a for-loop is often an aesthetic choice focused on the readability of the code. The `betterNestingTibble` may not be as clear as code that keeps for-loop(*i*) and uses the map command to replace the for-loop(*j*).
 
-#Summary
-* *functions( )* capture regularly used segments of code so the main workflow can focus on the result instead of the process
-* *for( ) { }* loops retain the serial nature of the workflow and avoid the need to copy/paste the iterations
-* *map_\*( )* functions are incredibly fast and powerful, and the preferred looping mechanism in **R** once the format is understood
+## Summary
+
+* `functions( )` capture regularly used segments of code so the main workflow can focus on the result instead of the process
+* `for( ) { }` loops retain the serial nature of the workflow and avoid the need to copy/paste the iterations
+* `map( )` functions are incredibly fast and powerful, and the preferred looping mechanism in R once the format is understood

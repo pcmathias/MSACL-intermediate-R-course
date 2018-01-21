@@ -1,7 +1,6 @@
 ---
 title: 'Lesson 7: Modelling the data'
 author: "Randall Julian"
-date: "1/2/2018"
 output:
   word_document: default
   html_document: default
@@ -9,13 +8,17 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(checkpoint)
+checkpoint("2018-01-20")
 library(tidyverse)
 library(modelr)
 library(magrittr)
 library(lubridate)
+library(here)
 ```
 
-# Data Modelling
+## Data Modelling
+
 After enough measurements have been made to consider your data a dataset, the next step is exploring that dataset to find trends and outliers. Most often, this includes a graph as well as a computational model which fits the data to a trendline. Modelling reduces the complexity of individual observations, which is good. However, it can only operate within the limits of the model. The linear model shown below doesn't fit as well as the quadratic model, but deciding whether the quadratic model makes physical sense is not something the model can demonstrate.
 ```{r drawing_two_models}
 # data taken from http://www.theanalysisfactor.com/r-tutorial-4/
@@ -47,8 +50,9 @@ g <- ggplot(data = raw, aes(x = x, y = y)) + geom_point()
 #  geom_point( , , )
 ```
 
-## Parsing dates and times with *lubridate*
-The context for most of the data we'll encounter involve a time series, where each batch is collected at a specific date and that order of collection is a necessary component of the analysis. Dates within **R** are interpreted using the IEEE "POSIX" format, but reading data from an exterior source such as a CSV means this information arrives as a string. Functions in the **lubridate** package help to convert strings to POSIX, or combine information from multiple columns of a data.frame into a usable date format. 
+### Parsing dates and times with *lubridate*
+
+The context for most of the data we'll encounter involve a time series, where each batch is collected at a specific date and that order of collection is a necessary component of the analysis. Dates within R are interpreted using the IEEE "POSIX" format, but reading data from an exterior source such as a CSV means this information arrives as a string. Functions in the **lubridate** package help to convert strings to POSIX, or combine information from multiple columns of a data.frame into a usable date format. 
 ```{r lubridate, error=TRUE}
 stringOfDates <- c("2017-12-15", "2017-Dec-16", "2017-12-17", "2017-12-18", "2017-12-19", "2017-12-20", "2017-12-21")
 stringOfDates + 7
@@ -64,10 +68,10 @@ tableOfDates <- tibble(
 tableOfDates %$% make_date(year, month, day) # uses the magrittr 'not a pipe' operator
 tableOfDates %$% make_datetime(year, month, day, hour, minute)
 ```
-It helps to remember **R** uses "yyyy-mm-dd" as the default order for dates when viewing or exporting.
+It helps to remember R uses "yyyy-mm-dd" as the default order for dates when viewing or exporting.
 
-## Symbolic formula notation
-The difficulty in using **R** for scientific modelling is that the language was built for statistical modelling. This is most obvious in the Wilkinson-Rogers notation for formula design. It is a versitile and powerful way to quickly describe the interactions between variables, but lacks an intuitive way to express basic transformations (quadratic, logrithmic, etc)
+### Symbolic formula notation
+The difficulty in using R for scientific modelling is that the language was built for statistical modelling. This is most obvious in the Wilkinson-Rogers notation for formula design. It is a versitile and powerful way to quickly describe the interactions between variables, but lacks an intuitive way to express basic transformations (quadratic, logrithmic, etc)
 
 Formula Notation  | Common Understanding
 ---------------- | --------------------
