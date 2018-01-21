@@ -1,28 +1,23 @@
 ---
 title: 'Lesson 5: Blending data from multiple files and sources'
 author: "Randall Julian"
-date: "12/27/2017"
 output:
   html_document: default
 ---
 
 ```{r setup, include=FALSE}
-# duringClass <- FALSE
-# if(duringClass) {
-#   setwd("/full/unzipped/path") # e.g. "C:\Users\johndoe\Desktop\MSACL-intermediate-R-course-master"
-#   rootDir <- getwd()
-# } else {
-#   rootDir <- "/Users/azabell/Dropbox/R/MSACL-intermediate-R-course"
-# }
 knitr::opts_chunk$set(echo = TRUE)
-#library(openxlsx)
+library(checkpoint)
+checkpoint("2017-01-20")
 library(tidyverse)
 library(readxl)
 library(here)
 ```
 
-# Blending Data
-## Simple *rbind* and *cbind*
+## Blending Data
+
+### Simple *rbind* and *cbind*
+
 Sometimes, you need data stored across more than one file. For example, managing the QC deviations across twelve separate months of reports. Rather than hold multiple printouts side-by-side to monitor a trend, **R** will allow you to read each file and knit them together either by row, or by column. For most circumstances, that combination involves adding rows to data set.
 ```{r rowbind}
 # workingDir <- file.path(rootDir,"class_data")
@@ -50,16 +45,19 @@ incomplete_data <- cbind(incomplete_data, additional_columns)
 incomplete_data
 ```
 
+There are also dplyr functions with equivalent function: `bind_rows()` and `bind_cols()`.
+
 There are better ways of adding per-column data. Creating a new named vector directly into the existing data.frame is straightforward and shown below, but a true merge of two distinct data.frames needs more explanation.
 ```{r add_column_inline}
 incomplete_data$batchName <- "batch01"
 incomplete_data
 ```
 
-# Joining Relational Data
+### Joining Relational Data
+
 The database example for this class has three different data.frames: one for batch-level information (calibration R^2^, instrument name); one for sample-level information (sample type, calculated concentration); and one for peak-level information (quant peak area, modification flag). Accessing the relationships across these three sources -- reporting the quant and qual peak area of only the qc samples, for example -- requires the tools of relational data. In the tidyverse, these tools are part of the **dplyr** package and involve three 'families of verbs' called *mutating joins*, *filtering joins*, and *set operations*, which in turn expect a unique key in order to correctly correlate the data. 
+
 ```{r one_batch_three_tables, message=FALSE}
-jan.b <- read.xlsx(xlsxFile = file.path(workingDir, "2017-01-06.xlsx"))
 jan.b <- read_excel(here::here("class_data", "2017-01-06.xlsx"))
 jan.p <- read_tsv(here::here("class_data", "2017-01-06.txt"))
 byBatch <- jan.b[jan.b$batchName == "b802253" | jan.b$batchName == "b252474", ]
@@ -67,7 +65,7 @@ bySample <- january[january$batchName == "b802253" | january$batchName == "b2524
 byPeak <- jan.p[jan.p$batchName == "b802253" | jan.p$batchName == "b252474", ]
 ```
 
-## Primary and foreign keys
+### Primary and foreign keys
 A key is the variable in a data.frame -- or combination of variables in a data.frame -- that uniquely defines every row. In our data, *batchName* is present in each data.frame but always insufficient to define a specific row. In fact, no single column in our data operates as a key. We can build a key by combinging two (or three) columns.
 ```{r uniquify}
 byBatch$keyB <- paste(byBatch$batchName, byBatch$compoundName, sep = ":")
@@ -75,13 +73,13 @@ bySample$keyS <- paste(bySample$sampleName, bySample$compoundName, sep = ":")
 byPeak$keyP <- paste(byPeak$sampleName, byPeak$compoundName, byPeak$chromatogramName, sep = ":")
 ```
 
-Doing this creates a **primary key**, which is the unique identifier for that data.frame. A **foreign key** by contrast would uniqely identify an item in another table. The following command (explained below) incompletely adds a foreign key to `byPeak` so that information in `byBatch` can be intuitively retreived. The second command completes the population of the foreign key variable, but only because the row order in `byPeak` follows a very specific format. There are safer ways of doing this, which require an understanding of set operations.
+Doing this creates a **primary key**, which is the unique identifier for that data.frame. A **foreign key** by contrast would uniqely identify an item in another table. The following command (explained below) incompletely adds a foreign key to byPeak so that information in `byBatch` can be intuitively retreived. The second command completes the population of the foreign key variable, but only because the row order in byPeak follows a very specific format. There are safer ways of doing this, which require an understanding of set operations.
 ```{r byPeak_foreign_key}
 byPeak <- left_join(byPeak, byBatch)
 byPeak$keyB[is.na(byPeak$keyB)] <- byPeak$keyB[!is.na(byPeak$keyB)] # dangerous!
 ```
 
-> Exercise 1: Why didn't the *left_join* fully populate `byPeak`?  
+> Exercise 1: Why didn't the `left_join` fully populate byPeak?  
 
 > Exercise 2: Join the batch and sample data using only the batch-specific key  
 > Partially complete commands are commented out in the following code chunk. Since `keyB` is already built for one data.frame, creating this variable in `bySample` is the next step. How would you specify that only this variable which should be used for the join? Notice what that does for all of the variables in the joined data.frame.
@@ -92,8 +90,8 @@ byBatch$keyB
 # exerciseTwo <- left_join( , , )
 ```
 
-## Set operations *union*, *intersect*, and *setdiff*
-These three commands will return a vector which is the unduplicated combination of the two input vectors. *union(A,B)* includes all the values found in both A and B. *intersect(A,B)* returns only those values found in both A and B. *setdiff(A,B)* is order dependent, and returns the values of the first vector which are not also in the second vector. 
+### Set operations *union*, *intersect*, and *setdiff*
+These three commands will return a vector which is the unduplicated combination of the two input vectors. `union(A,B)` includes all the values found in both A and B. `intersect(A,B)` returns only those values found in both A and B. `setdiff(A,B)` is order dependent, and returns the values of the first vector which are not also in the second vector. 
 ```{r set_operations}
 A <- rep(seq(1, 10), 2)
 B <- seq(2, 20, 2)
@@ -122,10 +120,10 @@ for (name in allNames[1:6]) {
 byPeak$keyB <- paste(byPeak$batchName, byPeak$analyte, sep = ":") # alternative build of keyB
 ```
 
-## Mutating join to add columns 
-Mutating joins operate in much the same way as the set operations, but on data.frames instead of vectors, and with one critical difference: repeated values are retained. We took advantage of this earlier when using the left_join command, so that the `byBatch$keyB` got repeated for both the Quant and the Qual peak entries in `byPeak`.
+### Mutating join to add columns 
+Mutating joins operate in much the same way as the set operations, but on data.frames instead of vectors, and with one critical difference: repeated values are retained. We took advantage of this earlier when using the left_join command, so that the byBatch$keyB got repeated for both the Quant and the Qual peak entries in byPeak.
 
-There are four kinds of mutating joins, differing in how the rows of the source data.frames are treated. In each case, the matching columns are identified by column name and only one is kept, with row order remaining consistent with the principle (usually the left) source. All non-matching columns are returned, and which rows are returned depends on the type of join. An *inner_join(A,B)* only returns rows from A which have a column match in B. The *full_join(A,B)* returns every row of both A and B, using an NA in those columns which don't have a match. The *left_join(A,B)* returns every row of A, and either the matching value from B or an NA for columns with don't have a match. Finally, the *right_join(A,B)* returns every row of B, keeping the order of B, with either the matching value from columns in A or an NA for columns with no match.
+There are four kinds of mutating joins, differing in how the rows of the source data.frames are treated. In each case, the matching columns are identified by column name and only one is kept, with row order remaining consistent with the principle (usually the left) source. All non-matching columns are returned, and which rows are returned depends on the type of join. An `inner_join(A,B)` only returns rows from A which have a column match in B. The `full_join(A,B)` returns every row of both A and B, using an NA in those columns which don't have a match. The `left_join(A,B)` returns every row of A, and either the matching value from B or an NA for columns with don't have a match. Finally, the `right_join(A,B)` returns every row of B, keeping the order of B, with either the matching value from columns in A or an NA for columns with no match.
 
 Because these commands can duplicate rows, the potential for breaking things is pretty significant if the key isn't unique. Here are two examples, one where you do -- and one where you do not -- want that duplication:
 ```{r good_and_bad_duplication}
@@ -141,13 +139,13 @@ badDuplication <- inner_join(
 )
 ```
 
-Having built the `byBatch` primary key, and correctly included it as a foreign key in `byPeak`, correctly joining them into a single data.frame is straightforward. 
+Having built the byBatch primary key, and correctly included it as a foreign key in byPeak, correctly joining them into a single data.frame is straightforward. 
 ```{r using_primary_and_foreign_keys}
 byPeakWide <- left_join(x = byPeak, y = byBatch)
 ```
 
-## Filtering join to check the overlap
-We created the `byBatch$keyB` explicitly, but it was effectively present already thanks to the *batchName* and *compoundName* columns. The compound naming scheme in `byPeak` remains problematic since the internal standard isn't identified in `byBatch` or `bySample`, but we fixed this using a new column *analyte*. We could have accomplished the same effect in fewer steps using the semi_join and anti_join commands. The *semi_join(A,B)* returns all rows of A where there is a match from B, but keeps only the columns of A, and does not duplicate a row if there are multiple matches. The *anti_join(A,B)* is the inverse, returning all rows from A where there is no match from B. To create the 'analyte' column as before:
+### Filtering join to check the overlap
+We created the `byBatch$keyB` explicitly, but it was effectively present already thanks to the *batchName* and *compoundName* columns. The compound naming scheme in `byPeak` remains problematic since the internal standard isn't identified in `byBatch` or `bySample`, but we fixed this using a new column *analyte*. We could have accomplished the same effect in fewer steps using the semi_join and anti_join commands. The `semi_join(A,B)` returns all rows of A where there is a match from B, but keeps only the columns of A, and does not duplicate a row if there are multiple matches. The `anti_join(A,B)` is the inverse, returning all rows from A where there is no match from B. To create the 'analyte' column as before:
 ```{r filtering_joins}
 byBatch <- jan.b %>% # reset the byBatch data.frame
   filter(batchName %in% c("b802253", "b252474"))
@@ -166,13 +164,13 @@ c(nrow(noMatch), nrow(justMatch), nrow(byPeak))
 ```
 
 > Exercise 3: Join the batch and peak data  
-> Start from the reset data.frames built in the prior code chunk, so the `keyB` and `keyP` variables are not present. Partially complete commands are commented out in the following code chunk.
+> Start from the reset data.frames built in the prior code chunk, so the keyB and keyP variables are not present. Partially complete commands are commented out in the following code chunk.
 
 ```{r ex3}
 # exerciseThree <- left_join( , ,by=c( ) )
 ```
 
-# Summary
+## Summary
 * **rbind** and **cbind** add rows (or columns) to an existing data.frame
 * **union**, **intersect**, and **setdiff** return a combination of two vectors
 * Relational data merges two data.frames on the common columns, called keys
