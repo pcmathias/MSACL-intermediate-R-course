@@ -129,10 +129,9 @@ $(document).ready(function () {
 <div id="joining-relational-data" class="section level1">
 <h1>Joining Relational Data</h1>
 <p>The database example for this class has three different data.frames (we use data.frame interchangably with the word tibble, even though we usually mean tibble) : one for batch-level information (calibration R<sup>2</sup>, instrument name); one for sample-level information (sample type, calculated concentration); and one for peak-level information (quant peak area, modification flag). Accessing the relationships across these three sources – reporting the quant and qual peak area of only the qc samples, for example – requires the tools of relational data. In the tidyverse, these tools are part of the <strong>dplyr</strong> package and involve three ‘families of verbs’ called <em>mutating joins</em>, <em>filtering joins</em>, and <em>set operations</em>, which in turn expect a unique key in order to correctly correlate the data. To begin, read in the batch, sample, and peak data from the month of January. For simplicity, we will reduce size of our working examples to only those rows of data associated with one of two batches.</p>
-<pre class="r"><code>workingDir &lt;- file.path(rootDir,&quot;class_data&quot;)
-jan.b &lt;- read.xlsx(xlsxFile=file.path(workingDir,&quot;2017-01-06.xlsx&quot;))
-jan.s &lt;- read_csv(file.path(workingDir,&quot;2017-01-06.csv&quot;))
-jan.p &lt;- read_tsv(file=file.path(workingDir,&quot;2017-01-06.txt&quot;))
+<pre class="r"><code>jan.b &lt;- read_excel(here(&quot;class_data&quot;,&quot;2017-01-06.xlsx&quot;))
+jan.s &lt;- read_csv(here(&quot;class_data&quot;,&quot;2017-01-06.csv&quot;))
+jan.p &lt;- read_tsv(here(&quot;class_data&quot;,&quot;2017-01-06.txt&quot;))
 byBatch &lt;- jan.b[jan.b$batchName==&quot;b802253&quot; | jan.b$batchName==&quot;b252474&quot;,]
 bySample &lt;- jan.s[jan.s$batchName==&quot;b802253&quot; | jan.s$batchName==&quot;b252474&quot;,]
 byPeak &lt;- jan.p[jan.p$batchName==&quot;b802253&quot; | jan.p$batchName==&quot;b252474&quot;,]</code></pre>
@@ -143,7 +142,7 @@ byPeak &lt;- jan.p[jan.p$batchName==&quot;b802253&quot; | jan.p$batchName==&quot
 <div id="simple-rbind-and-cbind" class="section level2">
 <h2>Simple <em>rbind</em> and <em>cbind</em></h2>
 <p>Sometimes, you need data stored across more than one file. For example, managing the QC deviations across twelve separate months of reports. Rather than hold multiple printouts side-by-side to monitor a trend, you can read each file and knit them together either by row, or by column. Working with tidy data means a ‘wide’ data.frame where each column is a specific variable, and each row is a specific measurment. If you know that your data sources have the same format, you can safely combine them with an <em>rbind</em> to append the second source of data at the end of the first.</p>
-<pre class="r"><code>january &lt;- read_csv(file.path(workingDir,&quot;2017-01-06.csv&quot;))</code></pre>
+<pre class="r"><code>january &lt;- read_csv(here(&quot;class_data&quot;,&quot;2017-01-06.csv&quot;))</code></pre>
 <pre><code>## Parsed with column specification:
 ## cols(
 ##   batchName = col_character(),
@@ -172,7 +171,7 @@ byPeak &lt;- jan.p[jan.p$batchName==&quot;b802253&quot; | jan.p$batchName==&quot
 ## 4    unknown                     0        FALSE         TRUE
 ## 5    unknown                     0        FALSE         TRUE
 ## 6    unknown                     0        FALSE         TRUE</code></pre>
-<pre class="r"><code>february &lt;- read_csv(file.path(workingDir,&quot;2017-02-06.csv&quot;))</code></pre>
+<pre class="r"><code>february &lt;- read_csv(here(&quot;class_data&quot;,&quot;2017-02-06.csv&quot;))</code></pre>
 <pre><code>## Parsed with column specification:
 ## cols(
 ##   batchName = col_character(),
