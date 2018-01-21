@@ -164,7 +164,7 @@ c(nrow(noMatch), nrow(justMatch), nrow(byPeak))
 ```
 
 > Exercise 3: Join the batch and peak data  
-> Start from the reset data.frames built in the prior code chunk, so the keyB and keyP variables are not present. Partially complete commands are commented out in the following code chunk.
+> Start from the reset data.frames built in the prior code chunk, so the `keyB` and `keyP` variables are not present. Partially complete commands are commented out in the following code chunk.
 
 ```{r ex3}
 # exerciseThree <- left_join( , ,by=c( ) )
