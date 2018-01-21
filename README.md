@@ -28,7 +28,7 @@ There are multiple ways to access and interact with the course content. We want 
 - In the event that there are issues with downloading files, we will have a local copy of the course repository that we can share.
 
 ## Course content
-
+- [Accessing the course](accessing_the_course.Rmd)
 - **Lesson 1**: [Adopting principles of reproducible research](lesson1/lesson1.Rmd)
 - **Lesson 2**: [Getting cozy with R Markdown](lesson2/lesson2.Rmd)
 - **Lesson 3**: [Reading files - beyond the basics](lesson3/lesson3.Rmd)
