@@ -1,6 +1,6 @@
 ---
 title: 'Lesson 8: Beyond the csv -- parsing xml and json files'
-author: "Randall Julian"
+author: "Randall Julian, Adam Zabell"
 date: "1/2/2018"
 output:
   word_document: default
@@ -9,6 +9,8 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(checkpoint)
+#checkpoint("2018-01-20")
 library(tidyverse)
 library(magrittr)
 library(xml2)
@@ -16,7 +18,7 @@ library(jsonlite)
 ```
 
 # Flat and Structured Files
-The commands *read_csv*, *read_tsv*, and *read.xlsx* (discussed in Lesson 5) open files that are often called 'flat' because there is no inherent structure to the delimited rows and columns. Using the first row as a column header is a common convention, but is not required for the function to work properly. In contrast, most databases have a required structure to each element, and these elements sometimes have a nestest structure within structure. The details of database construction are well beyond the scope of this class, but the return from a database query is typically in XML or JSON format, and working with these files in **R** involve some basic parsing techniques.
+The commands *read_csv*, *read_tsv*, and *read_excel* (discussed in Lesson 5) open files that are often called 'flat' because there is no inherent structure to the delimited rows and columns. Using the first row as a column header is a common convention, but is not required for the function to work properly. In contrast, most databases have a required structure to each element, and these elements sometimes have a nestest structure within structure. The details of database construction are well beyond the scope of this class, but if the source of your data is a database query, the returned results are typically in XML or JSON format. Being able to work with these files in **R** requires some basic parsing techniques.
 
 ## The extensible markup language (xml)
 When read as a text file, xml looks a lot like html, because html is (by and large) a subset of xml. That's not to say they're interchangable, since html permits some shortcuts which xml does not, and xml isn't restricted to web browser tags. The xml format declares and closes a *key*, with the *value* enclosed between them: `<key>value</key>`. That value can itself be one or more nested key-value statements. 
@@ -56,7 +58,7 @@ cd.df$PRICE %<>% map_dbl(as.numeric) # also invokes a from-and-back-into pipe no
 ```
 
 > Exercise 1: Renumbering Redux  
-> Will reading the xml into a tibble (instead of a data.frame) solve this number recognition? First, try it. Then, even if it did work, construct a 'standard pipe' mechanism using only `%>%` to change both *PRICE* and *YEAR* to double precision numbers.
+> Will reading the xml into a tibble (instead of a data.frame) solve this number recognition? First, try it. Then, even if it did work, construct a 'standard pipe' mechanism using `%>%` to change both *PRICE* and *YEAR* to double precision numbers.
 
 ```{r ex1}
 #cd.tibble <- as_tibble( )
@@ -65,7 +67,9 @@ cd.df$PRICE %<>% map_dbl(as.numeric) # also invokes a from-and-back-into pipe no
 
 There are many more problems that could happen, ultimately because each entry in the xml or json file is an independent object. There may be an element not present in every entry (e.g. not including a price for a CD), or multiple elements within an element (e.g. two artists for a CD), or the elements may not be retrieved in the same order each time (e.g. all Bob Dylan albums return the artist before the title). All are disasterous; the conversion examples shown here using *matrix* will now be wildly offset.
 
-Most problems should be solved on the query-side of the equation, to confirm the query was built correctly and that the database is populated as expected. But, since "two artists for one CD" is at least possible and might even be common, the retrieved data could simply be less data.frame friendly than you would like. Unless you're very sure of what the returned data must looks like, some basic checks now will avoid maddening troubleshooting later. 
+Most problems should be solved on the query-side of the equation, to confirm the database query was built correctly and that the database is populated as expected. But, since "two artists for one CD" is at least possible and might even be common, the retrieved data could simply be less data.frame friendly than you would like. Unless you're very sure of what the returned data must look like, some basic checks now will avoid exhausting effort later.  
+
+The following code snippet, for example, will go through each list element of `cd.list` and count how many variables are present, and create a key showing their order. Then, at the end, we look for all the *unique* components of our `numberOfElements` and `namesForElements`. If we have more than one, it's a sign we need to correct our query or adjust our expectations.  
 ```{r troubleshooting}
 numberOfElements <- c()
 namesForElements <- c()
@@ -85,7 +89,9 @@ paste(unique(numberOfElements),unique(namesForElements),sep=" | ")
 > Add this next line to `cd.list` and rerun the troubleshooting code section. What changed in the output from the *paste* command? How would you fix the list so the columns are correct while still using the *matrix* method described in Exercise 1?
 
 ```{r ex2}
-cd.list[[27]] <- list(ARTIST=list("Benny Andersson","Tim Rice","Bjorn Ulvaeus"),
+cd.list[[27]] <- list(ARTIST=list("Benny Andersson",
+                                  "Tim Rice",
+                                  "Bjorn Ulvaeus"),
                       TITLE=list("Chess"),
                       COUNTRY=list("Sweden"),
                       COMPANY=list("RCA Victor"),
