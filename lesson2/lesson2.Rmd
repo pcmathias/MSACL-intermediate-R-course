@@ -148,6 +148,7 @@ library("stringi")
 6. In the setup code chunk for the document, load the checkpoint package
 7. Add the checkpoint command to load packages from today: `checkpoint("2018-01-21")`
 8. Load the following packages in the setup chunk: tidyverse, readxl, lubridate, janitor, lattice, magrittr, modelr, xml2, jsonlite
+9. Save the file and then go ahead and run your setup chunk
 
 So why did you have to go through the first 3 steps before starting your R Markdown document? When RStudio knits a document, it calls certain packages behind the scenes to create the document. However, when you are using checkpoint, the package only looks for packages within your project folders and does not see those hidden RStudio folders. So adding knitr-packages.R is a workaround to allow checkpoint to see those packages and knit the document.
 
