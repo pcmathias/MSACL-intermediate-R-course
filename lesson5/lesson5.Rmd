@@ -16,23 +16,24 @@ library(here)
 ```
 
 
-# Joining Relational Data
+## Joining Relational Data
+
 The database example for this class has three different data.frames (we use data.frame interchangably with the word tibble, even though we usually mean tibble) : one for batch-level information (calibration R^2^, instrument name); one for sample-level information (sample type, calculated concentration); and one for peak-level information (quant peak area, modification flag). Accessing the relationships across these three sources -- reporting the quant and qual peak area of only the qc samples, for example -- requires the tools of relational data. In the tidyverse, these tools are part of the **dplyr** package and involve three 'families of verbs' called *mutating joins*, *filtering joins*, and *set operations*, which in turn expect a unique key in order to correctly correlate the data. To begin, read in the batch, sample, and peak data from the month of January. For simplicity, we will reduce size of our working examples to only those rows of data associated with one of two batches.  
 ```{r one_batch_three_tables, message=FALSE}
-workingDir <- file.path(rootDir,"class_data")
-jan.b <- read.xlsx(xlsxFile=file.path(workingDir,"2017-01-06.xlsx"))
-jan.s <- read_csv(file.path(workingDir,"2017-01-06.csv"))
-jan.p <- read_tsv(file=file.path(workingDir,"2017-01-06.txt"))
+jan.b <- read_excel(here::here("class_data", "2017-01-06.xlsx"))
+jan.s <- read_csv(here::here("class_data","2017-01-06.csv"))
+jan.p <- read_tsv(here::here("class_data","2017-01-06.txt"))
 byBatch <- jan.b[jan.b$batchName=="b802253" | jan.b$batchName=="b252474",]
 bySample <- jan.s[jan.s$batchName=="b802253" | jan.s$batchName=="b252474",]
 byPeak <- jan.p[jan.p$batchName=="b802253" | jan.p$batchName=="b252474",]
 ```
 
-Let's first talk about two simple commands in **R** which bind data, and the pitfalls of relying too heavily upon them.
+Let's first talk about two simple commands in R which bind data, and the pitfalls of relying too heavily upon them.
 
-# Blending Data
-## Simple *rbind* and *cbind*
-Sometimes, you need data stored across more than one file. For example, managing the QC deviations across twelve separate months of reports. Rather than hold multiple printouts side-by-side to monitor a trend, you can read each file and knit them together either by row, or by column. Working with tidy data means a 'wide' data.frame where each column is a specific variable, and each row is a specific measurment. If you know that your data sources have the same format, you can safely combine them with an *rbind* to append the second source of data at the end of the first.  
+## Blending Data
+
+### Simple *rbind* and *cbind*
+Sometimes, you need data stored across more than one file. For example, managing the QC deviations across twelve separate months of reports. Rather than hold multiple printouts side-by-side to monitor a trend, you can read each file and knit them together either by row, or by column. Working with tidy data means a 'wide' data.frame where each column is a specific variable, and each row is a specific measurment. If you know that your data sources have the same format, you can safely combine them with an `rbind` to append the second source of data at the end of the first.  
 ```{r rbind}
 january <- read_csv(file.path(workingDir,"2017-01-06.csv"))
 as.data.frame(january[187195:187200,])
@@ -47,7 +48,7 @@ twoMonths[187195:187204,]
 c(nrow(january), nrow(february), nrow(twoMonths))
 ```
 
-Because of how **R** treats columns, as long as the two files have the same number of columns and the same column names, the *rbind* command will correctly associate the data using the column order from the first variable. And if they aren't the same, you get an error that tells you what is wrong.  
+Because of how R treats columns, as long as the two files have the same number of columns and the same column names, the `rbind` command will correctly associate the data using the column order from the first variable. And if they aren't the same, you get an error that tells you what is wrong.  
 ```{r bad_rbinds}
 awkwardJanuary <- january[,c(10,1:9)]
 missingJanuary <- january[,c(1:9)]
@@ -62,7 +63,7 @@ names(misnamedJanuary)[1] <- "bName"
 #rbind( , february)
 ```
 
-There is an equivalent command called *cbind* which will append columns to a data.frame, but it is far more risky. The expectation within **R** that each row of information is correctly organized into a set of columns means this command will not check to make sure the order of values are correct between the two terms. Working to retain the correct association is the purpose of using keys as unique identifiers (see below).
+There is an equivalent command called `cbind` which will append columns to a data.frame, but it is far more risky. The expectation within R that each row of information is correctly organized into a set of columns means this command will not check to make sure the order of values are correct between the two terms. Working to retain the correct association is the purpose of using keys as unique identifiers (see below).
 ```{r cbind}
 incomplete_data <- tibble(sampleName="123456",
                           compoundName=c("morphine","hydromorphone","codeine","hydrocodone"),
@@ -84,6 +85,7 @@ incomplete_data
 ```
 
 ### Primary and foreign keys
+
 A key is the variable in a data.frame -- or combination of variables in a data.frame -- that uniquely defines every row. In our data, `batchName` is present in each data.frame but always insufficient to define a specific row. In fact, no single column in our data operates as a key. We can build a key by combinging two (or three) columns.
 ```{r uniquify}
 byBatch$keyB <- paste(byBatch$batchName, byBatch$compoundName, sep=":")
@@ -153,6 +155,7 @@ for (name in allNames[1:6]) {
   byPeak$analyte[byPeak$compoundName == theInternalStandard] <- theCompound
   byPeak$analyte[byPeak$compoundName == theCompound] <- theCompound
 }
+```
 
 ## Mutating join to add columns 
 Mutating joins operate in much the same way as the set operations, but on data.frames instead of vectors, and with one critical difference: repeated values are retained. We took advantage of this earlier when using the left_join command, so that the `byBatch$keyB` got repeated for both the Quant and the Qual peak entries in `byPeak`. Having built the `byBatch` primary key, and correctly included it as a foreign key in `byPeak`, correctly joining them into a single data.frame is straightforward. 
@@ -174,11 +177,6 @@ badDuplication <- inner_join(
   y = byBatch[, c(1:6)],
   by = c("compoundName")
 )
-```
-
-Having built the `byBatch` primary key, and correctly included it as a foreign key in `byPeak`, correctly joining them into a single data.frame is straightforward. 
-```{r using_primary_and_foreign_keys}
-byPeakWide <- left_join(x = byPeak, y = byBatch)
 ```
 
 ## Filtering join to check the overlap
