@@ -4,6 +4,11 @@ author: "Patrick Mathias"
 output: html_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+```
+
 ## Why integrate your analysis and documentation in one place?
 
 The short answer is that it will be easier for you to understand what you did and easier for anyone else to understand what you did when you analyzed your data. This aligns nicely with the principles of reproducible research and is arguably just as important for any analysis that occurs in a clinical laboratory for operational or test validation purposes. The analysis and the explanation of the analysis live in one place so if you or someone else signs off on the work, what was done is very clear.
@@ -78,7 +83,7 @@ Let's use the built-in functionality in RStudio to create an R Markdown document
 
 1. Add a file by selecting the add file button on the top left of your screen
 1. Select R Markdown... as the file type
-1. Title the document "Data Science 201" and select OK
+1. Title the document "Sample R Markdown Document" and select OK
 1. Put the cursor in the "cars" code chunk (should be the 2nd chunk) and hit `Ctrl+Shift+Enter`/`Command+Shift+Enter`. What happened?
 1. Insert a code chunk under the cars code chunk by using the `Ctrl+Alt+i`/`Command+Option+i`(Windows/Mac) shortcut
 1. Create output for the first lines of the cars data frame using the `head(cars)` command and execute the code chunk
@@ -90,7 +95,7 @@ RStudio also already provides you with an outline of a useful document, includin
 Now let's knit this file and create some output.
 
 1. Click the **Knit** button
-1. You are being prompted to save the .Rmd file. Choose any location of your liking (this is just for testing but remember where you save it) and name the file data_science_201
+1. You are being prompted to save the .Rmd file. Choose the "src" folder of your project and name the file sample_markdown_document
 1. RStudio should produce output in .html format and display
 1. Click the Open in Browser window and the same output should open in your default internet browser
 1. If you find the folder you saved the .Rmd file there should also be a .html file you can open as well
@@ -112,11 +117,13 @@ How can we integrate R Markdown documents within the context of these requiremen
 
 ***Exercise***
 
-1. From within the course directory (MSACL-intermediate-R-course), create a new directory called "coursework" & set your working directory to there
-2. Load the here package from within your console and use the `set_here()` command to set your "coursework" directory to be the primary point of reference for your project. (This creates an empty file named ".here", which is the first thing the here package looks for when trying to set its point of reference.)
-3. Create the directory structure we discussed in the last lesson, **with the exception of the data directory**
-4. Go to your operating system and copy the "class_data" directory you unzipped prior to the course (per the pre-course instructions) into your "coursework" directory
-5. At this point we will want to include our individual lesson .Rmd files in the "src" directory. You have a couple options:
+1. Close the RStudio window that has your "sample-project-structure" project open (refer to the upper right of your RStudio window to see which active project is open).
+1. Find your RStudio window with your "MSACL-intermediate-R-course" project (look in upper right). If you cannot find it, within RStudio, click the arrow to the right of the project name (it will say Project: (None) if you are not in a project) and select your "MSACL-intermediate-R-course" project.
+1. From within the course directory ("MSACL-intermediate-R-course"), create a new directory called "coursework" & set your working directory to there
+1. Load the here package from within your console and use the `set_here()` command to set your "coursework" directory to be the primary point of reference for your project. (This creates an empty file named ".here", which is the first thing the here package looks for when trying to set its point of reference.)
+1. Create the directory structure we discussed in the last lesson, **with the exception of the data directory**
+1. Go to your operating system and copy the "class_data" directory you unzipped prior to the course (per the pre-course instructions) into your "coursework" directory
+1. At this point we will want to include our individual lesson .Rmd files in the "src" directory. You have a couple options:
   - Sync your local repository with the master repository using git pull functionality in RStudio (we will update the repository to include the lesson files in the repository)
   - Copy the .Rmd files from each of the lesson folders into the "coursework" folder
 
