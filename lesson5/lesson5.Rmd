@@ -18,7 +18,7 @@ library(here)
 
 ### Simple *rbind* and *cbind*
 
-Sometimes, you need data stored across more than one file. For example, managing the QC deviations across twelve separate months of reports. Rather than hold multiple printouts side-by-side to monitor a trend, **R** will allow you to read each file and knit them together either by row, or by column. For most circumstances, that combination involves adding rows to data set.
+Sometimes, you need data stored across more than one file. For example, managing the QC deviations across twelve separate months of reports. Rather than hold multiple printouts side-by-side to monitor a trend, R will allow you to read each file and knit them together either by row, or by column. For most circumstances, that combination involves adding rows to data set.
 ```{r rowbind}
 # workingDir <- file.path(rootDir,"class_data")
 january <- read_csv(here::here("class_data", "2017-01-06.csv"))
@@ -30,7 +30,7 @@ twoMonths[187195:187204, ]
 c(nrow(january), nrow(february), nrow(twoMonths))
 ```
 
-There is an equivalent but less useful command in **R** which will append columns.
+There is an equivalent but less useful command in R which will append columns.
 ```{r cbind}
 incomplete_data <- tibble(
   sampleName = "123456",
@@ -66,20 +66,20 @@ byPeak <- jan.p[jan.p$batchName == "b802253" | jan.p$batchName == "b252474", ]
 ```
 
 ### Primary and foreign keys
-A key is the variable in a data.frame -- or combination of variables in a data.frame -- that uniquely defines every row. In our data, *batchName* is present in each data.frame but always insufficient to define a specific row. In fact, no single column in our data operates as a key. We can build a key by combinging two (or three) columns.
+A key is the variable in a data.frame -- or combination of variables in a data.frame -- that uniquely defines every row. In our data, `batchName` is present in each data.frame but always insufficient to define a specific row. In fact, no single column in our data operates as a key. We can build a key by combinging two (or three) columns.
 ```{r uniquify}
 byBatch$keyB <- paste(byBatch$batchName, byBatch$compoundName, sep = ":")
 bySample$keyS <- paste(bySample$sampleName, bySample$compoundName, sep = ":")
 byPeak$keyP <- paste(byPeak$sampleName, byPeak$compoundName, byPeak$chromatogramName, sep = ":")
 ```
 
-Doing this creates a **primary key**, which is the unique identifier for that data.frame. A **foreign key** by contrast would uniqely identify an item in another table. The following command (explained below) incompletely adds a foreign key to byPeak so that information in `byBatch` can be intuitively retreived. The second command completes the population of the foreign key variable, but only because the row order in byPeak follows a very specific format. There are safer ways of doing this, which require an understanding of set operations.
+Doing this creates a **primary key**, which is the unique identifier for that data.frame. A **foreign key** by contrast would uniqely identify an item in another table. The following command (explained below) incompletely adds a foreign key to byPeak so that information in `byBatch` can be intuitively retreived. The second command completes the population of the foreign key variable, but only because the row order in `byPeak` follows a very specific format. There are safer ways of doing this, which require an understanding of set operations.
 ```{r byPeak_foreign_key}
 byPeak <- left_join(byPeak, byBatch)
 byPeak$keyB[is.na(byPeak$keyB)] <- byPeak$keyB[!is.na(byPeak$keyB)] # dangerous!
 ```
 
-> Exercise 1: Why didn't the `left_join` fully populate byPeak?  
+> Exercise 1: Why didn't the `left_join` fully populate `byPeak`?  
 
 > Exercise 2: Join the batch and sample data using only the batch-specific key  
 > Partially complete commands are commented out in the following code chunk. Since `keyB` is already built for one data.frame, creating this variable in `bySample` is the next step. How would you specify that only this variable which should be used for the join? Notice what that does for all of the variables in the joined data.frame.
@@ -121,7 +121,7 @@ byPeak$keyB <- paste(byPeak$batchName, byPeak$analyte, sep = ":") # alternative 
 ```
 
 ### Mutating join to add columns 
-Mutating joins operate in much the same way as the set operations, but on data.frames instead of vectors, and with one critical difference: repeated values are retained. We took advantage of this earlier when using the left_join command, so that the byBatch$keyB got repeated for both the Quant and the Qual peak entries in byPeak.
+Mutating joins operate in much the same way as the set operations, but on data.frames instead of vectors, and with one critical difference: repeated values are retained. We took advantage of this earlier when using the `left_join` command, so that the `byBatch$keyB` got repeated for both the `Quant` and the `Qual` peak entries in `byPeak`.
 
 There are four kinds of mutating joins, differing in how the rows of the source data.frames are treated. In each case, the matching columns are identified by column name and only one is kept, with row order remaining consistent with the principle (usually the left) source. All non-matching columns are returned, and which rows are returned depends on the type of join. An `inner_join(A,B)` only returns rows from A which have a column match in B. The `full_join(A,B)` returns every row of both A and B, using an NA in those columns which don't have a match. The `left_join(A,B)` returns every row of A, and either the matching value from B or an NA for columns with don't have a match. Finally, the `right_join(A,B)` returns every row of B, keeping the order of B, with either the matching value from columns in A or an NA for columns with no match.
 
@@ -139,13 +139,13 @@ badDuplication <- inner_join(
 )
 ```
 
-Having built the byBatch primary key, and correctly included it as a foreign key in byPeak, correctly joining them into a single data.frame is straightforward. 
+Having built the `byBatch` primary key, and correctly included it as a foreign key in `byPeak`, correctly joining them into a single data.frame is straightforward. 
 ```{r using_primary_and_foreign_keys}
 byPeakWide <- left_join(x = byPeak, y = byBatch)
 ```
 
 ### Filtering join to check the overlap
-We created the `byBatch$keyB` explicitly, but it was effectively present already thanks to the *batchName* and *compoundName* columns. The compound naming scheme in `byPeak` remains problematic since the internal standard isn't identified in `byBatch` or `bySample`, but we fixed this using a new column *analyte*. We could have accomplished the same effect in fewer steps using the semi_join and anti_join commands. The `semi_join(A,B)` returns all rows of A where there is a match from B, but keeps only the columns of A, and does not duplicate a row if there are multiple matches. The `anti_join(A,B)` is the inverse, returning all rows from A where there is no match from B. To create the 'analyte' column as before:
+We created the `byBatch$keyB` explicitly, but it was effectively present already thanks to the `batchName` and `compoundName` columns. The compound naming scheme in `byPeak` remains problematic since the internal standard isn't identified in `byBatch` or `bySample`, but we fixed this using a new column `analyte`. We could have accomplished the same effect in fewer steps using the semi_join and anti_join commands. The `semi_join(A,B)` returns all rows of A where there is a match from B, but keeps only the columns of A, and does not duplicate a row if there are multiple matches. The `anti_join(A,B)` is the inverse, returning all rows from A where there is no match from B. To create the `analyte` column as before:
 ```{r filtering_joins}
 byBatch <- jan.b %>% # reset the byBatch data.frame
   filter(batchName %in% c("b802253", "b252474"))
@@ -171,10 +171,10 @@ c(nrow(noMatch), nrow(justMatch), nrow(byPeak))
 ```
 
 ## Summary
-* **rbind** and **cbind** add rows (or columns) to an existing data.frame
-* **union**, **intersect**, and **setdiff** return a combination of two vectors
+* `rbind` and `cbind` add rows (or columns) to an existing data.frame
+* `union`, `intersect`, and `setdiff` return a combination of two vectors
 * Relational data merges two data.frames on the common columns, called keys
-    + A primary key is a unique identifier for every row in a data.frame (the presence of keyB in byBatch)
-    + A foreign key is a unique identifier for another data.frame (the presence of keyB in byPeak)
-* **inner_join**, **full_join**, **left_join**, and **right_join** are mutating joins which add columns
-* **semi_join** and **anti_join** are filtering joins which check for overlap
+    + A primary key is a unique identifier for every row in a data.frame (the presence of `keyB` in `byBatch`)
+    + A foreign key is a unique identifier for another data.frame (the presence of `keyB` in `byPeak`)
+* `inner_join`, `full_join`, `left_join`, and `right_join` are mutating joins which add columns
+* `semi_join` and `anti_join` are filtering joins which check for overlap
