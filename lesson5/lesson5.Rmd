@@ -100,8 +100,6 @@ byPeak <- left_join(byPeak, byBatch)
 byPeak$keyB[is.na(byPeak$keyB)] <- byPeak$keyB[!is.na(byPeak$keyB)] # dangerous!
 ```
 
-> Exercise 1: Why didn't the `left_join` fully populate `byPeak`?  
-
 > Exercise 2: Join the batch and sample data using only the batch-specific key  
 > Partially complete commands are commented out in the following code chunk. Since `keyB` is already built for one data.frame, creating this variable in `bySample` is the next step. How would you specify that only this variable which should be used for the join? Notice what that does for all of the variables in the joined data.frame.
 
