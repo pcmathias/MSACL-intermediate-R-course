@@ -146,7 +146,6 @@ g <- jan.s %>%
 oneYearSamples <- list.files(here::here("class_data"), pattern = "csv$") %>%
   file.path(here::here("class_data"), .) %>%
   map_dfr(read_csv)
->>>>>>> master
 oneYearSamples$idx <- 1:nrow(oneYearSamples)
 coreR <- function(oneYearSamples) {
   sampleTypes <- unique(oneYearSamples$sampleType)
