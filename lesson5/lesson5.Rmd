@@ -2,14 +2,14 @@
 title: 'Lesson 5: Blending data from multiple files and sources'
 author: "Randall Julian, Adam Zabell"
 output:
-  word_document: default
   html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(checkpoint)
-checkpoint("2017-01-20")
+# checkpoint("2018-01-20")
 library(tidyverse)
 library(readxl)
 library(here)
@@ -20,7 +20,7 @@ library(here)
 
 The database example for this class has three different data.frames (we use data.frame interchangably with the word tibble, even though we usually mean tibble) : one for batch-level information (calibration R^2^, instrument name); one for sample-level information (sample type, calculated concentration); and one for peak-level information (quant peak area, modification flag). Accessing the relationships across these three sources -- reporting the quant and qual peak area of only the qc samples, for example -- requires the tools of relational data. In the tidyverse, these tools are part of the **dplyr** package and involve three 'families of verbs' called *mutating joins*, *filtering joins*, and *set operations*, which in turn expect a unique key in order to correctly correlate the data. To begin, read in the batch, sample, and peak data from the month of January. For simplicity, we will reduce size of our working examples to only those rows of data associated with one of two batches.  
 ```{r one_batch_three_tables, message=FALSE}
-jan.b <- read_excel(here::here("class_data", "2017-01-06.xlsx"))
+jan.b <- read_excel(here::here("class_data","2017-01-06.xlsx"))
 jan.s <- read_csv(here::here("class_data","2017-01-06.csv"))
 jan.p <- read_tsv(here::here("class_data","2017-01-06.txt"))
 byBatch <- jan.b[jan.b$batchName=="b802253" | jan.b$batchName=="b252474",]
@@ -35,14 +35,14 @@ Let's first talk about two simple commands in R which bind data, and the pitfall
 ### Simple *rbind* and *cbind*
 Sometimes, you need data stored across more than one file. For example, managing the QC deviations across twelve separate months of reports. Rather than hold multiple printouts side-by-side to monitor a trend, you can read each file and knit them together either by row, or by column. Working with tidy data means a 'wide' data.frame where each column is a specific variable, and each row is a specific measurment. If you know that your data sources have the same format, you can safely combine them with an `rbind` to append the second source of data at the end of the first.  
 ```{r rbind}
-january <- read_csv(file.path(workingDir,"2017-01-06.csv"))
+january <- read_csv(here::here("class_data","2017-01-06.csv"))
 as.data.frame(january[187195:187200,])
-february <- read_csv(file.path(workingDir,"2017-02-06.csv"))
+february <- read_csv(here::here("class_data","2017-02-06.csv"))
 as.data.frame(february[1:5,])
 twoMonths <- rbind(january,february)
 ```
 
-Notice the continuation from the last rows of `jaunary` to the first rows of `february` and that the number of rows in the combined data.frame `twoMonths` is the sum of the first two months of sample-level data.  
+Notice the continuation from the last rows of `january` to the first rows of `february` and that the number of rows in the combined data.frame `twoMonths` is the sum of the first two months of sample-level data.  
 ```{r jan_plus_feb}
 twoMonths[187195:187204,]
 c(nrow(january), nrow(february), nrow(twoMonths))
@@ -99,8 +99,6 @@ Doing this creates a **primary key**, which is the unique identifier for that da
 byPeak <- left_join(byPeak, byBatch)
 byPeak$keyB[is.na(byPeak$keyB)] <- byPeak$keyB[!is.na(byPeak$keyB)] # dangerous!
 ```
-
-> Exercise 1: Why didn't the `left_join` fully populate `byPeak`?  
 
 > Exercise 2: Join the batch and sample data using only the batch-specific key  
 > Partially complete commands are commented out in the following code chunk. Since `keyB` is already built for one data.frame, creating this variable in `bySample` is the next step. How would you specify that only this variable which should be used for the join? Notice what that does for all of the variables in the joined data.frame.
