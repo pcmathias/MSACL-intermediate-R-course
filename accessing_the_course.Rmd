@@ -22,9 +22,10 @@ We created a Github repository for this course to help us collaborate but it als
 
 ## Accessing the course repository via RStudio
 
-RStudio provides built-in functionality within the creation of a new project to obtain the contents of a Github repository. Let's pull the project into RStudio:
+RStudio provides built-in functionality within the creation of a new project to obtain the contents of a Github repository. Let's pull the project into RStudio. A requirement to use this functionality is to install git on your computer.
 
-1. Navigate to the File menu and select New Project
+1. Install git for your operating system from this website: [git downloads](https://git-scm.com/downloads)
+1. When that is complete, navigate to the File menu and select New Project
 2. Select Version Control in the Create Project prompt
 3. Select Git
 4. Paste the following URL in the Repository URL prompt: https://github.com/pcmathias/MSACL-intermediate-R-course
