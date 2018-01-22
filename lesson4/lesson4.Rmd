@@ -7,7 +7,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(checkpoint)
-checkpoint("2018-01-19")
+#checkpoint("2018-01-19")
 library(tidyverse)
 library(janitor)
 library(readxl)
@@ -97,8 +97,9 @@ samples_jan %>%
   filter(sample_type == "unknown" | concentration > 0)
 ```
 
-***Exercise***
-Carve the January data set in both directions. We want sample information (batch, sample, compound) and ion ratio data for only oxycodone measurements in unknown sample types with a concentration > 0. Provide a summary of the data.
+> Exercise 1
+>
+> Carve the January data set in both directions. We want sample information (batch, sample, compound) and ion ratio data for only oxycodone measurements in unknown sample types with a concentration > 0. Provide a summary of the data.
 
 ```{r carving_exercise, eval = FALSE}
 samples_jan_oxy_ir <- samples_jan %>%
@@ -149,9 +150,9 @@ summary(batch_jan_timestamps)
 ```
 You can see from the above example that these functions provide a great deal of flexibility in associating a row with arbitrary time scales. This allows the ability to group items by time and calculate summary data, which we will discuss in the next section.
 
-***Exercise***
-
-How long an average does it take to review each batch? Using the January batch data in "2017-01-06.xlsx", convert the review start timestamp and review complete timestamp fields into variables with a datetime type, then generate a new field the calculates the duration of the review in minutes. There are multiple approaches to this, but the `difftime()` function may be the most transparent - read the help on this function. The data will need to be collapsed by batch (which I do for you using the `distinct()` function) and display the min, max, median, and mean review times.
+> Exercise 2
+>
+> How long an average does it take to review each batch? Using the January batch data in "2017-01-06.xlsx", convert the review start timestamp and review complete timestamp fields into variables with a datetime type, then generate a new field the calculates the duration of the review in minutes. There are multiple approaches to this, but the `difftime()` function may be the most transparent - read the help on this function. The data will need to be collapsed by batch (which I do for you using the `distinct()` function) and display the min, max, median, and mean review times.
 
 ```{r mutate_exercise}
 batch_jan_reviews <- batch_jan %>%
@@ -201,9 +202,9 @@ batch_jan_timestamps %>%
 
 A relatively new package that provides nice grouping functionality based on times is called [tibbletime](https://github.com/business-science/tibbletime). This package provides similar functionality to the mutating and summarizing we did with times above but has a cleaner syntax for some operations and more functionality.
 
-***Exercise***
-
-From the January sample dataset, for samples with unknown sample type, what is the minimum, median, mean, and maximum concentration for each compound by batch? What is the mean of the within-batch means by compound?
+> Exercise 3
+>
+> From the January sample dataset, for samples with unknown sample type, what is the minimum, median, mean, and maximum concentration for each compound by batch? What is the mean of the within-batch means by compound?
 
 ```{r collapsing_exercise}
 sample_stats_jan <- samples_jan %>%
@@ -246,12 +247,12 @@ head(samples_jan_remessy)
 
 There are other useful tidyr functions such as `separate()` and `unite()` to split one column into multiple columns or combine multiple columns into one column, respectively. These are pretty straightforward to pick up so can be an independent exercise if you are intereted.
 
-***Exercise***
-
-The "2017-01-06-batch-messy.csv" file in the messy subdirectory of class_data is related to the "2017-01-06.xlsx" batch file you have worked with before. Unfortunately, it is not set up to have a single observation per row. There are two problems that need to be solved:
-1. Each parameter in a batch is represented with a distinct column per compound, but all compounds appear on the same row. Each compound represents a distinct observation, so these should appear on their own rows.
-2. There are 3 parameters per obsevation (compound) - calibration slope, intercept, and R^2. However these appear on different lines. All 3 paramters need to appear on the same row.
-After solving these problems, each row should contain a single compound with all three parameters appearing on that single row. Use `gather()` and `spread()` to tidy this data.
+> Exercise 4
+>
+> The "2017-01-06-batch-messy.csv" file in the messy subdirectory of class_data is related to the "2017-01-06.xlsx" batch file you have worked with before. Unfortunately, it is not set up to have a single observation per row. There are two problems that need to be solved:
+> 1. Each parameter in a batch is represented with a distinct column per compound, but all compounds appear on the same row. Each compound represents a distinct observation, so these should appear on their own rows.
+> 2. There are 3 parameters per obsevation (compound) - calibration slope, intercept, and R^2. However these appear on different lines. All 3 paramters need to appear on the same row.
+> After solving these problems, each row should contain a single compound with all three parameters appearing on that single row. Use `gather()` and `spread()` to tidy this data.
 ```{r tidyr_exercise}
 batch_jan_messy <- read_csv(here::here("class_data", "messy", ))
 batch_jan_gathered <- batch_jan_messy %>%
