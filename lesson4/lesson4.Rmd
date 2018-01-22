@@ -1,7 +1,9 @@
 ---
 title: 'Lesson 4: Data manipulation in the tidyverse'
 author: "Patrick Mathias"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -53,7 +55,7 @@ Reducing a data set to a subset of columns and/or rows are common operations, pa
 Let's take these for a spin using the data we started examining in the last lesson.
 
 Review the type of data we were working with:
-```{r}
+```{r, eval = FALSE}
 samples_jan <- read_csv(
   here::here("class_data", "2017-01-06.csv"),
   # note that we added the package name to the front of the function
@@ -68,31 +70,31 @@ str(samples_jan)
 ```
 
 Let's say we don't need the last two logical columns and want to get rid of them. We can use `select()` and provide a range of adjacent variables:
-```{r}
+```{r, eval = FALSE}
 samples_jan %>%
   select(batch_name:expected_concentration)
 ```
 
 Or we only care about the first 3 variables plus the concentration:
-```{r}
+```{r, eval = FALSE}
 samples_jan %>%
   select(batch_name:compound_name, concentration)
 ```
 
 Now let's carve the data set in the other direction. If we only care about the morphine data, we can use `filter()` to pick those rows based on a logical condition:
-```{r}
+```{r, eval = FALSE}
 samples_jan %>%
   filter(compound_name == "morphine")
 ```
 
 Or maybe we want to examine only the unknown samples with a concentration greater than 0:
-```{r}
+```{r, eval = FALSE}
 samples_jan %>%
   filter(sample_type == "unknown", concentration > 0)
 ```
 
 Note that a comma in the filter state implies a logical AND - condition A and condition B. You could include an OR condition as well using the pipe character | - condition A | condition B.
-```{r}
+```{r, eval = FALSE}
 samples_jan %>%
   filter(sample_type == "unknown" | concentration > 0)
 ```
@@ -111,7 +113,7 @@ summary()
 ### Expanding your data set
 
 Another common data manipulation task is adding or replacing columns that are derived from data in other columns. The `mutate()` function provides a quick and clean way to add additional variables that can include calculations, evaluating some logic, string manipulation, etc. You provide the function with the following argument(s): name of the new column = value. For example, if we continue with our January sample data set that includes concentrations and expected concentrations for standards, we can calculate the ratio of concentration to expected:
-```{r}
+```{r, eval = FALSE}
 samples_jan %>%
   filter(sample_type == "standard", expected_concentration > 0) %>%
   mutate(conc_ratio = concentration/expected_concentration) %>%
@@ -119,7 +121,7 @@ samples_jan %>%
 ```
 
 Notice that we got around the issue of dividing by 0 by filtering for expected concentrations above 0. However, you may want to include these yet don't want R to throw an error. How can you deal with edge cases like this? `mutate()` borrows from SQL (Structured Query Language) and offers a `case_when` syntax for dealing with different cases. The [syntax](http://dplyr.tidyverse.org/reference/case_when.html) takes some getting used to but this can be helpful when you want to classify or reclassify values based on some criteria. Let's do the same calculation but spell out the case when expected_concentration is 0 and add a small number to numerator and denominator in that case:
-```{r}
+```{r, eval = FALSE}
 samples_jan %>%
   filter(sample_type == "standard") %>%
   mutate(
@@ -132,7 +134,7 @@ samples_jan %>%
 ```
 
 Another common operation manipulation is wrangling dates. The [lubridate package](http://lubridate.tidyverse.org/) offers a helpful toolset to quickly parse dates and times. The bread and butter parsing functions are named intuitively based on the order of year, month, date, and time elements. For example, `mdy("1/20/2018")` will convert the string into a date that R can use. There are other useful functions like `month()` and `wday()` that pull out a single element of the date to use for grouping operations, for example. Let's work with a different January data set that has batch data and parse the collection dates in a variety of ways:
-```{r}
+```{r, eval = FALSE}
 batch_jan <- read_excel(here::here("class_data", "2017-01-06.xlsx")) %>%
   clean_names()
 # note: here is also a function in lubridate so you must specify the package explicitly before calling the function
@@ -154,7 +156,7 @@ You can see from the above example that these functions provide a great deal of 
 >
 > How long an average does it take to review each batch? Using the January batch data in "2017-01-06.xlsx", convert the review start timestamp and review complete timestamp fields into variables with a datetime type, then generate a new field the calculates the duration of the review in minutes. There are multiple approaches to this, but the `difftime()` function may be the most transparent - read the help on this function. The data will need to be collapsed by batch (which I do for you using the `distinct()` function) and display the min, max, median, and mean review times.
 
-```{r mutate_exercise}
+```{r mutate_exercise, eval = FALSE}
 batch_jan_reviews <- batch_jan %>%
   mutate(review_start_timestamp = ,
          review_complete_timestamp = ,
@@ -171,7 +173,7 @@ max()
 ### Collapse (summarize) your data set
 
 Carving and expanding your data are helpful but they are relatively simple. Often you will need to do more sophisticated analyses such as calculating statistical measures for multiple subsets of data. Grouping data by a variable using the `group_by()` function is critical tool provided by dplyr and naturally couples with its summary function `summarize()`. By grouping data you can apply a function within individual groups and calculate things like mean or standard deviation. As an example, we may want to look at our January sample data set and look at some statistics for the ion ratios by compound for the unknown sample type with non-zero concentation.
-```{r}
+```{r, eval = FALSE}
 samples_jan %>%
   filter(sample_type == "unknown", concentration > 0) %>%
   group_by(compound_name) %>%
@@ -181,7 +183,7 @@ samples_jan %>%
 ```
 
 We may want to look at this on the batch level, which only requires adding another variable to the `group_by()` function.
-```{r}
+```{r, eval = FALSE}
 samples_jan %>%
   filter(sample_type == "unknown", concentration > 0) %>%
   group_by(batch_name, compound_name) %>%
@@ -191,7 +193,7 @@ samples_jan %>%
 ```
 
 Let's revisit our batch dataset with timestamps that we have parsed by time period (eg. month or week) and look at correlation coefficient statistics by instrument, compound, and week:
-```{r}
+```{r, eval = FALSE}
 batch_jan_timestamps %>%
   group_by(instrument_name, compound_name, collect_week) %>%
   summarize(median_cor = median(calibration_r_2),
@@ -206,7 +208,7 @@ A relatively new package that provides nice grouping functionality based on time
 >
 > From the January sample dataset, for samples with unknown sample type, what is the minimum, median, mean, and maximum concentration for each compound by batch? What is the mean of the within-batch means by compound?
 
-```{r collapsing_exercise}
+```{r collapsing_exercise, eval = FALSE}
 sample_stats_jan <- samples_jan %>%
   filter() %>%
   group_by() %>%
@@ -224,13 +226,13 @@ sample_means_jan
 ## Shaping and tidying data with tidyr
 
 Data in the real world are not always tidy. Consider a variant of the January sample data we've reviewed previously in the "2017-01-06-messy.csv" file.
-```{r}
+```{r, eval = FALSE}
 samples_jan_messy <- read_csv(here::here("class_data", "messy", "2017-01-06-sample-messy.csv"))
 head(samples_jan_messy)
 ```
 
 This certainly isn't impossible to work with, but there are some challenges with not having separate observations on each row. Arguably the biggest challenges revolve around built-in tidyverse functionality, with grouping and plotting as the most prominent issues you might encounter. Luckily the tidyr package can help reshape your data. The `gather()` function can take a list of columns as arguments, the key argument to name the variable you are gathering, and the value argument to name the new column with the values you extract from the old column.
-```{r}
+```{r, eval = FALSE}
 samples_jan_tidy <- samples_jan_messy %>%
   gather("morphine", "hydromorphone", "oxymorphone", "codeine", "hydrocodone", "oxycodone",
          key = "compound_name", value = "concentration")
@@ -239,7 +241,7 @@ head(samples_jan_tidy)
 The syntax takes some getting used to, so it's important to remember that you are taking column names and shoving those into rows, so you have name that variable (the key), and you are also putting values across multiple columns into one column, whose variable also needs to be named (the value).
 
 Sometimes other people want your data and they prefer non-tidy data. Sometimes you need messy data for quick visualization purposes. Or sometimes you have data that is actually non-tidy not because multiple observations are on one row, but because a single observation is split up between rows when it could be on one row. It is not too difficult to perform the opposite operation of `gather()` using the `spread()` function. You specify the key, which is the variable than needs to be used to generate multiple new columns, as well as the value, which takes the specifies the variable that will need to populate those new columns. Let's do the opposite on the data set we just gathered:
-```{r}
+```{r, eval = FALSE}
 samples_jan_remessy <- samples_jan_tidy %>%
   spread(key = "compound_name", value = "concentration")
 head(samples_jan_remessy)
@@ -253,7 +255,8 @@ There are other useful tidyr functions such as `separate()` and `unite()` to spl
 > 1. Each parameter in a batch is represented with a distinct column per compound, but all compounds appear on the same row. Each compound represents a distinct observation, so these should appear on their own rows.
 > 2. There are 3 parameters per obsevation (compound) - calibration slope, intercept, and R^2. However these appear on different lines. All 3 paramters need to appear on the same row.
 > After solving these problems, each row should contain a single compound with all three parameters appearing on that single row. Use `gather()` and `spread()` to tidy this data.
-```{r tidyr_exercise}
+
+```{r tidyr_exercise, eval = FALSE}
 batch_jan_messy <- read_csv(here::here("class_data", "messy", ))
 batch_jan_gathered <- batch_jan_messy %>%
   gather()
