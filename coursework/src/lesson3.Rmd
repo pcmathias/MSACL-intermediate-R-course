@@ -1,7 +1,9 @@
 ---
 title: 'Lesson 3: Reading files - beyond the basics'
 author: "Patrick Mathias"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -39,17 +41,18 @@ For the curious, additional information about the history of of stringsAsFactors
 > 1. What does the data look like? (Recall the `summary()` function to view column types and characteristics about the data.)
 
 ```{r base_load, eval = FALSE}
-base_load <- read.csv()
-
-
+base_load <- read.csv(here::here("class_data", "2017-01-06.csv"))
+# str(base_load)
+summary(base_load)
 ```
 
 > Repeat the previous steps starting with #2, but include the argument `stringsAsFactors = FALSE` when you read in the data.
 
 ```{r base_load_nofactors, eval = FALSE}
-base_load_nofactors <- read.csv( , stringsAsFactors = )
-
-
+base_load_nofactors <- read.csv(here::here("class_data", "2017-01-06.csv"),
+                                stringsAsFactors = FALSE)
+# str(base_load_nofactors)
+summary(base_load_nofactors)
 ```
 
 For this data set, which fields should be strings and which should be factors?
@@ -108,19 +111,19 @@ readr_load <- read_csv()
 Now compare the time required to run the base `read.csv()` function with the readr `read_csv()` function using `system.time()`.
 
 **Time to read with base:** 
-```{r}
-system.time(base_load <- read.csv(here("class_data", "2017-01-06.csv")))
+```{r, eval = FALSE}
+system.time(base_load <- read.csv(here::here("class_data", "2017-01-06.csv")))
 ```
 
 **Time to read with readr:** 
-```{r}
-system.time(readr_load <- read_csv(here("class_data", "2017-01-06.csv")))
+```{r, eval = FALSE}
+system.time(readr_load <- read_csv(here::here("class_data", "2017-01-06.csv")))
 ```
 
 Finally, let's follow some best practices and explicitly define columns with the `col_types` argument. We want to explicitly define compoundName and sampleType as factors. Note that the `col_factor()` expects a definition of the factor levels but you can get around this by supplying a `NULL`. Then run a summary to review the data
-```{r col_types}
+```{r col_types, eval = FALSE}
 readr_load_factors <- read_csv(
-  here("class_data", "2017-01-06.csv"),
+  here::here("class_data", "2017-01-06.csv"),
   col_types = cols(
     compoundName = col_factor(NULL),
     sampleType = col_factor(NULL)
@@ -161,8 +164,9 @@ To close out the discussion on reading files, there is one more useful package t
 Let's take these functions for a spin using our data set. We are going to use the development version of the package because there is new, additional functionality. I will chain the commands together with pipes (which we'll discuss in more detail in the next lesson).
 
 First let's review the first few lines of data after cleaning the columns names:
-```{r janitor}
-devtools::install_github("sfirke/janitor") # the development version of janitor handles cleaning names better than the current CRAN version
+```{r janitor, eval = FALSE}
+devtools::install_github("sfirke/janitor") 
+# the development version of janitor handles cleaning names better than the current CRAN version
 library(janitor)
 readr_load_cleaned <- readr_load %>%
   clean_names()
@@ -170,7 +174,7 @@ head(readr_load_cleaned)
 ```
 
 Now we'll do a quick tabulation to count the number of rows:
-```{r tabyl}
+```{r tabyl, eval = FALSE}
 readr_load_cleaned %>% tabyl(compound_name)
 ```
 
