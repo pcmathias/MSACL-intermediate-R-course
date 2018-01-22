@@ -1,7 +1,9 @@
 ---
 title: 'Lesson 1: Adopting principles of reproducible research'
 author: "Patrick Mathias"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 bibliography: lesson1_references.bib
 ---
 
@@ -69,7 +71,7 @@ Now that we're thinking about creating directories for projects and directory st
 > 2. Create a "Projects" directory
 > 3. Set your directory to the "Projects" directory
 
-```{r}
+```{r, eval = FALSE}
 dir.create("Projects")
 setwd("/Projects")
 ```
@@ -100,6 +102,7 @@ One solution to help avoid these issues in maintaining the separation of church 
 > Exercise 3
 >
 > Let's go ahead and create a minimal project structure:
+
 ```{r, eval = FALSE}
 dir.create("data") # raw data
 dir.create("output") # output from analysis
@@ -182,6 +185,7 @@ Fear not, there is a package for that! Let's install the [here package](https://
 > 1. Install the package
 > 2. Load the package. What does the output tell you?
 > 3. Run the command `here()`. What does the output tell you?
+
 ```{r, eval = FALSE}
 install.packages("here")
 library(here)
@@ -225,7 +229,10 @@ library(checkpoint)
 
 # below is sample code but we're not quite ready to run it (yet)
 # library(checkpoint)
-# checkpoint("2018-01-01", checkpointLocation = tempdir()) # checkpoint function takes the date of the package you want as the primary argument and a location for the directory to load the packages into
+# checkpoint("2018-01-01", checkpointLocation = tempdir()) 
+# checkpoint function takes the date of the package you want as the primary argument 
+# and a location for the directory to load the packages into
+#
 # library(dplyr)
 # library(lubridate)
 ```
