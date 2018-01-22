@@ -15,7 +15,6 @@ library(tidyverse)
 library(modelr)
 library(magrittr)
 library(lubridate)
-library(here)
 ```
 
 # Data Modelling

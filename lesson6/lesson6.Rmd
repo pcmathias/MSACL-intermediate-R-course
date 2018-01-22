@@ -21,7 +21,7 @@ Default **R** comes with several basic plotting commands -- *plot* to draw an X,
 
 The first major drawback to using these plots is that each requires learning a slightly different syntax to decorate the graph. For example, here are three plots basd on the January sample data, showing the ion ratios for all compounds and samples which exhibit and quant and qual peak. The first is a simple series plot, changing the default plot color to blue.  
 ```{r plot_color_syntax}
-jan.s <- read_csv(here("class_data","2017-01-06.csv"))
+jan.s <- read_csv(here::here("class_data","2017-01-06.csv"))
 jan.s$idx <- c(1:nrow(jan.s))
 hasIonRatio <- jan.s$ionRatio > 0
 plot(jan.s$ionRatio[which(hasIonRatio)],col='blue')
@@ -138,8 +138,8 @@ g <- jan.s %>%
 > There is a longstanding community opinion that ggplot "takes longer" than the other two plotting mechanisms, but how much longer is it really? Is the time savings from **lattice** worth learning that syntax?
 
 ```{r ex2, message=FALSE}
-oneYearSamples <- list.files(here("class_data"),pattern="csv$") %>%
-                  file.path(here("class_data"), .) %>%
+oneYearSamples <- list.files(here::here("class_data"),pattern="csv$") %>%
+                  file.path(here::here("class_data"), .) %>%
                   map_dfr(read_csv)
 oneYearSamples$idx <- 1:nrow(oneYearSamples)
 coreR <- function(oneYearSamples) {
