@@ -10,7 +10,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(checkpoint)
-checkpoint("2018-01-20")
+# checkpoint("2018-01-20")
 library(tidyverse)
 library(magrittr)
 library(xml2)
