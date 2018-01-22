@@ -30,7 +30,7 @@ oneYearBatches <- list.files(here::here("class_data"), pattern = "xlsx$") %>%
   type_convert()
 
 ggplot(oneYearBatches, aes(x = calibrationR2, color = compoundName, fill = compoundName)) +
-  geom_histogram(bins=30)
+  geom_histogram(bins = 30)
 ggplot(oneYearBatches, aes(x = batchCollectedTimestamp, y = calibrationR2, color = compoundName)) +
   geom_line()
 ```

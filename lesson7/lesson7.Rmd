@@ -19,7 +19,7 @@ library(lubridate)
 library(here)
 ```
 
-## Data Modelling
+# Data Modelling
 
 After enough measurements have been made to consider your data a dataset, the next step is exploring that dataset to find trends and outliers. Most often, this includes a graph as well as a computational model which fits the data to a trendline. Modelling reduces the complexity of individual observations, which is good. However, it can only operate within the limits of the model. The linear model shown below doesn't fit as well as the quadratic model, but deciding whether the quadratic model makes physical sense is not something the model can demonstrate.
 ```{r drawing_two_models, eval = FALSE}
@@ -95,7 +95,7 @@ newraw <- raw %>%
 newraw$instrument <- c(rep("Coarse", 12), rep("Fine", 40))
 newraw$date <- c("07-08-2017", "10-08-2017") %>%
   rep(times = 26) %>%
-  dmy()
+  dmy() 
 # this could also have been done on a single line without pipes: 
 # newraw$date <- dmy( rep(c("07-08-2017","10-08-2017"), times=26) )
 ```
