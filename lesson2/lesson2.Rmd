@@ -1,7 +1,9 @@
 ---
 title: 'Lesson 2: Getting cozy with R Markdown'
 author: "Patrick Mathias"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}

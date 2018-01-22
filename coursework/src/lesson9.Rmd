@@ -3,7 +3,6 @@ title: 'Lesson 9: Scaling with purrr to loop through a vector'
 author: "Randall Julian, Adam Zabell"
 date: "1/3/2018"
 output:
-  pdf_document: default
   html_document: default
   word_document: default
 ---
@@ -20,7 +19,7 @@ Reducing duplication in your typed code makes it easier to see the purpose of th
 
 ## Looping with user functions
 Every command in **R** is consistent with the function syntax *command(inputA,inputB,...)* and writing your own function is no different. Here, we create two functions that will return a median value across every column, or across every row, of a data.frame.  
-```{r function_example, eval = FALSE}
+```{r function_example}
 tableOfNumbers <- tibble(
   a = c(53, 1, 51, 23, 28, 12, 87, 0, 47),
   b = floor(100 * runif(9)),
@@ -50,7 +49,7 @@ Both of these functions use a for-loop to cycle through the `byColumn` or `byRow
 
 ## Looping with *for* and *while*
 These loops are explicitly sequential, showing the input and output of each command in exactly the same way as the primary code you work with. The *for* loop follows a three component format: create the output vector, define the looping sequence, and perform the body of work. In our example functions, that body is two lines long, but it could be as complex as necessary to produce the intended output. When working with long loops (100s to 1000s of iterations), the inefficiency of growing the output vector at each iteration will slow down the code. Instead, the output should be initialized as an empty vector of the expected length. Modifying our `medianByColumn` to resolve this inefficiency:  
-```{r for_loop, eval = FALSE}
+```{r for_loop}
 medianByColumn <- function(tb) {
   recordOfValues <- vector("double", ncol(tb))
   for (i in 1:ncol(tb)) {
@@ -64,14 +63,14 @@ medianByColumn <- function(tb) {
 > Exercise 1: Making a two-variable function that 'switches'  
 > Create a function `medianBy( )` that accepts both the data.frame and a logical value to indicate whether the result should be by row or column.
 
-```{r ex1, eval = FALSE}
+```{r ex1}
 medianBy <- function(tb, byRow=FALSE) {
 
 }
 ```
 
 The *while* loop is used when the work being performed should continue until a logical condition occurs. The obvious risk is that the condition never occurs, prompting the need for a failsafe. They are rarely used, but here are two examples.  
-```{r while_loop, eval = FALSE}
+```{r while_loop}
 numberOfFlips <- 0
 numberOfHeads <- 0
 while (numberOfHeads < 3) { # risky
@@ -95,7 +94,7 @@ while (numberOfTails < 3 | countedFlips == 1000) { # safer
 These loops are explicitly vectored, performing the action on every element in that vector. The **purrr** package has five functions which return a vector for each type of output: list, logical, integer, double, and character. It comes with a significant increase in speed and further improved readability, but requires a different seeming workflow. Most notably, for-loops often have bookkeeping variables for the intermediate steps in the body of work, while `map` functions generate the output vector directly and are designed to work well with pipes.
 
 The *map* structure builds on the idea that a solution to "how do I solve for a single set of data" is simpler to visualize. After breaking the problem down to small steps on one set, enclosing those steps in the function will iterate on each column of data in the data.frame to report the result. Revisiting our example functions to use *map_dbl* which will return a real (double precision) number:
-```{r map_function, eval = FALSE}
+```{r map_function}
 medianByColumn <- function(tb) {
   recordOfValues <- map_dbl(tb, median) %>% unname()
   return(recordOfValues)
@@ -109,7 +108,7 @@ medianByRow <- function(tb) {
 
 > Exercise 2: Improve the `medianBy( )` function to use map looping.  
 
-```{r ex2, eval = FALSE}
+```{r ex2}
 medianBy <- function(tb, byRow=FALSE) {
 
 }
@@ -117,7 +116,7 @@ medianBy <- function(tb, byRow=FALSE) {
 
 # Nested Looping 
 Having built one loop, a second (or more) iteration may still be necessary to do the work. This is usually done for simple counting variables like `i` and `j` as shown below. 
-```{r nested_for, eval = FALSE}
+```{r nested_for}
 vectorList <- vector("list", 10)
 for (i in 1:10) {
   oneVector <- vector("double", 20)
@@ -132,7 +131,7 @@ nestingTibble <- vectorList %>%
 ```
 
 It can also be done using the map functions. In this example, *map_dfc* returns a data.frame created by column-binding each entry.
-```{r nested_map, eval = FALSE}
+```{r nested_map}
 betterNestingTibble <- c(1:10) %>% 
   map_dfc( ~ tibble(x = . * 1:20) ) %>% 
   set_names(map_chr(1:10, paste0, "column"))
