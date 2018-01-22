@@ -17,7 +17,8 @@ library(here)
 ```
 
 # Plotting Data With Default Graphics
-Default **R** comes with several basic plotting commands -- *plot* to draw an X,Y graph, *points* to add X,Y points to the current graph, *barplot* to draw vertical or horizontal bars, *boxplot* to draw box-and-whisker plots, *hist* to build and draw a histogram, and many other plot types or plot-specific additions to plots.
+
+Default R comes with several basic plotting commands -- `plot` to draw an X,Y graph, `points` to add X,Y points to the current graph, `barplot` to draw vertical or horizontal bars, `boxplot` to draw box-and-whisker plots, `hist` to build and draw a histogram, and many other plot types or plot-specific additions to plots.
 
 The first major drawback to using these plots is that each requires learning a slightly different syntax to decorate the graph. For example, here are three plots basd on the January sample data, showing the ion ratios for all compounds and samples which exhibit and quant and qual peak. The first is a simple series plot, changing the default plot color to blue.  
 ```{r plot_color_syntax}
@@ -40,14 +41,18 @@ hist(jan.s$ionRatio[which(hasIonRatio)],border='blue',main='Histogram')
 The second drawback is that these plots, while drawn quickly, require detailed sort and select mechanisms in order to display complex data on a single graph. Plotting a matrix of graphs (as shown below) is even more difficult and you may spend more time troubleshooting the graph than actually analyzing the data. Here is a simple example which colors the series data by compound.  
 ```{r plot_by_compound}
 compounds <- unique(jan.s$compoundName)
-for(i in 1:length(compounds)) {
-  if(i==1) {
-    plot(jan.s$ionRatio[hasIonRatio & jan.s$compoundName==compounds[i]],
-         col=i,
-         main="color by compound")
+for (i in 1:length(compounds)) {
+  if (i == 1) {
+    plot(
+      jan.s$ionRatio[hasIonRatio & jan.s$compoundName == compounds[i]],
+      col = i,
+      main = "color by compound"
+    )
   } else {
-    points(jan.s$ionRatio[hasIonRatio & jan.s$compoundName==compounds[i]],
-           col=i)
+    points(
+      jan.s$ionRatio[hasIonRatio & jan.s$compoundName == compounds[i]],
+      col = i
+    )
   }
 }
 ```
@@ -84,8 +89,8 @@ Sometimes there is a need to optimize code for timing as well as readability, an
 system.time(print("Anything seen as a single function can be tested in this way"))
 
 anyUserFunction <- function(someText) {
-  hasNumber <- grepl("[:digit:]",someText)
-  if(hasNumber) {
+  hasNumber <- grepl("[:digit:]", someText)
+  if (hasNumber) {
     editedText <- "including their pros and cons"
     unusedVariable <- rnorm(1e6)
   } else {
@@ -109,8 +114,8 @@ Our first two examples show the ggplot version of the per component plots previo
 ```{r gg_plotting_series}
 g <- jan.s %>%
   filter(ionRatio > 0) %>%
-  ggplot(aes(x=idx,y=ionRatio,colour=sampleType))
-g + geom_point() + facet_wrap(~compoundName) + scale_x_continuous(labels=NULL)
+  ggplot(aes(x = idx, y = ionRatio, colour = sampleType))
+g + geom_point() + facet_wrap(~compoundName) + scale_x_continuous(labels = NULL)
 g + geom_smooth() + facet_wrap(~compoundName)
 ```
 
@@ -129,43 +134,45 @@ We could easily spend the whole class session on this package, but the above plo
 ```{r ex1}
 g <- jan.s %>%
   filter(ionRatio > 0) %>%
-  ggplot(aes(x=ionRatio,colour=sampleType,fill=sampleType))
-#g + geom_histogram(position='dodge', bins= ) + facet_wrap(~compoundName)
-#g + geom_histogram(aes(y=..density..), bins= ) + facet_grid(sampleType~compoundName)
+  ggplot(aes(x = ionRatio, colour = sampleType, fill = sampleType))
+# g + geom_histogram(position='dodge', bins= ) + facet_wrap(~compoundName)
+# g + geom_histogram(aes(y=..density..), bins= ) + facet_grid(sampleType~compoundName)
 ```
 
 > Exercise 2: Plot timing  
 > There is a longstanding community opinion that ggplot "takes longer" than the other two plotting mechanisms, but how much longer is it really? Is the time savings from **lattice** worth learning that syntax?
 
 ```{r ex2, message=FALSE}
-oneYearSamples <- list.files(here::here("class_data"),pattern="csv$") %>%
-                  file.path(here::here("class_data"), .) %>%
-                  map_dfr(read_csv)
+oneYearSamples <- list.files(here::here("class_data"), pattern = "csv$") %>%
+  file.path(here::here("class_data"), .) %>%
+  map_dfr(read_csv)
 oneYearSamples$idx <- 1:nrow(oneYearSamples)
 coreR <- function(oneYearSamples) {
   sampleTypes <- unique(oneYearSamples$sampleType)
-  for(i in 4:1) {
-    oneType <- which(oneYearSamples$sampleType==sampleTypes[i])
-    if(i==4) {
-      plot(oneYearSamples$idx[oneType],oneYearSamples$concentration[oneType],col=i)
+  for (i in 4:1) {
+    oneType <- which(oneYearSamples$sampleType == sampleTypes[i])
+    if (i == 4) {
+      plot(oneYearSamples$idx[oneType], oneYearSamples$concentration[oneType], col = i)
     } else {
-      points(oneYearSamples$idx[oneType],oneYearSamples$concentration[oneType],col=i)
+      points(oneYearSamples$idx[oneType], oneYearSamples$concentration[oneType], col = i)
     }
   }
 }
-g <- ggplot(oneYearSamples,aes(x=idx,y=concentration,color=sampleType)) + geom_point()
-l <- xyplot(concentration ~ idx , 
-       data=oneYearSamples, 
-       groups=sampleType, 
-       auto.key=TRUE)
-#system.time(coreR(oneYearSamples))
-#dev.off()
-#system.time(print(g))
-#dev.off()
-#system.time(print(l))
+g <- ggplot(oneYearSamples, aes(x = idx, y = concentration, color = sampleType)) + geom_point()
+l <- xyplot(
+  concentration ~ idx,
+  data = oneYearSamples,
+  groups = sampleType,
+  auto.key = TRUE
+)
+# system.time(coreR(oneYearSamples))
+# dev.off()
+# system.time(print(g))
+# dev.off()
+# system.time(print(l))
 ```
 
-# Summary
+## Summary
 * [ggplot2 cheatsheat](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
 * [lattice overview](https://www.statmethods.net/advgraphs/trellis.html)
 * [download a PDF comparison of both packages](http://www.londonr.org/download/?id=69)
