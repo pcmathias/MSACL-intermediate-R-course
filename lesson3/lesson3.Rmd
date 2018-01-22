@@ -31,7 +31,8 @@ To be safe, the best practice is arguably to explicitly define column types when
 
 For the curious, additional information about the history of of stringsAsFactors can be found [here](https://simplystatistics.org/2015/07/24/stringsasfactors-an-unauthorized-biography/).
 
-> Exercise
+> Exercise 1
+> 
 > Let's run through the base reading function with a csv.
 > 1. Use the base `read.csv()` function to read the "2017-01-06.csv" file into a data frame. Recall how to use the `here()` function - it is using the "coursework" directory as the point of reference
 > 1. What is the internal structure of the object? (Recall the `str()` command to quickly view the structure.)
@@ -77,6 +78,7 @@ Base R functions get the job done, but they have some weaknesses:
 
 One package in the tidyverse family meant to address these issues is [readr](http://readr.tidyverse.org/articles/readr.html). This package provides functions similar to the base R file reading functions, with very similar function names: `read_csv()` (instead of `read.csv()`) or `read_delim()` for example. Tab-delimited files can be read in with `read_tsv()`. These functions are ~10x faster at reading in files than the base R functions and do not automatically convert strings to factors. Readr functions also provide a helpful syntax for explicitly defining column types:
 ```{r, eval = FALSE}
+# purely a dummy example, not executable!
 imaginary_data_frame <- read_csv(
   "imaginary_file.csv",
   col_types = cols(
@@ -90,7 +92,8 @@ Another advantage of these functions is that they actually explicitly tell you h
 
 Readr also offers equivalent write functions such as `write_csv()` and `write_tsv()`. There is a variant of `write_csv()` specifically for csv files intended to be read with Excel: `write_excel_csv()`. These functions do not write row names by default.
 
-> Exercise
+> Exercise 2
+>
 > Now let's run through using the readr function for a csv:
 > 1. Use the `read_csv()` function to read the "2017-01-06.csv" file into a data frame.
 > 1. What is the internal structure of the object? (Recall the `str()` command to quickly view the structure.)
@@ -133,7 +136,8 @@ You may have broken up with Excel, but unfortunately many of your colleagues hav
 
 If you are dealing with Excel data that is not a traditional tabular format, the [tidyxl package](https://cran.r-project.org/web/packages/tidyxl/vignettes/tidyxl.html) is useful to be aware of. We will not cover it in this course but it is worth reading up on if you ever have to analyze a pivot table or some other product of an Excel analysis.
 
-> Exercise
+> Exercise 3
+>
 > You might be able to guess what comes next: we'll read in an Excel file.
 > 1. Use the `read_excel()` function to read the "2017-01-06.xlsx" file into a data frame
 > 1. View a summary of the imported data
