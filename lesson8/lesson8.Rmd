@@ -3,8 +3,8 @@ title: 'Lesson 8: Beyond the csv -- parsing xml and json files'
 author: "Randall Julian, Adam Zabell"
 date: "1/2/2018"
 output:
-  word_document: default
   html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -29,11 +29,15 @@ cd <- read_xml("https://www.w3schools.com/xml/cd_catalog.xml")
 cd.list <- as_list(cd)
 cd.rows <- length(cd.list)
 cd.names <- names(cd.list[[1]])
-cd.df <- data.frame(matrix(unlist(cd.list), 
-                           nrow=cd.rows, 
-                           byrow=TRUE, 
-                           dimnames=list(NULL,cd.names)),
-                    stringsAsFactors=FALSE)
+cd.df <- data.frame(
+  matrix(
+    unlist(cd.list),
+    nrow = cd.rows,
+    byrow = TRUE,
+    dimnames = list(NULL, cd.names)
+  ),
+  stringsAsFactors = FALSE
+)
 ```
 
 ## The javascript object notation (json)
@@ -43,11 +47,15 @@ Reading a json file requires the **jsonlite** package (or one like it). Consider
 ```{r json_example}
 colr <- fromJSON("https://raw.githubusercontent.com/corysimmons/colors.json/master/colors.json")
 colr.rows <- length(colr)
-colr.df <- data.frame(matrix(unlist(colr), 
-                             nrow=colr.rows, 
-                             byrow=TRUE,
-                             dimnames=list(NULL,c("R","G","B","T"))),
-                      stringsAsFactors=FALSE)
+colr.df <- data.frame(
+  matrix(
+    unlist(colr),
+    nrow = colr.rows,
+    byrow = TRUE,
+    dimnames = list(NULL, c("R", "G", "B", "T"))
+  ),
+  stringsAsFactors = FALSE
+)
 colr.df$name <- names(colr)
 ```
 
@@ -61,11 +69,10 @@ cd.df$PRICE %<>% map_dbl(as.numeric) # also invokes a from-and-back-into pipe no
 > Will reading the xml into a tibble (instead of a data.frame) solve this number recognition? First, try it. Then, even if it did work, construct a 'standard pipe' mechanism using `%>%` to change both *PRICE* and *YEAR* to double precision numbers.
 
 ```{r ex1}
-#cd.tibble <- as_tibble( )
-
+# cd.tibble <- as_tibble( )
 ```
 
-There are many more problems that could happen, ultimately because each entry in the xml or json file is an independent object. There may be an element not present in every entry (e.g. not including a price for a CD), or multiple elements within an element (e.g. two artists for a CD), or the elements may not be retrieved in the same order each time (e.g. all Bob Dylan albums return the artist before the title). All are disasterous; the conversion examples shown here using *matrix* will now be wildly offset.
+There are many more problems that could happen, ultimately because each entry in the xml or json file is an independent object. There may be an element not present in every entry (e.g. not including a price for a CD), or multiple elements within an element (e.g. two artists for a CD), or the elements may not be retrieved in the same order each time (e.g. all Bob Dylan albums return the artist before the title). All are disasterous; the conversion examples shown here using `matrix` will now be wildly offset.
 
 Most problems should be solved on the query-side of the equation, to confirm the database query was built correctly and that the database is populated as expected. But, since "two artists for one CD" is at least possible and might even be common, the retrieved data could simply be less data.frame friendly than you would like. Unless you're very sure of what the returned data must look like, some basic checks now will avoid exhausting effort later.  
 
@@ -73,31 +80,34 @@ The following code snippet, for example, will go through each list element of `c
 ```{r troubleshooting}
 numberOfElements <- c()
 namesForElements <- c()
-for(l in cd.list) {
-  numberOfElements <- c(numberOfElements,length(l))
-  namesForElements <- c(namesForElements,paste(names(l),collapse=":"))
-  for(e in l) {
+for (l in cd.list) {
+  numberOfElements <- c(numberOfElements, length(l))
+  namesForElements <- c(namesForElements, paste(names(l), collapse = ":"))
+  for (e in l) {
     valuesInElement <- length(e)
-    if(valuesInElement!=1) {break}
+    if (valuesInElement != 1) {
+      break
+    }
   }
-  if(valuesInElement!=1) {break}
+  if (valuesInElement != 1) {
+    break
+  }
 }
-paste(unique(numberOfElements),unique(namesForElements),sep=" | ")
+paste(unique(numberOfElements), unique(namesForElements), sep = " | ")
 ```
 
 > Exercise 2: Fixing a known misordered data.frame  
 > Add this next line to `cd.list` and rerun the troubleshooting code section. What changed in the output from the *paste* command? How would you fix the list so the columns are correct while still using the *matrix* method described in Exercise 1?
 
 ```{r ex2}
-cd.list[[27]] <- list(ARTIST=list("Benny Andersson",
-                                  "Tim Rice",
-                                  "Bjorn Ulvaeus"),
-                      TITLE=list("Chess"),
-                      COUNTRY=list("Sweden"),
-                      COMPANY=list("RCA Victor"),
-                      PRICE=list("19.95"),
-                      YEAR=list("1984"))
-
+cd.list[[27]] <- list(
+  ARTIST = list("Benny Andersson", "Tim Rice", "Bjorn Ulvaeus"),
+  TITLE = list("Chess"),
+  COUNTRY = list("Sweden"),
+  COMPANY = list("RCA Victor"),
+  PRICE = list("19.95"),
+  YEAR = list("1984")
+)
 ```
 
 > Exercise 3: Preventing a misordered data.frame  
@@ -105,10 +115,9 @@ cd.list[[27]] <- list(ARTIST=list("Benny Andersson",
 
 ```{r ex3}
 cd <- read_xml("https://www.w3schools.com/xml/cd_catalog.xml")
-
 ```
 
-# Summary
+## Summary
 * **xml2** for read/writing xml files
 * **jsonlite** for read/writing json files
 * troubleshoot the returned query result to catch
