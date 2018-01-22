@@ -40,7 +40,7 @@ as.data.frame(february[1:5,])
 twoMonths <- rbind(january,february)
 ```
 
-Notice the continuation from the last rows of `jaunary` to the first rows of `february` and that the number of rows in the combined data.frame `twoMonths` is the sum of the first two months of sample-level data.  
+Notice the continuation from the last rows of `january` to the first rows of `february` and that the number of rows in the combined data.frame `twoMonths` is the sum of the first two months of sample-level data.  
 ```{r jan_plus_feb}
 twoMonths[187195:187204,]
 c(nrow(january), nrow(february), nrow(twoMonths))
