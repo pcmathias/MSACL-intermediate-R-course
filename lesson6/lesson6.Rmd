@@ -22,7 +22,7 @@ Default R comes with several basic plotting commands -- `plot` to draw an X,Y gr
 
 The first major drawback to using these plots is that each requires learning a slightly different syntax to decorate the graph. For example, here are three plots basd on the January sample data, showing the ion ratios for all compounds and samples which exhibit and quant and qual peak. The first is a simple series plot, changing the default plot color to blue.  
 ```{r plot_color_syntax}
-jan.s <- read_csv(here::here("class_data","2017-01-06.csv"))
+jan.s <- read_csv(here::here("class_data", "2017-01-06.csv"))
 jan.s$idx <- c(1:nrow(jan.s))
 hasIonRatio <- jan.s$ionRatio > 0
 plot(jan.s$ionRatio[which(hasIonRatio)],col='blue')

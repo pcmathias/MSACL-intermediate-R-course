@@ -3,8 +3,8 @@ title: 'Lesson 7: Modelling the data'
 author: "Randall Julian, Adam Zabell"
 date: "1/2/2018"
 output:
-  word_document: default
   html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -101,9 +101,9 @@ newraw$date <- c("07-08-2017", "10-08-2017") %>%
 
 Now we can explore the simple linear model in context of the instrument or the date of collection. Using the `summary` command on each linear model will provide basic statistical results assocaited with that model.  
 ```{r linear_modelling_run}
-fullModel <- lm(y ~ x * date * instrument, data=newraw)
-interactingTerms <- lm(y ~ x * instrument, data=newraw)
-noninteractingTerms <- lm(y ~ x + instrument, data=newraw)
+fullModel <- lm(y ~ x * date * instrument, data = newraw)
+interactingTerms <- lm(y ~ x * instrument, data = newraw)
+noninteractingTerms <- lm(y ~ x + instrument, data = newraw)
 summary(interactingTerms)
 ```
 
