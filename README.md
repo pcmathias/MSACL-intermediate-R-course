@@ -29,7 +29,7 @@ There are multiple ways to access and interact with the course content. We want 
 
 ## Course content
 
-- **Entire text**: [Data Science 201 Text in pdf format](course_text.pdf)
+- **Entire text**: [Data Science 201 Text in pdf format](coursework/src/course_text.pdf)
 - [Accessing the course](accessing_the_course.Rmd)
 - **Lesson 1**: [Adopting principles of reproducible research](lesson1/lesson1.Rmd)
 - **Lesson 2**: [Getting cozy with R Markdown](lesson2/lesson2.Rmd)
