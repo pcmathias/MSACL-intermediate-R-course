@@ -28,6 +28,8 @@ There are multiple ways to access and interact with the course content. We want 
 - In the event that there are issues with downloading files, we will have a local copy of the course repository that we can share.
 
 ## Course content
+
+- **Entire text**: [Data Science 201 Text in pdf format](course_text.pdf)
 - [Accessing the course](accessing_the_course.Rmd)
 - **Lesson 1**: [Adopting principles of reproducible research](lesson1/lesson1.Rmd)
 - **Lesson 2**: [Getting cozy with R Markdown](lesson2/lesson2.Rmd)
