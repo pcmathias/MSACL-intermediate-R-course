@@ -50,25 +50,27 @@ What is a project? Wilson et al. suggest dividing projects based on "overlap in 
 
 Now that we're thinking about creating directories for projects and directory structure in general, let's take the opportunity to review some basic commands and configuration related to directories in R.
 
-> Exercise 1
-> 
-> 1. Navigate to your **Preferences** for the RStudio application and note the *Default working directory (when not in a project)*
-> 2. Navigate to your Console and get the working directory using `getwd()`
-> 3. Review the contents of your current folder using `list.files()`
-> 4. Now try to set your working directory using `setwd("test_dir")`. What happened?
-> 5. Create a new test directory using `dir.create("test_dir")`
-> 6. Review your current directory
-> 7. Set your directory to the test directory you just created
-> 8. Using the Files window (bottom right in RStudio, click on **Files** tab if on another tab), navigate to the test directory you just created and list the files. *Pro tip: The More menu here has shortcuts to set the currently displayed directory as your working directory and to navigate to the current working directory*
-> 9. Navigate back to one level above the directory you created using `setwd("..")` and list the files
-> 10. Delete the directory you created using the `unlink()` function. Learn more about how to use the function by reviewing the documentation: `?unlink`. Pay special attention to comments about deleting directories.
+**Exercise 1**
 
-> Optional Exercise (If you do not already have a project directory)
->
-> Now that you're warmed up with navigating through directories using R, let's use functionality that's built into RStudio to make our project-oriented lives easier. To enter this brave new world of project directories, let's make a home for our projects. (Alternately, if you already have a directory that's a home for your projects, set your working directory there.)
-> 1. Using the Files navigation window (bottom right, Files tab), navigate to your home directory or any directory you'd like to place your future RStudio projects
-> 2. Create a "Projects" directory
-> 3. Set your directory to the "Projects" directory
+1. Navigate to your **Preferences** for the RStudio application and note the *Default working directory (when not in a project)*
+2. Navigate to your Console and get the working directory using `getwd()`
+3. Review the contents of your current folder using `list.files()`
+4. Now try to set your working directory using `setwd("test_dir")`. What happened?
+5. Create a new test directory using `dir.create("test_dir")`
+6. Review your current directory
+7. Set your directory to the test directory you just created
+8. Using the Files window (bottom right in RStudio, click on **Files** tab if on another tab), navigate to the test directory you just created and list the files. *Pro tip: The More menu here has shortcuts to set the currently displayed directory as your working directory and to navigate to the current working directory*
+9. Navigate back to one level above the directory you created using `setwd("..")` and list the files
+10. Delete the directory you created using the `unlink()` function. Learn more about how to use the function by reviewing the documentation: `?unlink`. Pay special attention to comments about deleting directories.
+
+**End Exercise**
+
+**Optional Exercise (If you do not already have a project directory)**
+
+Now that you're warmed up with navigating through directories using R, let's use functionality that's built into RStudio to make our project-oriented lives easier. To enter this brave new world of project directories, let's make a home for our projects. (Alternately, if you already have a directory that's a home for your projects, set your working directory there.)
+1. Using the Files navigation window (bottom right, Files tab), navigate to your home directory or any directory you'd like to place your future RStudio projects
+2. Create a "Projects" directory
+3. Set your directory to the "Projects" directory
 
 ```{r, eval = FALSE}
 dir.create("Projects")
@@ -77,14 +79,18 @@ setwd("/Projects")
 
 Alternately, you can do the above steps within your operating system (eg. on a Mac, open Finder window and create a folder) or if you are comfortable working at the command line, you can make a directory there. In the newest version of RStudio (version 1.1), you have the option of opening up a command line prompt under the Terminal tab (on the left side, next to the Console tab).
 
-> Exercise 2
-> 
-> Let's start a new project :
-> 1. Navigate to the **File** menu and select **New Project...** OR Select the **Create a project** button on the global toolbar (2nd from the left)
-> 2. Select **New Directory** option
-> 3. In the Project Type prompt, select **New Project**
-> 4. In the Directory Name prompt under Create New Project, enter "intermediate-R-course"
-> 5. In the Create Project as a Subdirectory of prompt under Create New Project, navigate to the Projects folder you just created (or another directory of your choosing). You can type in the path or hit the **Browse** button to find the directory. Check the option for "Open in a new session" and create your project.
+**End Exercise**
+
+**Exercise 2**
+
+Let's start a new project :
+1. Navigate to the **File** menu and select **New Project...** OR Select the **Create a project** button on the global toolbar (2nd from the left)
+2. Select **New Directory** option
+3. In the Project Type prompt, select **New Project**
+4. In the Directory Name prompt under Create New Project, enter "intermediate-R-course"
+5. In the Create Project as a Subdirectory of prompt under Create New Project, navigate to the Projects folder you just created (or another directory of your choosing). You can type in the path or hit the **Browse** button to find the directory. Check the option for "Open in a new session" and create your project.
+
+**End Exercise**
 
 So, what exactly does creating a Project in RStudio do for you? In a nutshell, using these Projects allows you to drop what you're doing, close RStudio, and then open the Project to pick up where you left off. Your data, history, settings, open tabs, etc. will be saved for you automatically.
 
@@ -98,9 +104,9 @@ Using R alone will not necessarily save you from these patterns but they take a 
 
 One solution to help avoid these issues in maintaining the separation of church and state (if I may use a poor analogy) is to explicitly organize your analysis so that raw data lives in one directory (the *data* directory) and the results of running your R code are placed in another directory (eg. *results* or *output*). You can take this concept a little further and include other directories within your project folder to better organize work such as *figures*, *documents* (for manuscripts), or *processed_data*/*munge* (if you want to create intermediate data sets). You have a lot of flexibility and there are multiple resources that provide some guidance [(Parzakonis 2017)](https://statsravingmad.com/measure/sample-r-project-structure/), [(Muller 2017)](http://blog.jom.link/implementation_basic_reproductible_workflow.html), [(Software Carpentry 2016)](https://swcarpentry.github.io/r-novice-gapminder/02-project-intro/). 
 
-> Exercise 3
->
-> Let's go ahead and create a minimal project structure:
+**Exercise 3**
+
+Let's go ahead and create a minimal project structure:
 
 ```{r, eval = FALSE}
 dir.create("data") # raw data
@@ -109,7 +115,9 @@ dir.create("cache") # intermediate data (after processing raw data)
 dir.create("src") # code goes into this folder
 ```
 
-This is a bare bones structure that should work for our purposes. 
+This is a bare bones structure that should work for our purposes.
+
+**End Exercise**
 
 *Further exploration/tools for creating projects*: There is also a dedicated Project Template package that has a nice "minimal project layout" that can be a good starting point if you want R to do more of the work for you: [Project Template](http://projecttemplate.net/index.html). This package duplicates some functionality that the RStudio Project does for you, so you probably want to run it outside of an RStudio Project but it is a good tool to be aware of.
 
