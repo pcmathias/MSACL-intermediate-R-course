@@ -4,7 +4,6 @@ author: "Patrick Mathias"
 output:
   pdf_document: default
   html_document: default
-bibliography: lesson1_references.bib
 ---
 
 ## What is reproducible research?
