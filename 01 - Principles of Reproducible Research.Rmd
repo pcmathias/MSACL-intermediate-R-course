@@ -2,8 +2,8 @@
 title: 'Lesson 1: Adopting principles of reproducible research'
 author: "Patrick Mathias"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ## What is reproducible research?
@@ -23,11 +23,12 @@ Reproducibility can be achieved when the following criteria are met [(Marecelino
 
 **"Everything you do, you will probably have to do over again."** [(Noble 2009)](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1000424)
 
-There are three practices we will cover in this lesson to help get your code to be more reproducible and reusable:
+There are core practices we will cover in this lesson to help get your code to be more reproducible and reusable:
 
 - Develop a standardized but easy-to-use project structure
 - Adopt a style convention for coding
 - Enforce reproducibility when working with projects and packages
+- Use a version control system
 
 ## Develop a standard project structure
 
@@ -252,6 +253,14 @@ The checkpoint package is very helpful in writing reproducible analyses, but the
 - checkpoint is tied to projects, so alternate structures that don't use projects may not able to utilize the package
 
 In the next lesson we will dive into more detail about how to use checkpoint in the context of an R Markdown document, so this is just a brief introduction to the concept of using checkpoint to make your code reproducible.
+
+## Use a version control system
+
+![One of many justifications for using version control](assets/phd_comic_final_version.gif)
+
+The concept of capturing changes to a document by resaving the file with different names is well-intentioned and lines up with previous concepts of reproducibilty. In particular, this can help capture changes you've made in the evolution of a project. The problem with this method is that it is very clunky and, realistically, you will not be able to capture every single change you've made. When writing code, you often do want to capture changes at a higher resolution than when writing a paper or other text document. 
+
+The basic functionality of a version control system facilitates the process of tracking changes (in addition to who made changes in collaborative settings) and makes it easier to undo changes. But you can go further with version control and implement it as a tool in collaboration workflows because it enables multiple people to work on changes to the same set of files at once.
 
 ## Summary
 
