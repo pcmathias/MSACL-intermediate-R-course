@@ -4,7 +4,10 @@ Course content for MSACL Data Science 201: Going Further with R
 This course is intended for laboratory professionals with a basic command of R and is a follow-up course to Daniel Holmes' and Steve Master's basic R course at MSACL. The emphasis of this course will be best practices in applying R to solve problems in mass spectrometry and in the clinical laboratory.
 
 - Instructors: Patrick Mathias & Randall Julian
+
+<!---
 - Teaching assistant: Adam Zabell
+--->
 
 ## Pre-course work/requirements
 
@@ -28,11 +31,12 @@ There are multiple ways to access and interact with the course content. We want 
 - Alternately, you can download this github repository as a zip file and install it on your computer (e.g. C:\Users\jdoe\Desktop\msacl2018).
 - In the event that there are issues with downloading files, we will have a local copy of the course repository that we can share.
 
+<!---
 ## Course content
 
 - **Entire text**: [Data Science 201 Text in pdf format](coursework/src/course_text.pdf)
 - [Accessing the course](accessing_the_course.Rmd)
-- **Lesson 1**: [Adopting principles of reproducible research](lesson1/lesson1.Rmd)
+- **Lesson 1**: [Adopting principles of reproducible research](01 - Principles of Reproducible Research.Rmd)
 - **Lesson 2**: [Getting cozy with R Markdown](lesson2/lesson2.Rmd)
 - **Lesson 3**: [Reading files - beyond the basics](lesson3/lesson3.Rmd)
 - **Lesson 4**: [Data manipulation in the tidyverse](lesson4/lesson4.Rmd)
@@ -42,6 +46,7 @@ There are multiple ways to access and interact with the course content. We want 
 - **Lesson 8**: [Beyond flat files](lesson8/lesson8.Rmd)
 - **Lesson 9**: [Scaling - don't make me repeat myself](lesson9/lesson9.Rmd)
 - **Lesson 10**: [End-to-end - from file import to communication](lesson10/lesson10.Rmd)
+--->
 
 ## Notes/Disclaimers/Acknowledgments
 
