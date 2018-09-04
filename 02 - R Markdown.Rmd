@@ -79,15 +79,17 @@ Under the hood, the knitting functionality in RStudio takes advantage of a unive
 
 There is additional functionality in RStudio that allows you to create an R Notebook, which is a useful variant of an R Markdown document. Traditionally you might put together an R Markdown document, with all its glorious text + code, and then knit the entire document to produce some output. The R Notebook is a special execution mode that allows you to run individual code chunks separately and interactively. This allows you to rapidly interact with your code and see the output without having to run all the code in the entire document. As with inserting a chunk, there are multiple options for running a chunk: the `Run` button near the top right of your script window or the `Ctrl+Shift+Enter`/`Command+Shift+Enter` (Windows/Mac) shortcut. Within a code chunk, if you just want to run an individual line of code, the `Ctrl+Enter`/`Command+Enter` (Windows/Mac) shortcut while run only the line your cursor is currently on.
 
-> Exercise 1
->
-> Let's use the built-in functionality in RStudio to create an R Markdown document.
-> 1. Add a file by selecting the add file button on the top left of your screen
-> 1. Select R Markdown... as the file type
-> 1. Title the document "Sample R Markdown Document" and select OK
-> 1. Put the cursor in the "cars" code chunk (should be the 2nd chunk) and hit `Ctrl+Shift+Enter`/`Command+Shift+Enter`. What happened?
-> 1. Insert a code chunk under the cars code chunk by using the `Ctrl+Alt+i`/`Command+Option+i`(Windows/Mac) shortcut
-> 1. Create output for the first lines of the cars data frame using the `head(cars)` command and execute the code chunk
+**Exercise 1**
+
+Let's use the built-in functionality in RStudio to create an R Markdown document.
+1. Add a file by selecting the add file button on the top left of your screen
+1. Select R Markdown... as the file type
+1. Title the document "Sample R Markdown Document" and select OK
+1. Put the cursor in the "cars" code chunk (should be the 2nd chunk) and hit `Ctrl+Shift+Enter`/`Command+Shift+Enter`. What happened?
+1. Insert a code chunk under the cars code chunk by using the `Ctrl+Alt+i`/`Command+Option+i`(Windows/Mac) shortcut
+1. Create output for the first lines of the cars data frame using the `head(cars)` command and execute the code chunk
+
+**End Exercise**
 
 RStudio sets up the document to be run as an R Notebook so you can interactively run chunks separately and immediately view the output.
 
@@ -95,15 +97,17 @@ RStudio also already provides you with an outline of a useful document, includin
 
 Now let's knit this file and create some output.
 
-> Exercise 2
-> 
-> 1. Click the **Knit** button
-> 1. You are being prompted to save the .Rmd file. Choose the "src" folder of your project and name the file sample_markdown_document
-> 1. RStudio should produce output in .html format and display
-> 1. Click the Open in Browser window and the same output should open in your default internet browser
-> 1. If you find the folder you saved the .Rmd file there should also be a .html file you can open as well
-> 1. Now, instead of hitting the **Knit** button, select the down arrow adjacent to it and click Knit to PDF
-> 1. Repeat the previous step but knit to a Word document
+**Exercise 2**
+
+1. Click the **Knit** button
+1. You are being prompted to save the .Rmd file. Choose the "src" folder of your project and name the file sample_markdown_document
+1. RStudio should produce output in .html format and display
+1. Click the Open in Browser window and the same output should open in your default internet browser
+1. If you find the folder you saved the .Rmd file there should also be a .html file you can open as well
+1. Now, instead of hitting the **Knit** button, select the down arrow adjacent to it and click Knit to PDF
+1. Repeat the previous step but knit to a Word document
+
+**End Exercise**
 
 The add file options also allow you to create a presentation in R Markdown. This can be a handy alternative to Powerpoint, especially if you want to share code and/or many figures within a presentation. You can find more information about these presentations and the syntax used to set up slides at the RStudio site on [Authoring R Presentations](https://support.rstudio.com/hc/en-us/articles/200486468-Authoring-R-Presentations).
 
@@ -118,45 +122,20 @@ Let's review the components of a project according to the take home points from 
 
 How can we integrate R Markdown documents within the context of these requirements? We already created a project and associated directories for this course so most of our work is done. Now we are going to add our R Markdown file to the project and set it up so we can be efficient and reproducible.
 
-> Exercise 3
-> 
-> 1. Close the RStudio window that has your "sample-project-structure" project open (refer to the upper right of your RStudio window to see which active project is open).
-> 1. Find your RStudio window with your "MSACL-intermediate-R-course" project (look in upper right). If you cannot find it, within RStudio, click the arrow to the right of the project name (it will say Project: (None) if you are not in a project) and select your "MSACL-intermediate-R-course" project.
-> 1. From within the course directory ("MSACL-intermediate-R-course"), create a new directory called "coursework" & set your working directory to there
-> 1. Load the here package from within your console and use the `set_here()` command to set your "coursework" directory to be the primary point of reference for your project. (This creates an empty file named ".here", which is the first thing the here package looks for when trying to set its point of reference.)
-> 1. Restart your R session by navigating to the Session menu and selecting Restart R. This is required to reinitialize the here package and point it to the .here file you just created in your "coursework" directory
-> 1. Create the directory structure we discussed in the last lesson, **with the exception of the data directory**
-> 1. Go to your operating system and copy the "class_data" directory you unzipped prior to the course (per the pre-course instructions) into your "coursework" directory
-> 1. At this point we will want to include our individual lesson .Rmd files in the "src" directory. For now, copy your lesson3.Rmd from the lesson3 folder into your "src" directory under coursework.
+**Exercise 3**
+
+1. Close the RStudio window that has your "sample-project-structure" project open (refer to the upper right of your RStudio window to see which active project is open).
+1. Find your RStudio window with your "MSACL-intermediate-R-course" project (look in upper right). If you cannot find it, within RStudio, click the arrow to the right of the project name (it will say Project: (None) if you are not in a project) and select your "MSACL-intermediate-R-course" project.
+1. From within the course directory ("MSACL-intermediate-R-course"), create a new directory called "coursework" & set your working directory to there
+1. Load the here package from within your console and use the `set_here()` command to set your "coursework" directory to be the primary point of reference for your project. (This creates an empty file named ".here", which is the first thing the here package looks for when trying to set its point of reference.)
+1. Restart your R session by navigating to the Session menu and selecting Restart R. This is required to reinitialize the here package and point it to the .here file you just created in your "coursework" directory
+1. Create the directory structure we discussed in the last lesson, **with the exception of the data directory**
+1. Go to your operating system and copy the "class_data" directory you unzipped prior to the course (per the pre-course instructions) into your "coursework" directory
+1. At this point we will want to include our individual lesson .Rmd files in the "src" directory. For now, copy your lesson3.Rmd from the lesson3 folder into your "src" directory under coursework.
+
+**End Exercise**
 
 These steps have set up your directory structure for future lessons. We have pre-made lesson files for future lessons, but it is also helpful to create an independent R Markdown file for any additional code you might want to write outside of the lesson. Plus, we want you to get some experience building your own R Markdown file within your project environment from scratch.
-
-> Exercise 4
-> 
-> 1. Before we jump into creating our R Markdown file, we need to create a file that will allow us to run checkpoint together with knitr - click the Add File button and select "R Script"
-> 2. Add the following code to your R script (minus the code chunk delimiters)
-```{r, eval = FALSE}
-library("formatR")
-library("htmltools")
-library("caTools")
-library("bitops")
-library("base64enc")
-library("rprojroot")
-library("rmarkdown")
-library("evaluate")
-library("stringi")
-```
-> 3. Save as "knitr-packages.R" in the src folder of your project (explanation of why you did this below)
-> 4. Now add a new R Markdown file, title it "Data Science 201", and leave as the default .html ouptut selection
-> 5. Go ahead and save the .Rmd by clicking the Save button (disk button) or selecing Save under the File menu: save the file to your src folder within your project. This will be an extra place to write code outside of the lesson files we provide. Name according to the principles we disucssed in lesson 1 (think of it as a scratchpad).
-> 6. In the setup code chunk for the document, load the checkpoint package
-> 7. Add the checkpoint command to load packages from today: `checkpoint("2018-01-21")`
-> 8. Load the following packages in the setup chunk: tidyverse, readxl, lubridate, janitor, lattice, magrittr, modelr, xml2, jsonlite
-> 9. Save the file and then go ahead and run your setup chunk
-
-So why did you have to go through the first 3 steps before starting your R Markdown document? When RStudio knits a document, it calls certain packages behind the scenes to create the document. However, when you are using checkpoint, the package only looks for packages within your project folders and does not see those hidden RStudio folders. So adding knitr-packages.R is a workaround to allow checkpoint to see those packages and knit the document.
-
-The R Markdown document you created will be your scratchpad if you want to experiment with differnt functions or explore data in our dataset outside of the context of the structured lessons.
 
 Now we're ready to jump into lesson 3!
 
