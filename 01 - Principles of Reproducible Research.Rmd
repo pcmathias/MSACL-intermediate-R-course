@@ -334,11 +334,21 @@ The Git workflow for keeping changes updated is not as seamless as many modern d
 
 ### Addditional Git tips and tricks
 
+#### Using branches
+
 When multiple people are working on a repository or you are working on multiple types of changes in a repository, there are other potential workflows besides forking a repository, making changes, and sending a pull request. A branch in Git is essentially another line of development that allows you to work without disrupting the primary line of code development (most often the *master* branch). RStudio provides support to create new branches and change branches - both features are on the top right of the Git window.
 
 ![Branching in Git. Credit: https://www.atlassian.com/git/tutorials/using-branches/git-merge](assets/branching.png)
 
 So when should you use branches? Arguably the cleanest way to use branches is to couple each branch to a major feature or change in your code. This is particularly helpful if you (and your team) want to work on multiple features at once. You can isolate each feature to branch, test it, and merge the branch (this can be done via similar workflows to the pull request) but also allows parallel development. To take this workflow one step further, GitHub and other Git-based systems allow you to open up "issues" (note the "Issues" tab on a GitHub repo page) that can include feature requests. You can open up a branch, name it for an issue, work on the feature, and then close out the issue when the feature is completed and tested.
+
+#### Setting up ssh
+
+Typing in your password every time you interact with remote repository (eg. in GitHub) can be annoying to do repeatedly. An alternative is to set up SSH. At a high level, this requires setting up a public-private SSH key pair, where the private key lives on your machine (and should not be shared!) and the public key lives in your GitHub profile. There are nice instructions for setting this up from either RStudio or the shell (eg. Terminal tab) at http://happygitwithr.com/ssh-keys.html. 
+
+SSH is a useful protocol to know about in general. There is a short tutorial at https://www.hostinger.com/tutorials/ssh-tutorial-how-does-ssh-work that explains many of the concepts. For a general reading resource on cryptography, [The Code Book](https://www.amazon.com/gp/product/B004IK8PLE/ref=kinw_myk_ro_title) by Simon Singh is highly recommended.
+
+#### What should and shouldn't go into version control
 
 The last thing to consider is a question: should you put everything in your project under version control? Maybe not. Git and similar version control systems typically do not handle raw data files well and the repository site you use may impose file size limits (Github has a 100 MB limit). *Also note that your repository site may be public so storing sensitive data (such as health information) within the repo may be problematic.* The excellent article by [Wilson et al.](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510) covers these issues in more details and provides nice guidance about what should not go into version control.
 
