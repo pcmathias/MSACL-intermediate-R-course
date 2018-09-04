@@ -243,9 +243,9 @@ When working in Git, there are three states that files live in: modified, staged
 
 We have placed the contents of this course into a Git repository (central hub - we will discuss in more detail later) for the class to download and work with. This will help cut down on the scripting you need to run through the exercises for this course and will also give you the chance to work with Git. In the following exercise you will use Git with the existing course repository to move through the typical workflow using RStudio.
 
-*If you have not set up Git per the pre-course instructions (https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and signed up for an account on Github.com (https://github.com/join), you will need to do so before you can complete the next exercise*
+*If you have not set up Git per the pre-course instructions (https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and signed up for an account on Github.com (https://github.com/join), you will need to do so before you can complete the next exercise.*
 
-**Exercise **
+**Exercise 4**
 
 Forking the course repository:
 
@@ -301,7 +301,7 @@ A common workflow in GitHub is one in which there is a single official project r
 
 When we first pulled the course repository, we completed the first few steps of this workflow. We took the central version of the course repo and made a local copy on our Github accounts ("forked" the repository). Then we started making local changes and committing them. Now we can work through updating the remote repository.
 
-**Exercise **
+**Exercise 5**
 
 *These steps are dependent on completing the previous exercise*
 
