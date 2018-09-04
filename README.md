@@ -13,14 +13,15 @@ This course is intended for laboratory professionals with a basic command of R a
 
 - A laptop with wifi, access to the internet, and the ability to download files is required
   - Confirm you can connect to conference wifi prior to class
-- Complete the following survey so we can better understand your R experience and what you want out of the course: [MSACL Intermediate R Course Survey](https://goo.gl/forms/3D2RNAb5wkdbZnPd2)
+- Complete the following survey so we can better understand your R experience and what you want out of the course: [MSACL Intermediate R Course Survey](https://goo.gl/forms/p4l2sbFMfRN9Qiad2)
 - Install the latest version of R by choosing the closest CRAN mirror here at https://cran.r-project.org/mirrors.html and downloading the version for your operating system
 - Install the latest version of RStudio Desktop at https://www.rstudio.com/products/rstudio/download/#download 
 - Open RStudio and confirm you are able to install packages by running `install.packages(c("tidyverse", "tinytex"), dependencies = TRUE)`
 - Go to Github at https://github.com and sign up for an account (if you don't have one already)
-
-- Please make an effort to complete the following Introduction to GitHub: https://services.github.com/on-demand/intro-to-github/
 - Download the mock database zip file from [this link](https://figshare.com/s/8d9798a03faf7c191013), park it someplace you will remember for the course, and uncompress. If you have problems with that link, the data is also available [here](https://indigobio.egnyte.com/fl/rjfI054C48) and [here](https://drive.google.com/file/d/1ruGqmwp_jfT8_wUCtMmC9hVyoZtT5aR7/view?usp=sharing). We will also have a copy on hand on a thumb drive as well.
+
+**Optional but strongly encouraged**
+- Please make an effort to complete the following Introduction to GitHub: https://services.github.com/on-demand/intro-to-github/
 
 ## Accessing/interacting with the course content
 
