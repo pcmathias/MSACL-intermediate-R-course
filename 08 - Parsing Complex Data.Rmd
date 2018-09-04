@@ -44,7 +44,7 @@ The most common problem is that numbers, even if they were stored as numbers, ca
 cd.df$PRICE %<>% map_dbl(as.numeric) # also invokes a from-and-back-into pipe notation
 ```
 
-> Exercise 1: Renumbering Redux  
+** Exercise 1: Renumbering Redux  
 > Will reading the xml into a tibble (instead of a data.frame) solve this number recognition? First, try it. Then, even if it did work, construct a 'standard pipe' mechanism using `%>%` to change both *PRICE* and *YEAR* to double precision numbers.
 
 ```{r ex1, eval = FALSE}
