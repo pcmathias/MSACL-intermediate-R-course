@@ -8,8 +8,6 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-# library(checkpoint)
-# checkpoint("2018-01-19")
 library(tidyverse)
 library(readxl)
 library(here)
