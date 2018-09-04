@@ -186,22 +186,7 @@ Hmmm, R can't find the file, even though you set the working directory for your 
 
 What is the problem? Setting your working directory is actually the problem here, because it is almost guaranteed that the path to a directory on your computer does not match the path to the directory on another computer. That path may not even work on your own computer a couple years from now!
 
-Fear not, there is a package for that! Let's install the [here package](https://cran.r-project.org/web/packages/here/index.html) to help solve this problem and explore how it works.
-
-> Exercise 4
-> 
-> 1. Install the package
-> 2. Load the package. What does the output tell you?
-> 3. Run the command `here()`. What does the output tell you?
-
-```{r, eval = FALSE}
-install.packages("here")
-library(here)
-here()
-```
-
-
-The here package uses a pretty straightforward syntax to help you point to the file you want. In the example above, where file.csv is a data file in the root directory (I know, not ideal practice per our discussion on project structure above), then you can reference the file using `here("file.csv")`, where `here()` indicates the current directory. So reading the file could be accomplished with `read.csv(here("file.csv"))` and it could be run by any who you share the project with.
+Fear not, there is a package for that! The [here package](https://cran.r-project.org/web/packages/here/index.html) is a helpful way to "anchor" your project to a directory without setting your working directory. The here package uses a pretty straightforward syntax to help you point to the file you want. In the example above, where file.csv is a data file in the root directory (I know, not ideal practice per our discussion on project structure above), then you can reference the file using `here("file.csv")`, where `here()` indicates the current directory. So reading the file could be accomplished with `read.csv(here("file.csv"))` and it could be run by any who you share the project with.
 
 The here package couples well with an RStudio Project because there is an algorithm that determines which directory is the top-level directory by looking for specific files
 - creating an RStudio Project creates an .Rproj file that tells here which is the project top-level directory
@@ -216,34 +201,7 @@ Moral of the story: avoid using `setwd()` and complicated paths to your file - u
 
 Now imagine you've written a nice analysis for your mass spec data but let it sit on the shelf for 6 months or a year. In the meantime, you've updated R and your packages multiple times. You rerun your analysis on the same old data set and either (a) one or more lines of code longer works or (b) the output of your analysis is different than the first time you ran it. Very often these problems arise because one or more of the packages you use in your code have been updated since the first time you ran your analysis. Sometimes package updates change the input or output specific functions expect or produce or alter the behavior of packages in unexpected ways. These problems also arise when sharing code with colleagues because different users may have different versions of packages loaded.
 
-Don't worry, there is a package for that! Probably the most lightweight solution to this problem is the [checkpoint package](https://cran.r-project.org/web/packages/checkpoint/index.html). The basic premise behind checkpoint is that it allows you use the package as it existed at a specific date. There is a snapshot for all packages in CRAN (the R package repository) each day, dating back to 2017-09-17. By using checkpoint you can be confident that the version of the package you reference in your code is the same version that anyone else running your code will be using.
-
-Let's run through some basics of using the package.
-
-> Exercise 5
-> 
-> 1. Install the checkpoint package
-
-```{r, eval = FALSE}
-install.packages("checkpoint")
-```
-
-> 2. Load the checkpoint package
-> 3. Read the help for the checkpoint function
-
-```{r, eval = FALSE}
-library(checkpoint)
-?checkpoint
-
-# below is sample code but we're not quite ready to run it (yet)
-# library(checkpoint)
-# checkpoint("2018-01-01", checkpointLocation = tempdir()) 
-# checkpoint function takes the date of the package you want as the primary argument 
-# and a location for the directory to load the packages into
-#
-# library(dplyr)
-# library(lubridate)
-```
+Don't worry, there are actually multiple packages for that! Probably the most lightweight solution to this problem is the [checkpoint package](https://cran.r-project.org/web/packages/checkpoint/index.html). The basic premise behind checkpoint is that it allows you use the package as it existed at a specific date. There is a snapshot for all packages in CRAN (the R package repository) each day, dating back to 2017-09-17. By using checkpoint you can be confident that the version of the package you reference in your code is the same version that anyone else running your code will be using.
 
 The behavior of checkpoint makes it complicated to test out in this section: the package is tied to a project and by default searches for every package called within your project (via `library()` or `require()`). However, if you refer to the setup code chunks for this course you will see how checkpoint works in the wild.
 
@@ -252,15 +210,139 @@ The checkpoint package is very helpful in writing reproducible analyses, but the
 - package updates over time may fix bugs so changes in output may be more accurate
 - checkpoint is tied to projects, so alternate structures that don't use projects may not able to utilize the package
 
-In the next lesson we will dive into more detail about how to use checkpoint in the context of an R Markdown document, so this is just a brief introduction to the concept of using checkpoint to make your code reproducible.
+There is another solution to this problem that has tighter integration with RStudio: the [packrat package](https://cran.r-project.org/web/packages/packrat/index.html). Packrat sets up a private package library and helps manage the version of each package you use in a project. It is very similar to checkpoint conceptually, but rather than locking packages to a date, you are capturing specific versions of each package. In some ways this is a better way to manage packages since the versions are more transparent, but there is more overhead in setting this up. There is a helpful walkthrough here: http://rstudio.github.io/packrat/walkthrough.html. In addition, there is integration with the RStudio IDE, which is detailed here: http://rstudio.github.io/packrat/rstudio.html.
+
+Either approach to package management will work - the important point here is to be proactive about how you manage your packages, especially if you know your code will be used over and over again in the future.
 
 ## Use a version control system
 
-![One of many justifications for using version control](assets/phd_comic_final_version.gif)
+![One of many justifications for using version control. Source: phdcomics.com](assets/phd_comic_final_version.gif)
 
-The concept of capturing changes to a document by resaving the file with different names is well-intentioned and lines up with previous concepts of reproducibilty. In particular, this can help capture changes you've made in the evolution of a project. The problem with this method is that it is very clunky and, realistically, you will not be able to capture every single change you've made. When writing code, you often do want to capture changes at a higher resolution than when writing a paper or other text document. 
+The concept of capturing changes to a document by resaving the file with different names is well-intentioned and lines up with previous concepts of reproducibilty. This can help capture changes you've made in the evolution of a project. The problem with this method is that it is very clunky and, realistically, you will not be able to capture every single change you've made. When writing code, you often do want to capture changes at a higher resolution than when writing a paper or other text document. 
 
-The basic functionality of a version control system facilitates the process of tracking changes (in addition to who made changes in collaborative settings) and makes it easier to undo changes. But you can go further with version control and implement it as a tool in collaboration workflows because it enables multiple people to work on changes to the same set of files at once.
+The basic functionality of a version control system tracks changes (in addition to who made changes in collaborative settings) and makes it easier to undo changes. But you can go further with version control and implement it as a tool in collaboration workflows because it enables multiple people to work on changes to the same set of files at once.
+
+### A brief intro to Git
+
+This section is a high level summary of many concepts explained in Chapter 1 of the [Pro Git](https://git-scm.com/book/en/v2) textbook. There are other great resources to learn about using Git and using Git with RStudio, including https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN and http://r-bio.github.io/intro-git-rstudio/.
+
+Git was originally developed as a tool to support the development of Linux (the open source operating system that powers most web servers and many mobile devices). There were a variety of requirements but to meet the needs of a large open source project, the version control system needed to support many contributors working in parallel in a sizable code base.
+
+Git works on the following principles:
+
+- Git works by taking snapshots of a set of files over time
+- Most operations are performed on your local machine
+- Every change is captured
+- Git generally adds data and does not remove it (which means it is hard to lose data)
+
+When working in Git, there are three states that files live in: modified, staged, and committed. A modified file is self explanatory - you have made some change to a file in your project. When the file is staged, you indicate that that modified file will be incorporated into your next snapshot. When the file (or files) is/are committed, you then indicate that the staged file(s) can now be stored. Committing is indicating to Git that you are ready to take the snapshot. This workflow is captured visually below.
+
+![Git basic workflow. Source: https://git-scm.com/book/en/v2/Getting-Started-Git-Basics](assets/git_basic_workflow.png)
+
+### Hands-on with Git
+
+We have placed the contents of this course into a Git repository (central hub - we will discuss in more detail later) for the class to download and work with. This will help cut down on the scripting you need to run through the exercises for this course and will also give you the chance to work with Git. In the following exercise you will use Git with the existing course repository to move through the typical workflow using RStudio.
+
+*If you have not set up Git per the pre-course instructions (https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and signed up for an account on Github.com (https://github.com/join), you will need to do so before you can complete the next exercise*
+
+**Exercise **
+
+Forking the course repository:
+
+1. Navigate to the course repository at https://github.com/pcmathias/MSACL-intermediate-R-course.
+1. Select the "Fork" button at the top right of the repository page. If you are not already signed in, you will be asked to sign in.
+1. You should now have the course repository under your account at Github (github.com/*your-user-name*/MSACL-intermediate-R-course). 
+
+We will explain why we "forked" the repository in more detail after the exercise.
+
+Opening the repository as a project in RStudio:
+
+1. Before we can use the Git interface in RStudio, we need to enable version control in the application. Navigate to "Global Options" under the Tools menu with RStudio and select "Git/SVN" on the lefthand menu. Ensure that the check box for "Enable version control interface for RStudio projects" is checked.
+1. Under the File menu within the RStudio application, select "New Project".
+1. Select "Version Control" in the first Create Project prompt.
+1. Select "Git" in the next Create Project from Version Control prompt.
+1. Copy and paste the URL for the repository you just forked (github.com/*your-user-name*/MSACL-intermediate-R-course) into the prompt for Repository URL.
+1. Select a project name as well as a destination folder for your project (perhaps under a newly created Projects folder?).
+
+Creating a file and using the Git workflow:
+
+1. Let's create a new file within the repository by navigating to "New File" under the File menu and selecting "R Script".
+1. Add a title to the first line by inserting a comment (using #) with a title: "# My First Commit".
+1. Add another comment line: "# Author: *your-user-name*".
+1. Add a single line of code, eg. `print("Hello world")`.
+1. Save the file in the your repository folder with the following convention:  username_first_commit.R.
+1. If not already open, open up the Git window in the top left of the RStudio window (click the Git tab). You should see your new file in that window with two boxes containing yellow question marks. Check the box for the file under Staged and you should see a green box with an "A" under the Status box. This has taken a new file (with a modified status) and staged it.
+1. Now press the "Commit" button in the Git window. A new window will pop up showing the file(s) in the Git window, with a Commit message window on the right and the code below. Add "My first commit" to the Commit message window and hit the "Commit" button below.
+
+That is the general workflow you will use within RStudio. Modify (or add) a file, stage it by checking the box in the Git window, and then commit it. Be sure to include helpful comments when you commit, in case you need to go back to a previous version. All of these changes have happened locally on your machine.
+
+**End Exercise**
+
+### Moving to distributed workflows
+
+So far everything we have done has been on a local repository. A powerful aspect of Git is the ability to maintain a centralized repository outside of your local machine. This can help you synchronize the repo (short for repository) between multiple computers, but more importantly, this facilitates workflows in which multiple people contribute to a project. Imagine our local Git repository has a copy that lives on another system but is publically available for yourself and others to access. That is the function of GitHub, which hosts our course repo.
+
+GitHub is the largest host of Git repositories and hosts open source projects (like this course) for free. GitHub also hosts private repos for a fee, and there are other services such as GitLab and BitBucket that host Git repos but also provide other functionality. GitHub is very popular among academic software projects because most are open source (and therefore free to host) but there is one important factor to consider when using the free GitHub service: content is hosted on their servers so this may not be a good fit for sensitive data (such as health information). Many organizations who write code to analyze sensitive information do not risk committing this information and purchase Git services that allow them to host repositories on their own hardware. *Always be very careful about preventing sensitive information from being available publically when working with version control system (and in general).*
+
+One possible workflow when taking advantage of a distributed Git repository, which we refer to as a "remote" repository, is one which multiple people work from one repo and are continually bringing over copies to their local machines and then committing changes.
+
+![Centralized workflow with Git. Credit: https://git-scm.com/book/en/v2/Distributed-Git-Distributed-Workflows](assets/centralized_workflow.png)
+
+A common workflow in GitHub is one in which there is a single official project repo that contributors create a public clone of, make changes to their own repo, and request that the official repo incorporate changes into the main project ("pull request"). A step-by-step breakdown of the process illustrated below is as follows:
+
+1. The project maintainer pushes to their public repository.
+1. A contributor clones that repository and makes changes.
+1. The contributor pushes to their own public copy.
+1. The contributor sends the maintainer an email asking them to pull changes.
+1. The maintainer adds the contributor’s repository as a remote and merges locally.
+1. The maintainer pushes merged changes to the main repository.
+
+![Integration manager workflow with Git. Credit: https://git-scm.com/book/en/v2/Distributed-Git-Distributed-Workflows](assets/integration-manager.png)
+
+When we first pulled the course repository, we completed the first few steps of this workflow. We took the central version of the course repo and made a local copy on our Github accounts ("forked" the repository). Then we started making local changes and committing them. Now we can work through updating the remote repository.
+
+**Exercise **
+
+*These steps are dependent on completing the previous exercise*
+
+1. Now that you have committed changes to your local repository, you can update your remote repository on GitHub by "pushing" the local changes to the remote repository. Press the "Push" button (with a green up arrow beside it) to push your changes to remote.
+1. You should be prompted for a username and password. Enter your GitHub username and password and you should seen an indication that the push has completed.
+1. Navigate to your MSACL-intermediate-R-course repository on your web browser (github.com/*your-user-name*/MSACL-intermediate-R-course). You should see the file you've added there.
+
+Now both of your local repo and your remote repo are aligned.
+
+**Optional steps:** If you would like to try the pull request workflow
+
+1. Navigate to your MSACL repository webpage (under your username in GitHub) and select the "New pull request" button near the top.
+1. Under "Compare changes", select the link to "compare across forks".
+1. Click the "base fork" button and select "pcmathias/MSACL-intermediate-R-course".
+1. Click the "head fork" button and select your repository.
+1. The "Create pull request" button should be available to select now. Click the button.
+
+**Optional steps:** If you would like to synchronize your MSACL repo with the main course repo in the future
+
+1. Open Terminal within RStudio on the bottom left of the window (tab is adjacent to Console tab).
+1. The Terminal window should be set to your MSACL course repo directory. Run `ls` to confirm that you see the course contents. If not, use `cd` to navigate to the right directory.
+1. Enter `git remote upstream https://github.com/pcmathias/MSACL-intermediate-R-course`.
+1. Enter `git remote -v` to list the remote repositories. You should see the main course repository listed as upstream.
+
+Now your course repository is linked to the main course repo. To sync with the original repository in the future, refer to instructions here: https://help.github.com/articles/syncing-a-fork.
+
+**End Exercise**
+
+The Git workflow for keeping changes updated is not as seamless as many modern document editors such as Office 365 or Google Docs, which continuously update changes for you without manual saving. One reason Git does not work that way is that your commits are expected to be strategic and coupled with changes that you may want to roll back. This is important to give you confidence that you do not need to create backup copies of your work, but the trade off is that you have to do extra work to make sure updates are captured. This is especially important when working with a remote repository. We made local changes and pushed those to the remote to update it. But imagine another scenario where you are working on multiple computers and made changes on computer A yesterday but are working on computer B today. If you pushed your changes from computer A to the remote yesterday, you can perform the opposite function on computer B today. You would use the "Pull" button to pull the contents of the remote repository onto your local computer B.
+
+### Addditional Git tips and tricks
+
+When multiple people are working on a repository or you are working on multiple types of changes in a repository, there are other potential workflows besides forking a repository, making changes, and sending a pull request. A branch in Git is essentially another line of development that allows you to work without disrupting the primary line of code development (most often the *master* branch). RStudio provides support to create new branches and change branches - both features are on the top right of the Git window.
+
+![Branching in Git. Credit: https://www.atlassian.com/git/tutorials/using-branches/git-merge](assets/branching.png)
+
+So when should you use branches? Arguably the cleanest way to use branches is to couple each branch to a major feature or change in your code. This is particularly helpful if you (and your team) want to work on multiple features at once. You can isolate each feature to branch, test it, and merge the branch (this can be done via similar workflows to the pull request) but also allows parallel development. To take this workflow one step further, GitHub and other Git-based systems allow you to open up "issues" (note the "Issues" tab on a GitHub repo page) that can include feature requests. You can open up a branch, name it for an issue, work on the feature, and then close out the issue when the feature is completed and tested.
+
+The last thing to consider is a question: should you put everything in your project under version control? Maybe not. Git and similar version control systems typically do not handle raw data files well and the repository site you use may impose file size limits (Github has a 100 MB limit). *Also note that your repository site may be public so storing sensitive data (such as health information) within the repo may be problematic.* The excellent article by [Wilson et al.](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510) covers these issues in more details and provides nice guidance about what should not go into version control.
+
+Finally, there are variety of resources available to learn Git. The [Pro Git](https://git-scm.com/book/en/v2) textbook has a lot of detail about a variety of Git topics. There is also a downloadable Git tutorial that may be helpful to reinforce many of the above concepts: https://github.com/jlord/git-it-electron.
 
 ## Summary
 
@@ -270,3 +352,4 @@ The basic functionality of a version control system facilitates the process of t
   - Developing a standardized but easy-to-use project structure
   - Adopting a style convention for coding
   - Enforcing reproducibility when working with projects and packages
+  - Using a version control system to track work and collaborate with others
