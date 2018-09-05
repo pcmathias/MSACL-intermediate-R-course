@@ -39,23 +39,49 @@ library(mzR)
 
 mzXML <- openMSfile("7MIX_STD_110802_1.mzXML")
 
+header(mzXML,10)
+peaksCount(mzXML,10)
+
+pl <- peaks(mzXML,10)
+plot(pl[,1], pl[,2], type="h", lwd=1)
+
+header(mzXML,11)
+
+hdx<-header(mzXML)
 ```
 
-**Exercise 1:**  
+**Exercise 1:**
+Notice that the header contains the variable `msLevel` which is set to 1 for a survey scan (MS) or 2 for an MS/MS scan (MS^n). In the exercise, you will create chromatogram from the total ion current of all the MS survey scans. Step 1 will be to create a vector of the survey scan numbers:
 
-```{r ex1, eval = FALSE}
-# cd.tibble <- as_tibble( )
+```{r ex_1, eval=FALSE}
+survey <- which(hdx$msLevel == 1)
 ```
 
-**End Exercise**
+**Exercise 2:**
+Next create a tibble to hold the sum of the ion current from each survey spectrum:
+
+```{r ex_2, eval=FALSE}
+totalIonCurrent = tibble(index = survey, time = 0.0, inten = 0.0)
+```
+
+**Exercise 3:**
+Finally fill the tibble with the information from the XML file using functions of mzR
+
+```{r ex_3, eval=FALSE}
+for( i in 1:length(survey)) {
+  totalIonCurrent$time[i] <- header(mzXML,survey[i])$retentionTime
+  totalIonCurrent$inten[i] <- sum(peaks(mzXML,survey[i])[,2])
+}
+```
+
+Now the TIC can be plotted using either base or ggplot functions:
+
+```{r plot_the_TIC, eval=FALSE}
+plot(totalIonCurrent$time, totalIonCurrent$inten, type="l")
+```
 
 
 ## Summary
-* **xml2** for read/writing xml files
-* **jsonlite** for read/writing json files
-* troubleshoot the returned query result to catch
-    + multiple values where a single was expected
-    + the same key names are in every entry
-    + the key names are always in the same order (or the conversion code robustly adjusts to handle this)
-    + numbers stored as strings
-    + strings stored as factors
+* **xml2** can be used for for reading and writing generic xml files
+* **mzR** can be used to read and write most mass spectrometry file formats
+* XML formats are text files which are verbose, large and slow to process, but they are resistent to changes in instrumentation, computer platforms and experimental designs.
