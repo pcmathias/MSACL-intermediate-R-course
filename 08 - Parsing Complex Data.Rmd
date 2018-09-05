@@ -41,7 +41,7 @@ mzXML <- openMSfile("7MIX_STD_110802_1.mzXML")
 
 ```
 
-**Exercise 1: **  
+**Exercise 1:**  
 
 ```{r ex1, eval = FALSE}
 # cd.tibble <- as_tibble( )
