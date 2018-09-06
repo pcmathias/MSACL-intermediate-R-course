@@ -17,6 +17,7 @@ This course is intended for laboratory professionals with a basic command of R a
 - Install the latest version of R by choosing the closest CRAN mirror here at https://cran.r-project.org/mirrors.html and downloading the version for your operating system
 - Install the latest version of RStudio Desktop at https://www.rstudio.com/products/rstudio/download/#download 
 - Open RStudio and confirm you are able to install packages by running `install.packages(c("tidyverse", "tinytex"), dependencies = TRUE)`
+  - If you do not already have LaTeX installed on your computer, run the following to install TinyTeX: `tinytex::install_tinytex()`. Note that you will get error messages when installing on Windows that are OK to click through.
 - If not already installed, install Git per instructions at https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
 - Go to Github at https://github.com and sign up for an account (if you don't have one already)
 
