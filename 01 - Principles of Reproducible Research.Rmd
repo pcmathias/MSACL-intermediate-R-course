@@ -320,18 +320,27 @@ Now both of your local repo and your remote repo are aligned.
 
 1. Navigate to your MSACL repository webpage (under your username in GitHub) and select the "New pull request" button near the top.
 1. Under "Compare changes", select the link to "compare across forks".
-1. Click the "base fork" button and select "pcmathias/MSACL-intermediate-R-course".
-1. Click the "head fork" button and select your repository.
-1. The "Create pull request" button should be available to select now. Click the button.
+1. Click the "base fork" button and select "pcmathias/MSACL-intermediate-R-course". Click the "base" button adjacent to the "base fork" button and select "class-contributions".
+1. Click the "head fork" button and select your repository, if not already selected.
+1. The "Create pull request" button should be available to select now. Click the button and add any comments to close out the pull request process.
+
+On our end, we will get a notification about a pull request and can choose to incorporate the code into the repository.
 
 **Optional steps:** If you would like to synchronize your MSACL repo with the main course repo in the future
 
 1. Open Terminal within RStudio on the bottom left of the window (tab is adjacent to Console tab).
 1. The Terminal window should be set to your MSACL course repo directory. Run `ls` to confirm that you see the course contents. If not, use `cd` to navigate to the right directory.
-1. Enter `git remote upstream https://github.com/pcmathias/MSACL-intermediate-R-course`.
+1. Enter `git remote add upstream https://github.com/pcmathias/MSACL-intermediate-R-course`.
 1. Enter `git remote -v` to list the remote repositories. You should see the main course repository listed as upstream.
 
-Now your course repository is linked to the main course repo. To sync with the original repository in the future, refer to instructions here: https://help.github.com/articles/syncing-a-fork.
+Now your course repository is linked to the main course repo.
+
+In the future, if you want to retrieve changes to the original course repo:
+1. With your working directory set to the project directory, enter `git fetch upstream` (in Terminal console or Git Bash). This pulls any changes from the upstream repo to your local system.
+1. Enter `git checkout master` to make sure you are on your master branch (explained more below).
+1. Enter `git merge upstream/master` to merge the course repo changes with your local repository.
+
+These instructions were adapted from the following: https://help.github.com/articles/syncing-a-fork.
 
 **End Exercise**
 
