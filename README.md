@@ -19,7 +19,7 @@ This course is intended for laboratory professionals with a basic command of R a
 - Open RStudio and confirm you are able to install packages by running `install.packages(c("tidyverse", "tinytex"), dependencies = TRUE)`
   - **If you do not already have LaTeX installed on your computer, run the following to install TinyTeX: `tinytex::install_tinytex()`.** Note that you will get error messages when installing on Windows that are OK to click through.
 - If not already installed, install Git per instructions at https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
- - **When installing on a Windows machine, select "Use Git from the Windows Command Prompt"**
+  - **When installing on a Windows machine, select "Use Git from the Windows Command Prompt"**
 - Go to Github at https://github.com and sign up for an account (if you don't have one already)
 - **Download the mock database zip file from [this link](https://indigobio.egnyte.com/fl/Bq6uXMpRKG), park it someplace you will remember for the course, and uncompress.**
 
