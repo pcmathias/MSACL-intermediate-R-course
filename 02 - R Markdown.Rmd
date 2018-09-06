@@ -145,7 +145,7 @@ Running chunks in an R Markdown document can be really helpful. Similarly to wor
 
 How do you avoid getting the wrong answer? One suggestion is to build a step in to periodically knit the whole document and review the output. Running the entire document should produce consistent results every time. Be aware of this issue and try to knit the document at least before the end of every session with an R Markdown document.
 
-There was a very recent [JupyterCon presentation](https://docs.google.com/presentation/d/1n2RlMdmv1p25Xy5thJUhkKGvjtV-dkAIsUXP-AL4ffI/edit#slide=id.g3d168d2fd3_0_142) on this topic that captured this issue plus others very nicely. (Jupyter is the Python equivalent of notebooks.) There are some differences between R Markdown (plus RStudio) and Jupyter notebooks, but many of the same issues do apply.
+There was a [JupyterCon presentation](https://docs.google.com/presentation/d/1n2RlMdmv1p25Xy5thJUhkKGvjtV-dkAIsUXP-AL4ffI/edit#slide=id.g3d168d2fd3_0_142) on this topic that captured this issue plus others very nicely. (Jupyter is the Python equivalent of notebooks.) There are some differences between R Markdown (plus RStudio) and Jupyter notebooks, but many of the same issues do apply.
 
 ## Further reading and resources for R Markdown
 
