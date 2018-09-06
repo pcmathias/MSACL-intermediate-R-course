@@ -26,10 +26,6 @@ This course is intended for laboratory professionals with a basic command of R a
 **Optional but strongly encouraged**
 - Please make an effort to complete the following Introduction to GitHub: https://services.github.com/on-demand/intro-to-github/
 
-<!---
- If you have problems with that link, the data is also available [here](https://indigobio.egnyte.com/fl/rjfI054C48) and [here](https://drive.google.com/file/d/1ruGqmwp_jfT8_wUCtMmC9hVyoZtT5aR7/view?usp=sharing). We will also have a copy on hand on a thumb drive as well.
---->
-
 ## Accessing/interacting with the course content
 
 There are multiple ways to access and interact with the course content. We want to minimize any headaches with setting up the course and grappling with finicky work computers, but also hope this is a good opportunity to get oriented with version control and git.
