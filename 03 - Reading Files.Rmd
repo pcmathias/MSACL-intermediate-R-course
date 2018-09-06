@@ -10,7 +10,6 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readxl)
-library(here)
 ```
 
 This is a much shorter and less philosophical lesson than the previous lessons but hopefully is very useful when considering how to pull data into R.
@@ -31,20 +30,20 @@ To be safe, the best practice is arguably to explicitly define column types when
 
 For the curious, additional information about the history of of stringsAsFactors can be found [here](https://simplystatistics.org/2015/07/24/stringsasfactors-an-unauthorized-biography/).
 
-> Exercise 1
-> 
-> Let's run through the base reading function with a csv.
-> 1. Use the base `read.csv()` function to read the "2017-01-06.csv" file into a data frame. Recall how to use the `here()` function - it is using the "coursework" directory as the point of reference
-> 1. What is the internal structure of the object? (Recall the `str()` command to quickly view the structure.)
-> 1. What does the data look like? (Recall the `summary()` function to view column types and characteristics about the data.)
+**Exercise 1**
+
+Let's run through the base reading function with a csv.
+1. Use the base `read.csv()` function to read the "2017-01-06.csv" file into a data frame. Recall how to use the `here()` function - it is using the "coursework" directory as the point of reference
+1. What is the internal structure of the object? (Recall the `str()` command to quickly view the structure.)
+1. What does the data look like? (Recall the `summary()` function to view column types and characteristics about the data.)
 
 ```{r base_load, eval = FALSE}
-base_load <- read.csv(here::here("class_data", "2017-01-06.csv"))
+base_load <- read.csv("data/2017-01-06.csv"))
 # str(base_load)
 summary(base_load)
 ```
 
-> Repeat the previous steps starting with #2, but include the argument `stringsAsFactors = FALSE` when you read in the data.
+Repeat the previous steps starting with #2, but include the argument `stringsAsFactors = FALSE` when you read in the data.
 
 ```{r base_load_nofactors, eval = FALSE}
 base_load_nofactors <- read.csv(here::here("class_data", "2017-01-06.csv"),
@@ -52,6 +51,8 @@ base_load_nofactors <- read.csv(here::here("class_data", "2017-01-06.csv"),
 # str(base_load_nofactors)
 summary(base_load_nofactors)
 ```
+
+**End Exercise**
 
 For this data set, which fields should be strings and which should be factors?
 
