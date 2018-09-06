@@ -259,6 +259,9 @@ We will explain why we "forked" the repository in more detail after the exercise
 
 Opening the repository as a project in RStudio:
 
+1. First we need to set up our git configuration to include our email address and user name. Open either Terminal (Mac) or Git Bash (Windows) and run the following:
+  1. git config --global user.name "*your username*"
+  1. git config --global user.email *your email address*
 1. Before we can use the Git interface in RStudio, we need to enable version control in the application. Navigate to "Global Options" under the Tools menu with RStudio and select "Git/SVN" on the lefthand menu. Ensure that the check box for "Enable version control interface for RStudio projects" is checked.
 1. Under the File menu within the RStudio application, select "New Project".
 1. Select "Version Control" in the first Create Project prompt.
