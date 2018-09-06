@@ -53,7 +53,7 @@ Now that we're thinking about creating directories for projects and directory st
 
 **Exercise 1**
 
-1. Navigate to your **Preferences** for the RStudio application and note the *Default working directory (when not in a project)*
+1. Navigate to "Global Options" under the Tools menu in the RStudio application and note the *Default working directory (when not in a project)*
 2. Navigate to your Console and get the working directory using `getwd()`
 3. Review the contents of your current folder using `list.files()`
 4. Now try to set your working directory using `setwd("test_dir")`. What happened?
