@@ -88,7 +88,7 @@ Let's start a new project :
 1. Navigate to the **File** menu and select **New Project...** OR Select the **Create a project** button on the global toolbar (2nd from the left)
 2. Select **New Directory** option
 3. In the Project Type prompt, select **New Project**
-4. In the Directory Name prompt under Create New Project, enter "intermediate-R-course"
+4. In the Directory Name prompt under Create New Project, enter "sample-project-structure"
 5. In the Create Project as a Subdirectory of prompt under Create New Project, navigate to the Projects folder you just created (or another directory of your choosing). You can type in the path or hit the **Browse** button to find the directory. Check the option for "Open in a new session" and create your project.
 
 **End Exercise**
@@ -120,7 +120,9 @@ This is a bare bones structure that should work for our purposes.
 
 **End Exercise**
 
-*Further exploration/tools for creating projects*: There is also a dedicated Project Template package that has a nice "minimal project layout" that can be a good starting point if you want R to do more of the work for you: [Project Template](http://projecttemplate.net/index.html). This package duplicates some functionality that the RStudio Project does for you, so you probably want to run it outside of an RStudio Project but it is a good tool to be aware of.
+*Further exploration/tools for creating projects*: The directory creation code in the above exercise can be packaged into a function that creates the folder structure for you (either within or outside of a project). Software Carpentry has a nice refresher on writing functions: https://swcarpentry.github.io/r-novice-inflammation/02-func-R/.
+
+There is also a dedicated Project Template package that has a nice "minimal project layout" that can be a good starting point if you want R to do more of the work for you: [Project Template](http://projecttemplate.net/index.html). This package duplicates some functionality that the RStudio Project does for you, so you probably want to run it outside of an RStudio Project but it is a good tool to be aware of.
 
 ### Name all files (and variables) to reflect their content or function
 
@@ -350,7 +352,7 @@ SSH is a useful protocol to know about in general. There is a short tutorial at 
 
 #### What should and shouldn't go into version control
 
-The last thing to consider is a question: should you put everything in your project under version control? Maybe not. Git and similar version control systems typically do not handle raw data files well and the repository site you use may impose file size limits (Github has a 100 MB limit). *Also note that your repository site may be public so storing sensitive data (such as health information) within the repo may be problematic.* The excellent article by [Wilson et al.](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510) covers these issues in more details and provides nice guidance about what should not go into version control.
+The last thing to consider is a question: should you put everything in your project under version control? Maybe not. Git and similar version control systems typically do not handle raw data files well and the repository site you use may impose file size limits (Github has a 100 MB limit). *Also note that your repository site may be public so storing sensitive data (such as health information) within the repo may be problematic.* The excellent article by [Wilson et al.](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510) covers these issues in more details and provides nice guidance about what should not go into version control. Practically, the .gitignore can help exclude specific files - it is simply a list of files or groups of files to ignore. As an example, including "*.html" in the .gitignore will exclude html pages from your repository. (The reason for doing this will become more obvious in the next lesson.)
 
 Finally, there are variety of resources available to learn Git. The [Pro Git](https://git-scm.com/book/en/v2) textbook has a lot of detail about a variety of Git topics. There is also a downloadable Git tutorial that may be helpful to reinforce many of the above concepts: https://github.com/jlord/git-it-electron.
 
