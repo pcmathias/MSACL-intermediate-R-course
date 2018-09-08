@@ -226,7 +226,7 @@ The basic functionality of a version control system tracks changes (in addition 
 
 ### A brief intro to Git
 
-This section is a high level summary of many concepts explained in Chapter 1 of the [Pro Git](https://git-scm.com/book/en/v2) textbook. There are other great resources to learn about using Git and using Git with RStudio, including https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN and http://r-bio.github.io/intro-git-rstudio/.
+This section is a high level summary of many concepts explained in Chapter 1 of the [Pro Git](https://git-scm.com/book/en/v2) textbook. There are other great resources to learn about using Git and using Git with RStudio, including http://happygitwithr.com, https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN, and http://r-bio.github.io/intro-git-rstudio/.
 
 Git was originally developed as a tool to support the development of Linux (the open source operating system that powers most web servers and many mobile devices). There were a variety of requirements but to meet the needs of a large open source project, the version control system needed to support many contributors working in parallel in a sizable code base.
 
@@ -366,7 +366,12 @@ SSH is a useful protocol to know about in general. There is a short tutorial at 
 
 The last thing to consider is a question: should you put everything in your project under version control? Maybe not. Git and similar version control systems typically do not handle raw data files well and the repository site you use may impose file size limits (Github has a 100 MB limit). *Also note that your repository site may be public so storing sensitive data (such as health information) within the repo may be problematic.* The excellent article by [Wilson et al.](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510) covers these issues in more details and provides nice guidance about what should not go into version control. Practically, the .gitignore can help exclude specific files - it is simply a list of files or groups of files to ignore. As an example, including "*.html" in the .gitignore will exclude html pages from your repository. (The reason for doing this will become more obvious in the next lesson.)
 
-Finally, there are variety of resources available to learn Git. The [Pro Git](https://git-scm.com/book/en/v2) textbook has a lot of detail about a variety of Git topics. There is also a downloadable Git tutorial that may be helpful to reinforce many of the above concepts: https://github.com/jlord/git-it-electron.
+#### Additional Git resources
+
+Finally, there are variety of resources available to learn Git.
+- The [Happy Git and GitHub for the useR](http://happygitwithr.com) online book walks through Git in a lot more detail, with a lot more explanation.
+- The [Pro Git](https://git-scm.com/book/en/v2) textbook has a lot of detail about a variety of Git topics outside of the context of R and RStudio. 
+- There is also a downloadable Git tutorial that may be helpful to reinforce many of the above concepts: https://github.com/jlord/git-it-electron.
 
 ## Summary
 
