@@ -1,7 +1,5 @@
 ---
 title: 'Lesson 6: Stronger visualizations with ggplot2 and lattice'
-author: "Randall Julian, Adam Zabell"
-date: "12/28/2017"
 output:
   pdf_document: default
   html_document: default
@@ -11,59 +9,63 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
-library(here)
 ```
 
-# Plotting Data With Default Graphics
+## Plotting Data With Default Graphics
 
 Default R comes with several basic plotting commands -- `plot` to draw an X,Y graph, `points` to add X,Y points to the current graph, `barplot` to draw vertical or horizontal bars, `boxplot` to draw box-and-whisker plots, `hist` to build and draw a histogram, and many other plot types or plot-specific additions to plots.
 
-The first major drawback to using these plots is that each requires learning a slightly different syntax to decorate the graph. For example, here are three plots basd on the January sample data, showing the ion ratios for all compounds and samples which exhibit and quant and qual peak. The first is a simple series plot, changing the default plot color to blue.  
+The first major drawback to using these plots is that each requires learning a slightly different syntax to decorate the graph. For example, here are three plots basd on the January sample data, showing the ion ratios for all compounds and samples which exhibit and quant and qual peak. The first is a simple series plot, changing the default plot color to blue.
+
 ```{r plot_color_syntax, eval = FALSE}
-jan.s <- read_csv(here::here("class_data", "2017-01-06.csv"))
-jan.s$idx <- c(1:nrow(jan.s))
-hasIonRatio <- jan.s$ionRatio > 0
-plot(jan.s$ionRatio[which(hasIonRatio)],col='blue')
+january_samples <- read_csv("data/2017-01-06_s.csv"))
+january_samples$idx <- c(1:nrow(january_samples))
+hasIonRatio <- january_samples$ionRatio > 0
+plot(january_samples$ionRatio[which(hasIonRatio)],col='blue')
 ```
 
-If you want a histogram instead of a sequential series, the function changes but based on how `plot` looked, the coloring results may not be what you expected.  
+If you want a histogram instead of a sequential series, the function changes but based on how `plot` looked, the coloring results may not be what you expected.
+
 ```{r plot_hist1, eval = FALSE}
-hist(jan.s$ionRatio[which(hasIonRatio)],col='blue')
+hist(january_samples$ionRatio[which(hasIonRatio)],col='blue')
 ```
 
-In order to plot the histogram with blue outline, to match the blue open circles of the first plot, you need to specify a different variable.  
+In order to plot the histogram with blue outline, to match the blue open circles of the first plot, you need to specify a different variable.
+
 ```{r plot_hist2, eval = FALSE}
-hist(jan.s$ionRatio[which(hasIonRatio)],border='blue',main='Histogram')
+hist(january_samples$ionRatio[which(hasIonRatio)],border='blue',main='Histogram')
 ```
 
-The second drawback is that these plots, while drawn quickly, require detailed sort and select mechanisms in order to display complex data on a single graph. Plotting a matrix of graphs (as shown below) is even more difficult and you may spend more time troubleshooting the graph than actually analyzing the data. Here is a simple example which colors the series data by compound.  
+The second drawback is that these plots, while drawn quickly, require detailed sort and select mechanisms in order to display complex data on a single graph. Plotting a matrix of graphs (as shown below) is even more difficult and you may spend more time troubleshooting the graph than actually analyzing the data. Here is a simple example which colors the series data by compound. 
+
 ```{r plot_by_compound, eval = FALSE}
-compounds <- unique(jan.s$compoundName)
+compounds <- unique(january_samples$compoundName)
 for (i in 1:length(compounds)) {
   if (i == 1) {
     plot(
-      jan.s$ionRatio[hasIonRatio & jan.s$compoundName == compounds[i]],
+      january_samples$ionRatio[hasIonRatio & january_samples$compoundName == compounds[i]],
       col = i,
       main = "color by compound"
     )
   } else {
     points(
-      jan.s$ionRatio[hasIonRatio & jan.s$compoundName == compounds[i]],
+      january_samples$ionRatio[hasIonRatio & january_samples$compoundName == compounds[i]],
       col = i
     )
   }
 }
 ```
 
+## Plotting Data With *ggplot2*
 
-# Plotting Data With *ggplot2*
 To maintain the tidy focus of the tidyverse, the **ggplot2** package keeps the same syntax for all graphing schemes, has arguably prettier default graphs, and a frankly intuitive means for layering/faceting of the underlying data. The main drawback is that plotting from a large data.frame is still measured in minutes. The mock data in this course definitely qualifies as a large dataset, so we recommend that plotting be used judiciously if you're not applying a filter (see below).
 
 Syntax follows the format of {'define the data' {+ 'describe the visualization'}} where each description is called a *geom* and multiple geoms can be stacked together. Definitions for the aesthetic mappings (e.g. plotTerms, color, iconShape, lineType) can be supplied when defining the data and are applied to the subsequent stack of geoms. Any mappings can be overridden within an individual geom.
 
-Our first two examples show the ggplot version of the per component plots previously done with lattice. Notice that defining the data can be done as a variable (here it is `g`) and that definition can be used later for any number of geoms.  
+Our first two examples show the ggplot version of the per component plots previously done with lattice. Notice that defining the data can be done as a variable (here it is `g`) and that definition can be used later for any number of geoms.
+
 ```{r gg_plotting_series, eval = FALSE}
-g <- jan.s %>%
+g <- january_samples %>%
   filter(ionRatio > 0) %>%
   ggplot(aes(x = idx, y = ionRatio, colour = sampleType))
 g + geom_point() + facet_wrap(~compoundName) + scale_x_continuous(labels = NULL)
@@ -79,18 +81,21 @@ g +
 
 We could easily spend the whole class session on this package, but the above plots showcase the basic syntax. The cheatsheet downloadable from the link at the end of this lesson provides additional examples of what can be done.
 
-**Exercise 1: Draw a better histogram**  
+**Exercise 1**  
+
 The default histogram paramaters for ggplot will stack the sample types in the same bin, making it difficult to determine if the trend for qc and standard samples is the same as the unknowns. The first plot in this exercise makes adjacent bars, but what does the second plot do? 
 
 ```{r ex1, eval = FALSE}
-g <- jan.s %>%
+g <- january_samples %>%
   filter(ionRatio > 0) %>%
   ggplot(aes(x = ionRatio, colour = sampleType, fill = sampleType))
 # g + geom_histogram(position='dodge', bins= ) + facet_wrap(~compoundName)
 # g + geom_histogram(aes(y=..density..), bins= ) + facet_grid(sampleType~compoundName)
 ```
 
+**End Exercise**
+
 ## Summary
 * [ggplot2 cheatsheat](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
 * [download a PDF comparison of both packages](http://www.londonr.org/download/?id=69)
-* [download an older PDF showing the system.time comparison](https://learnr.files.wordpress.com/2009/08/latbook_time1.pdf)
+
