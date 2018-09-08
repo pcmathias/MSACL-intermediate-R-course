@@ -1,5 +1,5 @@
 ---
-title: 'Lesson 8: Beyond the csv -- parsing xml files'
+title: 'Lesson 9: Beyond the csv -- parsing xml files'
 author: "Randall Julian, Adam Zabell"
 date: "9/3/2018"
 output:
@@ -37,7 +37,7 @@ library(mzR)
 ```{r reading_mzXML, eval=FALSE}
 # From the mzR docs: https://bioconductor.org/packages/devel/bioc/vignettes/mzR/inst/doc/mzR.html
 
-mzXML <- openMSfile("7MIX_STD_110802_1.mzXML")
+mzXML <- openMSfile("data/7MIX_STD_110802_1.mzXML")
 
 header(mzXML,10)
 peaksCount(mzXML,10)
@@ -46,25 +46,26 @@ pl <- peaks(mzXML,10)
 plot(pl[,1], pl[,2], type="h", lwd=1)
 
 header(mzXML,11)
-
 hdx<-header(mzXML)
 ```
 
-**Exercise 1:**
+**Exercise 1: Find the MS Level 1 (Survey) Scans**
 Notice that the header contains the variable `msLevel` which is set to 1 for a survey scan (MS) or 2 for an MS/MS scan (MS^n). In the exercise, you will create chromatogram from the total ion current of all the MS survey scans. Step 1 will be to create a vector of the survey scan numbers:
 
 ```{r ex_1, eval=FALSE}
 survey <- which(hdx$msLevel == 1)
 ```
+**End of Exercise**
 
-**Exercise 2:**
+**Exercise 2: Create a `tibble` to hold and label the desired spectra**
 Next create a tibble to hold the sum of the ion current from each survey spectrum:
 
 ```{r ex_2, eval=FALSE}
 totalIonCurrent = tibble(index = survey, time = 0.0, inten = 0.0)
 ```
+**End of Exercise**
 
-**Exercise 3:**
+**Exercise 3: Load the `tibble` with the total ion current from each spectrum**
 Finally fill the tibble with the information from the XML file using functions of mzR
 
 ```{r ex_3, eval=FALSE}
@@ -73,6 +74,7 @@ for( i in 1:length(survey)) {
   totalIonCurrent$inten[i] <- sum(peaks(mzXML,survey[i])[,2])
 }
 ```
+**End of Exercise**
 
 Now the TIC can be plotted using either base or ggplot functions:
 
