@@ -2,8 +2,8 @@
 title: 'Lesson 3: Reading files - beyond the basics'
 author: "Patrick Mathias"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -141,7 +141,7 @@ readr_load <- read_csv("data/2017-01-06_b.csv")
 ```
 
 ```{r}
-str()
+str(readr_load)
 ```
 
 3. Summarize the data.
@@ -151,7 +151,7 @@ str()
 ```
 
 ```{r}
-summary()
+summary(readr_load)
 ```
 
 4. Finally, let's follow some best practices and explicitly define columns with the `col_types` argument. We want to explicitly define compoundName and sampleType as factors. Note that the `col_factor()` expects a definition of the factor levels but you can get around this by supplying a `NULL`. Then run a summary to review the data.
@@ -211,7 +211,7 @@ readxl_load_subset <- read_excel( , range = )
 
 ```
 
-```{r readxl, eval = FALSE}
+```{r}
 readxl_load <- read_excel("data/orders_data_set.xlsx")
 summary(readxl_load)
 readxl_load_subset <- read_excel("data/orders_data_set.xlsx", range = cell_cols("A:E"))
@@ -230,8 +230,8 @@ To close out the discussion on reading files, there is one more useful package t
 Let's take these functions for a spin using our data set. We are going to use the development version of the package because there is new, additional functionality. I will chain the commands together with pipes (which we'll discuss in more detail in the next lesson).
 
 First let's review the first few lines of data after cleaning the columns names:
-```{r janitor, eval = FALSE}
-install.packages("janitor", dependencies = TRUE)
+```{r janitor}
+# install.packages("janitor", dependencies = TRUE) # uncomment to install if needed
 # the development version of janitor handles cleaning names better than the current CRAN version
 library(janitor)
 readxl_load_cleaned <- readxl_load %>%
