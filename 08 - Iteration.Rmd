@@ -1,7 +1,7 @@
 ---
-title: 'Lesson 9: Scaling with purrr to loop through a vector'
+title: 'Lesson 8: Scaling with purrr to loop through a vector'
 author: "Randall Julian, Adam Zabell"
-date: "1/3/2018"
+date: "9/3/2018"
 output:
   pdf_document: default
   html_document: default
@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
-# Looping Commands
+## Looping Commands
 Reducing duplication in your typed code makes it easier to see the purpose of the code, easier to change the calculation, and easier to remove bugs. The three typical methods in R to iterate with a specific piece of code are functions, for-loops, and vector transformations with the **purrr** package.
 
 ## Looping with user functions
@@ -59,26 +59,24 @@ medianByColumn <- function(tb) {
 }
 ```
 
-> Exercise 1: Making a two-variable function that 'switches'  
-> Create a function `medianBy( )` that accepts both the data.frame and a logical value to indicate whether the result should be by row or column.
+**Exercise 1: Making a two-variable function that 'switches'**  
+Create a function `medianBy( )` that accepts both the data.frame and a logical value to indicate whether the result should be by row or column.
 
-```{r ex1, eval = FALSE}
+```{r switching, eval = FALSE}
 medianBy <- function(tb, byRow=FALSE) {
-
+  if(byRow) {l <- nrow(tb)} else {l <- ncol(tb)}
+  recordOfValues <- vector("double", l)
+  for(i in 1:l) {
+    if(byRow) {v <- unlist(tb[i,])} else {v <- unlist(tb[,i])}
+    recordOfValues[i] <- median(v)
+  }
+  return(recordOfValues)
 }
 ```
+**End of Exercise**
 
-The *while* loop is used when the work being performed should continue until a logical condition occurs. The obvious risk is that the condition never occurs, prompting the need for a failsafe. They are rarely used, but here are two examples.  
+The *while* loop is used when the work being performed should continue until a logical condition occurs.
 ```{r while_loop, eval = FALSE}
-numberOfFlips <- 0
-numberOfHeads <- 0
-while (numberOfHeads < 3) { # risky
-  if (sample(c("H", "T"), 1) == "H") {
-    numberOfHeads <- numberOfHeads + 1
-  }
-  numberOfFlips <- numberOfFlips + 1
-}
-
 countedFlips <- 0
 numberOfTails <- 0
 while (numberOfTails < 3 | countedFlips == 1000) { # safer
@@ -105,15 +103,17 @@ medianByRow <- function(tb) {
 }
 ```
 
-> Exercise 2: Improve the `medianBy( )` function to use map looping.  
-
-```{r ex2, eval = FALSE}
-medianBy <- function(tb, byRow=FALSE) {
-
+**Exercise 2: Improve the `medianBy( )` function to use map looping.** 
+```{r map_looping, eval = FALSE}
+medianBy <- function(tb,byRow=FALSE) {
+  if(byRow) {tb <- as_tibble(t(tb))}
+  recordOfValues <- map_dbl(tb,median) %>% unname()
+  return(recordOfValues)
 }
 ```
+**End of Exercise**
 
-# Nested Looping 
+## Nested Looping 
 Having built one loop, a second (or more) iteration may still be necessary to do the work. This is usually done for simple counting variables like `i` and `j` as shown below. 
 ```{r nested_for, eval = FALSE}
 vectorList <- vector("list", 10)
