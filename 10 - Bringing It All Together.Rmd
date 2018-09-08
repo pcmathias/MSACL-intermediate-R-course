@@ -97,7 +97,7 @@ We intentionally included several other issues within the database, which will r
 **Exercise : Revealing an ion ratio problem** 
 Ion ratios can be particularly sensitive to instrument conditions, and variability is a significant problem in mass spec based assays which use qualifying ions. With the tools that have been demonstrated in this course, we can look for outlier spikes and stability trends, and separate them out across instruments, or compounds, or sample types. First, plot the ion ratio as a function of instrument name. What trends are most obvious, and what is the reason for each of them? What additional variables would help besides the ones captured in the sample data.frame?
 
-```{r ex}
+```{r}
 # 1 #
 oneYearSamples %>%
   left_join(oneYearBatches) %>%
