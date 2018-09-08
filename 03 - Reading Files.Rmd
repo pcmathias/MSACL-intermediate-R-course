@@ -2,15 +2,14 @@
 title: 'Lesson 3: Reading files - beyond the basics'
 author: "Patrick Mathias"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readxl)
-library(here)
 ```
 
 This is a much shorter and less philosophical lesson than the previous lessons but hopefully is very useful when considering how to pull data into R.
@@ -31,29 +30,58 @@ To be safe, the best practice is arguably to explicitly define column types when
 
 For the curious, additional information about the history of of stringsAsFactors can be found [here](https://simplystatistics.org/2015/07/24/stringsasfactors-an-unauthorized-biography/).
 
-> Exercise 1
-> 
-> Let's run through the base reading function with a csv.
-> 1. Use the base `read.csv()` function to read the "2017-01-06.csv" file into a data frame. Recall how to use the `here()` function - it is using the "coursework" directory as the point of reference
-> 1. What is the internal structure of the object? (Recall the `str()` command to quickly view the structure.)
-> 1. What does the data look like? (Recall the `summary()` function to view column types and characteristics about the data.)
+**Exercise 1**
+
+Let's run through the base reading function with a csv.
+
+1. Use the base `read.csv()` function to read the "2017-01-06_s.csv" file in the data folder into a data frame.
+
+```{r, eval = FALSE}
+base_load <- 
+```
+
+```{r}
+base_load <- read.csv("data/2017-01-06_s.csv")
+```
+
+2. What is the internal structure of the object? (Recall the `str()` command to quickly view the structure.)
+
+```{r, eval = FALSE}
+
+```
+
+```{r}
+str(base_load)
+```
+
+3. Summarize the data. (Recall the `summary()` function to view column types and characteristics about the data.)
 
 ```{r base_load, eval = FALSE}
-base_load <- read.csv(here::here("class_data", "2017-01-06.csv"))
-# str(base_load)
+
+```
+
+```{r}
 summary(base_load)
 ```
 
-> Repeat the previous steps starting with #2, but include the argument `stringsAsFactors = FALSE` when you read in the data.
+4. Repeat the previous steps starting with #2, but include the argument `stringsAsFactors = FALSE` when you read in the data.
 
 ```{r base_load_nofactors, eval = FALSE}
-base_load_nofactors <- read.csv(here::here("class_data", "2017-01-06.csv"),
+base_load_nofactors <- 
+str()
+summary()
+```
+
+```{r}
+base_load_nofactors <- read.csv("data/2017-01-06_s.csv",
                                 stringsAsFactors = FALSE)
-# str(base_load_nofactors)
+str(base_load_nofactors)
 summary(base_load_nofactors)
 ```
 
-For this data set, which fields should be strings and which should be factors?
+5. For this data set, which fields should be strings and which should be factors?
+
+**End Exercise**
 
 ### Writing files
 
@@ -66,7 +94,7 @@ write.table(x, file = "", append = FALSE, quote = TRUE, sep = " ",
 ```
 There are a few other important parameters:
 - `sep` indicates the field separator ("\t" for tab)
-- `row.names` is set to TRUE by default - in general this makes for an ugly output file becuase the first column shows the row number (I almost always set this to FALSE)
+- `row.names` is set to TRUE by default - in general this makes for an ugly output file becuase the first column shows the row number (I almost always set this to FALSE when I use the base function)
 - `na` indicates the string to use for missing data and is set to R's standard of "NA" by default
 - `append` can be set to TRUE if you would like to append your data frame/matrix to an existing file
 
@@ -93,43 +121,74 @@ Another advantage of these functions is that they actually explicitly tell you h
 
 Readr also offers equivalent write functions such as `write_csv()` and `write_tsv()`. There is a variant of `write_csv()` specifically for csv files intended to be read with Excel: `write_excel_csv()`. These functions do not write row names by default.
 
-> Exercise 2
->
-> Now let's run through using the readr function for a csv:
-> 1. Use the `read_csv()` function to read the "2017-01-06.csv" file into a data frame.
-> 1. What is the internal structure of the object? (Recall the `str()` command to quickly view the structure.)
-> 1. What does the data look like? (Recall the `summary()` function to view column types and characteristics about the data.)
+**Exercise 2**
 
-```{r readr_load, eval = FALSE}
-readr_load <- read_csv()
+Now let's run through using the readr function for a csv:
+1. Use the `read_csv()` function to read the "2017-01-06_s.csv" file into a data frame.
 
+```{r, eval=FALSE}
+readr_load <- 
+```
+
+```{r}
+readr_load <- read_csv("data/2017-01-06_b.csv")
+```
+
+2. What is the internal structure of the object?
+
+```{r}
 
 ```
 
-Now compare the time required to run the base `read.csv()` function with the readr `read_csv()` function using `system.time()`.
+```{r}
+str(readr_load)
+```
 
-**Time to read with base:** 
+3. Summarize the data.
+
+```{r, eval = FALSE}
+
+```
+
+```{r}
+summary(readr_load)
+```
+
+4. Finally, let's follow some best practices and explicitly define columns with the `col_types` argument. We want to explicitly define compoundName and sampleType as factors. Note that the `col_factor()` expects a definition of the factor levels but you can get around this by supplying a `NULL`. Then run a summary to review the data.
+
+```{r col_types, eval = FALSE}
+readr_load_factors <- read_csv( ,
+  col_types = cols(
+    
+    
+    )
+  )
+summary( )
+```
+
+```{r}
+readr_load_factors <- read_csv("data/2017-01-06_b.csv",
+                               col_types = cols(
+                                 compoundName = col_factor(NULL),
+                                 sampleType = col_factor(NULL)
+                                 )
+                               )
+summary(readr_load_factors)
+```
+
+**End Exercise**
+
+For reference we can compare the time required to run the base `read.csv()` function with the readr `read_csv()` function using `system.time()`.
+
+*Time to read with base:*
 ```{r, eval = FALSE}
 system.time(base_load <- read.csv(here::here("class_data", "2017-01-06.csv")))
 ```
 
-**Time to read with readr:** 
+*Time to read with readr:*
 ```{r, eval = FALSE}
 system.time(readr_load <- read_csv(here::here("class_data", "2017-01-06.csv")))
 ```
-
-Finally, let's follow some best practices and explicitly define columns with the `col_types` argument. We want to explicitly define compoundName and sampleType as factors. Note that the `col_factor()` expects a definition of the factor levels but you can get around this by supplying a `NULL`. Then run a summary to review the data
-```{r col_types, eval = FALSE}
-readr_load_factors <- read_csv(
-  here::here("class_data", "2017-01-06.csv"),
-  col_types = cols(
-    compoundName = col_factor(NULL),
-    sampleType = col_factor(NULL)
-    )
-  )
-summary(readr_load_factors)
-```
-
 
 ## Dealing with Excel files (gracefully)
 
@@ -137,20 +196,29 @@ You may have broken up with Excel, but unfortunately many of your colleagues hav
 
 If you are dealing with Excel data that is not a traditional tabular format, the [tidyxl package](https://cran.r-project.org/web/packages/tidyxl/vignettes/tidyxl.html) is useful to be aware of. We will not cover it in this course but it is worth reading up on if you ever have to analyze a pivot table or some other product of an Excel analysis.
 
-> Exercise 3
->
-> You might be able to guess what comes next: we'll read in an Excel file.
-> 1. Use the `read_excel()` function to read the "2017-01-06.xlsx" file into a data frame
-> 1. View a summary of the imported data
-> 1. Now read in only the first 6 columns using the `range` parameter
-> 1. Review the first 6 lines of the imported data
+**Exercise 3**
+
+You might be able to guess what comes next: we'll read in an Excel file.
+1. Use the `read_excel()` function to read the "orders_data_set.xlsx" file into a data frame
+1. View a summary of the imported data
+1. Now read in only the first 5 columns using the `range` parameter
+1. Review the first 6 lines of the imported data
 
 ```{r readxl, eval = FALSE}
 readxl_load <- read_excel( )
-summary()
+
 readxl_load_subset <- read_excel( , range = )
+
+```
+
+```{r}
+readxl_load <- read_excel("data/orders_data_set.xlsx")
+summary(readxl_load)
+readxl_load_subset <- read_excel("data/orders_data_set.xlsx", range = cell_cols("A:E"))
 head(readxl_load_subset)
 ```
+
+**End Exercise**
 
 ## Importing dirty data
 
@@ -162,19 +230,65 @@ To close out the discussion on reading files, there is one more useful package t
 Let's take these functions for a spin using our data set. We are going to use the development version of the package because there is new, additional functionality. I will chain the commands together with pipes (which we'll discuss in more detail in the next lesson).
 
 First let's review the first few lines of data after cleaning the columns names:
-```{r janitor, eval = FALSE}
-devtools::install_github("sfirke/janitor") 
+```{r janitor}
+# install.packages("janitor", dependencies = TRUE) # uncomment to install if needed
 # the development version of janitor handles cleaning names better than the current CRAN version
 library(janitor)
-readr_load_cleaned <- readr_load %>%
+readxl_load_cleaned <- readxl_load %>%
   clean_names()
-head(readr_load_cleaned)
+head(readxl_load_cleaned)
 ```
 
-Now we'll do a quick tabulation to count the number of rows:
+Now we'll do a quick tabulation to count the different order classes in this orders data set:
 ```{r tabyl, eval = FALSE}
-readr_load_cleaned %>% tabyl(compound_name)
+readxl_load_cleaned %>% tabyl(order_class_c_descr)
 ```
+
+## Importing multiple files at once
+
+One of the most compelling reasons to learn how to program is being able to expand your ability to automate or effortless repeat common actions and workflows. In most research and clinic lab environments, the data that people deal with day-to-day is not neatly stored in an easy-to-use database. It is often spread out over a series of messy spreadsheets that might be associated with one batch of data, one day of data, one week of data, or some variant. While the best practice for that scenario is probably to build a database to store the data, that requires a good amount of overhead and some expertise. By taking advantage of iteration in R, you can dump similiarly formatted files into data frames (tibbles).
+
+The [purrr package](https://purrr.tidyverse.org) has a variety of `map()` functions that are well-explained in the [iteration chapter](http://r4ds.had.co.nz/iteration.html) of R for Data Science. The `map()` functions take a vector as an input, applies a function to elements of the vector, and returns a vector of identical length to the input vector. There are a number of map functions that correspond to the data type of the output. For example, `map()` returns a list, `map_int()` returns a vector of integers, `map_chr()` returns a character vector, and `map_dfr()` returns a data frame. These are very similar to the `apply()` family of functions but there are some advantages of the purrr functions, including consistent compabibility with pipes and more predictable output data types. 
+
+How does this work? Let's take a simple example right out of the R for Data Science text. We'll start with a tibble (tidyverse version of data frame) consisting of 4 variables (a through d) with 10 observations from a normal distribution.
+
+```{r}
+df <- tibble(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
+```
+
+We want to treat each variable as a vector and perform a calculation on each. If we want to take the mean of each and want the output to have a double data type, we use `map_dbl()`:
+
+```{r}
+df %>%
+  map_dbl(mean)
+```
+
+That is a pretty simple example but it captures the types of operations you can you do by iterating through a data set. For those of you who are familiar with for loops, the map functions can offer similar functionality but are much shorter to write and straight-forward to understand.
+
+Earlier in this lesson we discussed file reading functions, with the recognition that many data analysis tasks rely on flat files for source data. In a laboratory running batched testing such as a mass spectrometry lab, files are often tied to batches and/or dates and named correspondingly. If you want to analyze a set of data over multiple batches, you may find yourself importing data from each individually and stitching together the data using a function like `bind_rows()` (we will discuss this function in a future lesson). The `map()` functions (often `map_dfr()` specifically) can automate this process and save you a lot of time. There are a few prerequisites for this to work, though:
+- the underlying file structure must be the same: for spreadsheet-like data, columns must be in the same positions in each with consistent data types
+- the files must have the same file extension
+- if there are multiple different file types (with different data structures) mixed in one directory, the files must organized and named in a way to associate like data sets with like
+
+In the last lesson we placed our large mass spec data set in the data folder. This consists of a series of monthly data that are grouped into batches, samples, and peaks data, with suffixes of "_b", "_s", and "_p", respectively. Let's read all of the sample data into one data frame (technically a tibble). We are going to use the `read_csv()` function since the files are csvs. To use the `map_dfr()` function, we need to supply a vector as input - in this case, a vector of file names. How do generate that input vector?
+- First we use `list.files()`, which produces a character vector of names of files in a directory, which is the first argument. The function allows a pattern argument which you can supply with a text string for it to match against - all of the sample files end in "_s.csv".
+- Next we pipe that list to `file.path()`, which provides an operating system agnostic way of spitting out a character vector that corresponds to the appropriate file name and path. We started with the names of the files we care about, but we need to append the "data" folder to the beginning of the names. You'll notice that we used a period as the second argument - this is because by default the pipe feeds the output of the previous step into the first argument. The period is a placeholder to indicate that the output should be fed into a different argument.
+- Finally we feed that character to `map_df()`, which takes the `read_csv()` function as its argument. With the map family of functions, there is no need to include the parentheses in the function name if there arent' arguments.
+
+```{r}
+all_samples <- list.files("data", pattern = "_s.csv") %>%
+  file.path("data", .) %>%
+  map_dfr(read_csv) %>%
+  clean_names()
+summary(all_samples)
+```
+
+If you weren't already aware of this solution or another for reading in multiple files at once, the purrr package is an extremely handy tool for doing this. Just be aware of the requirements for doing this, and **always check the output**. You do not want to automate a bad or broken process!
 
 ## Summary
 
@@ -182,3 +296,4 @@ readr_load_cleaned %>% tabyl(compound_name)
 * readr functions such as `read_delim()` or `read_csv()` are faster than base R functions and do not automatically convert strings to factors
 * The readxl function `read_excel()` reads Excel files and offers functionality in specifying worksheets or subsets of the spreadsheet
 * The janitor package can help with cleaning up irregularly structured input files
+* The purrr package has useful tools for iterating that can be very powerful when coupled with file reading functions
