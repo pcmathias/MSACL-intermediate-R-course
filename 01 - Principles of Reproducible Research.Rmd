@@ -3,7 +3,6 @@ title: 'Lesson 1: Adopting principles of reproducible research'
 author: "Patrick Mathias"
 output:
   html_document: default
-  pdf_document: default
 ---
 
 ## What is reproducible research?
@@ -218,7 +217,7 @@ Either approach to package management will work - the important point here is to
 
 ## Use a version control system
 
-![One of many justifications for using version control. Source: phdcomics.com](assets/phd_comic_final_version.gif)
+![One of many justifications for using version control. Source: phdcomics.com](assets/phd_comic_final_version.jpg)
 
 The concept of capturing changes to a document by resaving the file with different names is well-intentioned and lines up with previous concepts of reproducibilty. This can help capture changes you've made in the evolution of a project. The problem with this method is that it is very clunky and, realistically, you will not be able to capture every single change you've made. When writing code, you often do want to capture changes at a higher resolution than when writing a paper or other text document. 
 
