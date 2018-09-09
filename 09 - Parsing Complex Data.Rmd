@@ -1,7 +1,5 @@
 ---
 title: 'Lesson 9: Beyond the csv -- parsing xml files'
-author: "Randall Julian, Adam Zabell"
-date: "9/3/2018"
 output:
   html_document: default
   word_document: default
@@ -24,7 +22,7 @@ With standards like mzXML, mzData, mzML, and other mass spectrometry formats (in
 
 One of the more useful XML packages for mass spectrometry is currently **mzR** which is part of the **Bioconductor** suite of tools. Bioconductor is a giant collection of packages, and sometimes only part of the suite is needed. The Bioconductor group has provided a mechanism to install just a part of the overall collection, which we will use to install mzR:
 
-```{r install_mzR, eval=FALSE}
+```{r}
 ## try http:// if https:// URLs are not supported
 source("https://bioconductor.org/biocLite.R")
 biocLite("mzR")
@@ -34,8 +32,8 @@ library(mzR)
 
 
 
-```{r reading_mzXML, eval=FALSE}
-# From the mzR docs: https://bioconductor.org/packages/devel/bioc/vignettes/mzR/inst/doc/mzR.html
+```{r}
+# More on the mzR package: https://bioconductor.org/packages/devel/bioc/vignettes/mzR/inst/doc/mzR.html
 
 mzXML <- openMSfile("data/7MIX_STD_110802_1.mzXML")
 
@@ -52,33 +50,47 @@ hdx<-header(mzXML)
 **Exercise 1: Find the MS Level 1 (Survey) Scans**
 Notice that the header contains the variable `msLevel` which is set to 1 for a survey scan (MS) or 2 for an MS/MS scan (MS^n). In the exercise, you will create chromatogram from the total ion current of all the MS survey scans. Step 1 will be to create a vector of the survey scan numbers:
 
-```{r ex_1, eval=FALSE}
+```{r}
 survey <- which(hdx$msLevel == 1)
+```
+
+```{r, eval=FALSE}
+survey <- which( )
 ```
 **End of Exercise**
 
 **Exercise 2: Create a `tibble` to hold and label the desired spectra**
 Next create a tibble to hold the sum of the ion current from each survey spectrum:
 
-```{r ex_2, eval=FALSE}
+```{r}
 totalIonCurrent = tibble(index = survey, time = 0.0, inten = 0.0)
+```
+
+```{r, eval=FALSE}
+totalIonCurrent = tibble( )
 ```
 **End of Exercise**
 
 **Exercise 3: Load the `tibble` with the total ion current from each spectrum**
 Finally fill the tibble with the information from the XML file using functions of mzR
 
-```{r ex_3, eval=FALSE}
+```{r}
 for( i in 1:length(survey)) {
   totalIonCurrent$time[i] <- header(mzXML,survey[i])$retentionTime
   totalIonCurrent$inten[i] <- sum(peaks(mzXML,survey[i])[,2])
+}
+```
+
+```{r, eval=FALSE}
+for(  ) {
+# put your code here
 }
 ```
 **End of Exercise**
 
 Now the TIC can be plotted using either base or ggplot functions:
 
-```{r plot_the_TIC, eval=FALSE}
+```{r}
 plot(totalIonCurrent$time, totalIonCurrent$inten, type="l")
 ```
 
