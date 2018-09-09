@@ -185,6 +185,7 @@ First let's review the first few lines of data after cleaning the columns names:
 # install.packages("janitor", dependencies = TRUE) # uncomment to install if needed
 # the development version of janitor handles cleaning names better than the current CRAN version
 library(janitor)
+readxl_load <- read_excel("data/orders_data_set.xlsx")
 readxl_load_cleaned <- readxl_load %>%
   clean_names()
 head(readxl_load_cleaned)
@@ -210,6 +211,7 @@ df <- tibble(
   c = rnorm(10),
   d = rnorm(10)
 )
+df
 ```
 
 We want to treat each variable as a vector and perform a calculation on each. If we want to take the mean of each and want the output to have a double data type, we use `map_dbl()`:
@@ -243,8 +245,8 @@ If you weren't already aware of this solution or another for reading in multiple
 
 ## Summary
 
-* The base R functions for reading files `read.delim()`, `read.csv()`, etc. are useful tools but it is important to recognize how they handle strings (and the dangers in automatic conversion to factors)
-* readr functions such as `read_delim()` or `read_csv()` are faster than base R functions and do not automatically convert strings to factors
-* The readxl function `read_excel()` reads Excel files and offers functionality in specifying worksheets or subsets of the spreadsheet
-* The janitor package can help with cleaning up irregularly structured input files
-* The purrr package has useful tools for iterating that can be very powerful when coupled with file reading functions
+- The base R functions for reading files `read.delim()`, `read.csv()`, etc. are useful tools but it is important to recognize how they handle strings (and the dangers in automatic conversion to factors)
+- readr functions such as `read_delim()` or `read_csv()` are faster than base R functions and do not automatically convert strings to factors
+- The readxl function `read_excel()` reads Excel files and offers functionality in specifying worksheets or subsets of the spreadsheet
+- The janitor package can help with cleaning up irregularly structured input files
+- The purrr package has useful tools for iterating that can be very powerful when coupled with file reading functions
