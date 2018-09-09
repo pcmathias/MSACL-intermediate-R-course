@@ -50,10 +50,6 @@ hdx<-header(mzXML)
 **Exercise 1: Find the MS Level 1 (Survey) Scans**
 Notice that the header contains the variable `msLevel` which is set to 1 for a survey scan (MS) or 2 for an MS/MS scan (MS^n). In the exercise, you will create chromatogram from the total ion current of all the MS survey scans. Step 1 will be to create a vector of the survey scan numbers:
 
-```{r}
-survey <- which(hdx$msLevel == 1)
-```
-
 ```{r, eval=FALSE}
 survey <- which( )
 ```
@@ -61,10 +57,6 @@ survey <- which( )
 
 **Exercise 2: Create a `tibble` to hold and label the desired spectra**
 Next create a tibble to hold the sum of the ion current from each survey spectrum:
-
-```{r}
-totalIonCurrent = tibble(index = survey, time = 0.0, inten = 0.0)
-```
 
 ```{r, eval=FALSE}
 totalIonCurrent = tibble( )

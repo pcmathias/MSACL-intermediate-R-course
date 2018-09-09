@@ -116,13 +116,6 @@ samples_jan_oxy_ir <- samples_jan %>%
 summary()
 ```
 
-```{r}
-samples_jan_oxy_ir <- samples_jan %>%
-  filter(sample_type == "unknown", concentration > 0, compound_name == "oxycodone") %>%
-  select(batch_name, sample_name, compound_name, ion_ratio)
-summary(samples_jan_oxy_ir)
-```
-
 **End Exercise**
 
 ### Expanding your data set
@@ -188,21 +181,6 @@ mean()
 max()
 ```
 
-```{r}
-batch_jan_reviews <- batch_jan %>%
-  mutate(review_start_timestamp = mdy_hm(review_start_timestamp),
-         review_complete_timestamp = mdy_hm(review_complete_timestamp),
-         review_duration = as.numeric(difftime(review_complete_timestamp, review_start_timestamp,
-                                               units = "mins")))
-# note: the output of difftime is a time interval, convert to numeric to avoid confusion downstream
-reviews_jan_grouped <- batch_jan_reviews %>%
-  distinct(batch_name, review_duration) 
-min(reviews_jan_grouped$review_duration)
-median(reviews_jan_grouped$review_duration)
-mean(reviews_jan_grouped$review_duration)
-max(reviews_jan_grouped$review_duration)
-```
-
 **End Exercise**
 
 ### Collapse (summarize) your data set
@@ -259,22 +237,6 @@ sample_means_jan <- sample_stats_jan %>%
 sample_means_jan
 ```
 
-```{r}
-sample_stats_jan <- samples_jan %>%
-  filter(sample_type == "unknown") %>%
-  group_by(batch_name, compound_name) %>%
-  summarize(min_conc = min(concentration),
-            median_conc = median(concentration),
-            mean_conc = mean(concentration),
-            max_conc = max(concentration)
-            )
-head(sample_stats_jan)
-sample_means_jan <- sample_stats_jan %>%
-  group_by(compound_name) %>%
-  summarize(overall_mean = mean(mean_conc))
-sample_means_jan
-```
-
 **End Exercise**
 
 ## Shaping and tidying data with tidyr
@@ -324,17 +286,6 @@ batch_jan_gathered <- batch_jan_messy %>%
   gather()
 batch_jan_tidy <- batch_jan_gathered %>%
   spread()
-```
-
-```{r}
-batch_jan_messy <- read_csv("data/messy/2017-01-06-batch-messy.csv")
-head(batch_jan_messy, 10)
-batch_jan_gathered <- batch_jan_messy %>%
-  gather("codeine",	"hydrocodone", "hydromorphone",	"morphine",	"oxycodone", 
-         "oxymorphone", key = "compound_name", value = "value")
-batch_jan_tidy <- batch_jan_gathered %>%
-  spread(key = "parameter", value = "value")
-head(batch_jan_tidy, 10)
 ```
 
 ## Summary

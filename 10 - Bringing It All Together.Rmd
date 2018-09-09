@@ -92,71 +92,9 @@ The second plot shows that calibrators were dropped regardless of whether they w
 
 We intentionally included several other issues within the database, which will require aggregation and plotting to discover.
 
-**Exercise 1: Revealing an ion ratio problem** 
+**Exercises: Revealing an ion ratio problem** 
 Ion ratios can be particularly sensitive to instrument conditions, and variability is a significant problem in mass spec based assays which use qualifying ions. With the tools that have been demonstrated in this course, we can look for outlier spikes and stability trends, and separate them out across instruments, or compounds, or sample types. First, plot the ion ratio as a function of instrument name. What trends are most obvious, and what is the reason for each of them? What additional variables would help besides the ones captured in the sample data.frame?
 
-```{r}
-# 1 #
-oneYearSamples %>%
-  left_join(oneYearBatches) %>%
-  ggplot(aes(x = batchCollectedTimestamp, y = ionRatio, color = compoundName)) +
-  geom_smooth() +
-  facet_grid(compoundName ~ instrumentName) # doc is grossly out of step, 
-# investigate later
-# Quants and quals got flipped
-
-# 2 #
-oneYearSamples %>%
-  left_join(oneYearBatches) %>%
-  filter(instrumentName != "doc") %>%
-  ggplot(aes(x = batchCollectedTimestamp, y = ionRatio, color = compoundName)) +
-  geom_smooth() +
-  facet_grid(compoundName ~ instrumentName) # grumpy+oxycodone looks least like the others
-
-# 3 #
-oneYearSamples %>%
-  left_join(oneYearBatches) %>%
-  filter(compoundName == "oxycodone" & instrumentName != "doc") %>%
-  ggplot(aes(x = batchCollectedTimestamp, y = ionRatio, color = instrumentName)) +
-  ggtitle("oxycodone") +
-  geom_smooth() # grumpy+oxycodone clearly outlying
-
-# 4 #
-oneYearSamples %>%
-  left_join(oneYearBatches) %>%
-  filter(compoundName == "oxycodone" & instrumentName != "doc" & ionRatio > 0) %>%
-  ggplot(aes(x = batchCollectedTimestamp, y = ionRatio, color = instrumentName)) +
-  ggtitle("oxycodone") +
-  geom_smooth() # ionRatio!=0 makes it even more clear
-
-# 5 #
-oneYearPeaks <- list.files("data/", pattern = "_p.csv$") %>%
-  file.path("data", .) %>%
-  map_dfr(read_csv, col_types = cols())
-
-meanByWeek <- oneYearPeaks %>%
-  left_join(oneYearBatches) %>%
-  filter(compoundName == "oxycodone" & instrumentName == "grumpy" & peakArea > 0) %>%
-  mutate(week = week(batchCollectedTimestamp)) %>%
-  group_by(week, chromatogramName) %>%
-  summarise(mean = mean(peakArea), sd = sd(peakArea), n = n())
-
-ggplot(meanByWeek, aes(x = week, y = mean, color = chromatogramName)) +
-  geom_line() +
-  geom_smooth() +
-  ggtitle("oxycodone + grumpy") +
-  facet_grid(chromatogramName ~ ., scales = "free_y") # quant is constant, qual drops
-
-# 6 #
-meanByWeek %>%
-  mutate(sd = NULL, n = NULL) %>%
-  spread(chromatogramName, mean) %>%
-  mutate(ionRatio = quant / qual) %>%
-  ggplot(aes(x = week, y = ionRatio)) +
-  geom_line() +
-  geom_smooth() +
-  ggtitle("ionRatio by week for oxycodone on grumpy") # basically recreate step 4
-```
 
 ```{r, eval=FALSE}
 

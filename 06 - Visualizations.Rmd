@@ -87,8 +87,8 @@ The default histogram paramaters for ggplot will stack the sample types in the s
 
 ```{r ex1, eval = FALSE}
 g <- january_samples %>%
-  filter(ionRatio > 0) %>%
-  ggplot(aes(x = ionRatio, colour = sampleType, fill = sampleType))
+  filter() %>%
+  ggplot(aes(x = , colour = , fill = ))
 # g + geom_histogram(position='dodge', bins= ) + facet_wrap(~compoundName)
 # g + geom_histogram(aes(y=..density..), bins= ) + facet_grid(sampleType~compoundName)
 ```

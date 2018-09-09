@@ -60,18 +60,6 @@ medianByColumn <- function(tb) {
 **Exercise 1: Making a two-variable function that 'switches'**  
 Create a function `medianBy( )` that accepts both the tibble and a logical value to indicate whether the result should be by row or column.
 
-```{r}
-medianBy <- function(tb, byRow=FALSE) {
-  if(byRow) {l <- nrow(tb)} else {l <- ncol(tb)}
-  recordOfValues <- vector("double", l)
-  for(i in 1:l) {
-    if(byRow) {v <- unlist(tb[i,])} else {v <- unlist(tb[,i])}
-    recordOfValues[i] <- median(v)
-  }
-  return(recordOfValues)
-}
-```
-
 ```{r, eval = FALSE}
 medianBy <- function( ) {
   # put your code here
@@ -109,13 +97,6 @@ medianByRow <- function(tb) {
 ```
 
 **Exercise 2: Improve the `medianBy( )` function to use map looping.** 
-```{r}
-medianBy <- function(tb,byRow=FALSE) {
-  if(byRow) {tb <- as_tibble(t(tb))}
-  recordOfValues <- map_dbl(tb,median) %>% unname()
-  return(recordOfValues)
-}
-```
 
 ```{r, eval = FALSE}
 medianBy <- function( ) {

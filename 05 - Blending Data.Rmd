@@ -68,12 +68,6 @@ bind_rows()
 bind_rows()
 ```
 
-```{r}
-bind_rows(january_peaks,   february_samples)
-bind_rows(january_batches, february_samples)
-bind_rows(january_samples, february_samples) # the only January data frame with matching columns
-```
-
 **End Exercise**
 
 There is an related command called `bind_cols` which will append columns to a tibble, but it also requires very clean data. This command will not check to make sure the order of values are correct between the two things being bound.
@@ -200,14 +194,8 @@ justMatch <- semi_join(select_peaks, select_batches,
 Join the batch and peak data. Start from the reset tibbles (`select_batches` and `select_peaks`) built in the prior code chunk, so the `keyB` and `keyP` variables are not present.
 
 ```{r, eval = FALSE}
-select_peaks$analyte <- sub("-.*$", "", select_peaks$analyte) # ensure the variable has been modified
-exercise_two <- left_join(byBatch, byPeak,by=c("batchName","compoundName"="analyte") )
-```
-
-```{r}
-select_peaks$analyte <- sub("-.*$", "", select_peaks$analyte) # ensure the variable has been modified
-exercise_two <- left_join(select_batches, select_peaks, 
-                          by=c("batch_name","compound_name" = "analyte"))
+ <- sub("", "", ) # ensure the variable has been modified
+exercise_two <- left_join(, ,)
 ```
 
 **End Exercise**
