@@ -348,6 +348,10 @@ hcg %>%
 
 **End Exercise** 
 
+## Acknowledgement
+
+This lesson was adapted from Daniel Hermann's lesson on method comparison that was taught in the [AACC Basic R Course](https://github.com/pcmathias/AACC-Introduction-to-R).
+
 ## Summary
 
 - When comparing methods, a useful first step is a comparison of summary statistics and distributions
