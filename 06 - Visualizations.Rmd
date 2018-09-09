@@ -1,9 +1,7 @@
 ---
 title: 'Lesson 6: Stronger visualizations with ggplot2 and lattice'
 output:
-  pdf_document: default
   html_document: default
-  word_document: default
 ---
 
 ```{r setup, include=FALSE}

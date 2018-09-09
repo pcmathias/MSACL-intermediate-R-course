@@ -2,7 +2,6 @@
 title: 'Lesson 3: Reading files - beyond the basics'
 output:
   html_document: default
-  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}

@@ -1,9 +1,7 @@
 ---
 title: 'Lesson 8: Scaling with purrr to loop through a vector'
 output:
-  pdf_document: default
   html_document: default
-  word_document: default
 ---
 
 ```{r setup, include=FALSE}
