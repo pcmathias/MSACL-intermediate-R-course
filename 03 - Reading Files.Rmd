@@ -1,6 +1,5 @@
 ---
 title: 'Lesson 3: Reading files - beyond the basics'
-author: "Patrick Mathias"
 output:
   html_document: default
   pdf_document: default
@@ -182,12 +181,12 @@ For reference we can compare the time required to run the base `read.csv()` func
 
 *Time to read with base:*
 ```{r, eval = FALSE}
-system.time(base_load <- read.csv(here::here("class_data", "2017-01-06.csv")))
+system.time(base_load <- read.csv("data/2017-01-06_p.csv"))
 ```
 
 *Time to read with readr:*
 ```{r, eval = FALSE}
-system.time(readr_load <- read_csv(here::here("class_data", "2017-01-06.csv")))
+system.time(readr_load <- read_csv("data/2017-01-06_p.csv"))
 ```
 
 ## Dealing with Excel files (gracefully)
@@ -240,7 +239,7 @@ head(readxl_load_cleaned)
 ```
 
 Now we'll do a quick tabulation to count the different order classes in this orders data set:
-```{r tabyl, eval = FALSE}
+```{r tabyl}
 readxl_load_cleaned %>% tabyl(order_class_c_descr)
 ```
 
