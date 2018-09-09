@@ -63,12 +63,6 @@ ggplot(data = ) +
   geom_density(aes(x = , fill = , color= ), alpha = )
 ```
 
-```{r}
-ggplot(data = hcg) + 
-  geom_density(aes(x=method_a, fill="blue", color="blue"), alpha = 0.5) +
-  geom_density(aes(x=method_b, fill="red", color="red"), alpha = 0.5)
-```
-
 **End exercise**
 
 ### Reorganizing a tibble to facilitate plotting
@@ -116,12 +110,6 @@ Evaluate parametric comparability of method means after log-transformation
 
 ```
 
-```{r}
-# Note we are using the paired=TRUE variant of the t.test, since we have paired measurements.
-t.test(log(hcg$method_a), log(hcg$method_b), 
-       paired=TRUE)
-```
-
 **End exercise**
 
 ### Using the RIGHT statistical test
@@ -138,10 +126,6 @@ Using the table above, select the _right_ test for comparing `method_a` and `met
 
 ```{r, eval = FALSE}
 
-```
-
-```{r}
-wilcox.test(hcg$method_a, hcg$method_b, paired=TRUE)
 ```
 
 **End Exercise** 
@@ -213,12 +197,6 @@ wdeming_results <-
 wdeming_results@para
 ```
 
-```{r}
-wdeming_results <- mcreg(hcg$method_a, hcg$method_b, 
-                        method.reg = "WDeming")
-wdeming_results@para         # "para" short for "parameters"-- this is a library/method specific term here
-```
-
 **End exercise**
 
 Now let's add the lines to our plot. We can use the `geom_abline()` ggplot function to add a line with a slope and intercept. The intercept and slope are stored in `deming_results@para[1]` and `deming_results@para[2]`, respectively.
@@ -274,17 +252,6 @@ ggplot(hcg) +
   geom_abline()
 ```
 
-```{r}
-ggplot(hcg) +
-  geom_point(aes(x=method_a, y=method_b))  +
-  geom_smooth(method = "lm", aes(x=method_a, y=method_b), se=FALSE) +  #blue
-  geom_abline(intercept = deming_results@para[1], slope = deming_results@para[2], 
-              color="red") +
-  xlim(0, 40000) + ylim(0, 40000) +
-  geom_abline(intercept=0, slope=1, linetype=2, color="gray") +
-  geom_abline(intercept = PB_results@para[1], slope = PB_results@para[2], color="yellow")
-```
-
 **End Exercise**
 
 ## Compare methods by concordance relative to decision thresholds
@@ -332,19 +299,19 @@ _Hint #1_: In the `mutate` function, use the `case_when` function to break a num
 
 _Hint #2_: Look at previous code for inspiration!
 
-```{r}
+```{r, eval = FALSE}
 hcg %>%
   mutate(method_a_bin = case_when(
-    method_a <= 25000 ~ "low",
-    method_a > 25000 & method_a <= 50000 ~ "middle",
-    method_a > 50000 ~ "high")) %>%
+     ~ ,
+     ~ ,
+     ~ )) %>%
   mutate(method_b_bin = case_when(
-    method_b <= 25000 ~ "low",
-    method_b > 25000 & method_a <= 50000 ~ "middle",
-    method_b > 50000 ~ "high"
+    ~ ,
+     ~ ,
+     ~ 
   )) %>%
-  count(method_a_bin, method_b_bin)  %>%
-  spread(method_b_bin, n, fill=0, sep=".") # Spreads method_b_pos from a single variable to a variable for each value
+    %>%
+   
 ```
 
 **End Exercise** 
