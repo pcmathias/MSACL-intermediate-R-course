@@ -115,6 +115,7 @@ Evaluate parametric comparability of method means after log-transformation
 ```{r, eval = FALSE}
 
 ```
+
 ```{r}
 # Note we are using the paired=TRUE variant of the t.test, since we have paired measurements.
 t.test(log(hcg$method_a), log(hcg$method_b), 
@@ -246,7 +247,6 @@ ggplot(hcg) +
               color="yellow") +
   xlim(0, 40000) + ylim(0, 40000) +
   geom_abline(intercept=0, slope=1, linetype=2, color="gray")
-  
 ```
 
 
@@ -324,10 +324,11 @@ hcg %>%
 ```
 
 
-**Exercise 6**: Write code to compare accuracy across two different decision thresholds (25000 and 50000, for example)
+**Exercise 6**
 
-_Hint #1_: In the `mutate` function, use the `cut()` function to break a numerical range into multiple a set of factor levels (categories):
-     For instance, for method_a you could run `cut(hcg$method_a, breaks=c(0, 20, 40, Inf), labels=c("low","middle","high"))` to convert to a factor for 0-20, 20-40, 40-Inf.
+Write code to compare accuracy across two different decision thresholds (25000 and 50000, for example)
+
+_Hint #1_: In the `mutate` function, use the `case_when` function to break a numerical range into multiple a set of factor levels (categories).
 
 _Hint #2_: Look at previous code for inspiration!
 
