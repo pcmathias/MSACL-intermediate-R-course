@@ -1,0 +1,267 @@
+Principles of Reproducible Research
+========================================================
+author: Patrick Mathias & Randall Julian
+date: September 9, 2018
+autosize: true
+
+What is reproducible research?
+========================================================
+
+Reproducible research = any research result can be reproduced by anybody
+
+Reproducibility can be achieved when the following criteria are met [(Marecelino 2016)](https://www.r-bloggers.com/what-is-reproducible-research/):
+- All methods are fully reported
+- All data and files used for the analysis are available
+- The process of analyzing raw data is well reported and preserved
+
+Why should I care about reproducibility?
+========================================================
+
+- Someone else may need to run your analysis
+- You will want to run the same exact analysis or a very similar analysis in the future
+- You may want to improve on that analysis
+
+**"Everything you do, you will probably have to do over again."** [(Noble 2009)](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1000424)
+
+Reproducbility practices discussed in this course
+========================================================
+
+- Develop a standardized but easy-to-use project structure
+- Adopt a style convention for coding
+- Enforce reproducibility when working with projects and packages
+- Use a version control system
+
+Great resource: "Good enough practices in scientific computing" [(Wilson 2017)](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510)
+
+Develop a standard project structure
+========================================================
+
+- **Put each project in its own directory, which is named after the project**
+- Put text documents associated with the project in the doc directory
+- **Put raw data and metadata in a data directory and files generated during cleanup and analysis in a results directory**
+- Put project source code in the src directory
+- Put compiled programs in the bin directory
+- **Name all files to reflect their content or function**
+
+Exercise 1: Refresher on navigating file structure in R
+========================================================
+1. Navigate to "Global Options" under the Tools menu in the RStudio application and note the *Default working directory (when not in a project)*
+2. Navigate to your Console and get the working directory using `getwd()`
+3. Review the contents of your current folder using `list.files()`
+4. Now try to set your working directory using `setwd("test_dir")`. What happened?
+5. Create a new test directory using `dir.create("test_dir")`
+
+Exercise 1: Refresher on navigating file structure in R
+========================================================
+6. Review your current directory
+7. Set your directory to the test directory you just created
+8. Using the Files window (bottom right in RStudio, click on **Files** tab if on another tab), navigate to the test directory you just created and list the files.
+9. Navigate back to one level above the directory you created using `setwd("..")` and list the files
+10. Delete the directory you created using the `unlink()` function. Learn more about how to use the function by reviewing the documentation: `?unlink`.
+
+Exercise 1 Comments
+========================================================
+
+- Be aware of your working directory: `getwd()` 
+- Set it when needed: `setwd()`
+- Directories created and removed with `dir.create()` and `unlink()`, respectively
+- Create a projects directory to house projects
+
+Exercise 2: Create a project using RStudio
+========================================================
+1. Navigate to the **File** menu and select **New Project...** OR Select the **Create a project** button on the global toolbar (2nd from the left)
+2. Select **New Directory** option
+3. In the Project Type prompt, select **New Project**
+4. In the Directory Name prompt under Create New Project, enter "sample-project-structure"
+5. In the Create Project as a Subdirectory of prompt under Create New Project, navigate to the Projects folder you just created (or another directory of your choosing). You can type in the path or hit the **Browse** button to find the directory. Check the option for "Open in a new session" and create your project.
+
+Exercise 2 Comments
+========================================================
+
+- RStudio projects can be easily closed and re-opened, preserving your work at a given time
+- RStudio projects can also help with directory organization
+  - Working dir = project dir (unless otherwise explicitly specified)
+  
+Create a data directory and a results directory
+========================================================
+
+- Using programming languages (as opposed to Excel) can help separate analysis from data
+  - Cannot trace what happened to data if overwritten during analysis
+- Raw data in **data** directory
+- Results from analysis in **results** or **output** directory
+- May want to separate out source code (**src** directory), figures, and documents (eg. manuscripts) as well
+
+Exercise 3: Create a minimal project structure
+========================================================
+
+Use `dir.create()` to create a project structure
+
+- Can convert code into a function that will build project structure for you [Refresher on writing functions](https://swcarpentry.github.io/r-novice-inflammation/02-func-R/)
+- Alternately, use an existing package to create your project structure: eg. [Project Template](http://projecttemplate.net/index.html)
+
+Name all files (and variables) to reflect their content or function
+========================================================
+
+- Compare the following names:
+  - results.csv
+  - morphine_precision_results.csv
+- Avoid sequential numerical names: what happens to figure2.jpg and figure3.jpg if you need to insert a figure between them in the manuscript?
+- **Pro tip: avoid white space and camel case (upper and lower case) in names**
+  - More efficient to type all lower case
+  - Ambiguity about whether you used white space or not
+  
+Adopt a style convention for coding
+========================================================
+
+- Consistent style makes it easier for others (and yourself to read code)
+- Tidyverse style guide: http://style.tidyverse.org/
+- styler and lintr packages can style a code chunk or document for you
+- Highlights:
+  -Use underscores to separate words in a name (see above comments for file names)
+  - Put a space before and after operators (such as `==`, `+`, `<-`), but there are a few exceptions such as `^` or `:`
+  - Use `<-` rather than `=` for assignment
+  - Try to limit code to 80 characters per line
+  - If a function call is too long, separate arguments to use one line each for function, arguements, and closing parenthesis
+  
+Style convention example
+========================================================
+```{r, eval = FALSE}
+# Good
+do_something_very_complicated(
+  something = "that",
+  requires = many,
+  arguments = "some of which may be long"
+)
+
+# Bad
+do_something_very_complicated("that", requires, many, arguments,
+                              "some of which may be long"
+                              )
+```
+
+Representing sequential operations in R - pipes
+========================================================
+```{r, eval = FALSE}
+# one way to represent a hop, scoop, and a bop, without pipes
+foo_foo <- hop(foo_foo, through = forest)
+foo_foo <- scoop(foo_foo, up = field_mice)
+foo_foo <- bop(foo_foo, on = head)
+# another way to represent the same sequence with less code but in a less readable way
+foo_foo <- bop(scoop(hop(foo_foo, through = forest), up = field_mice), on = head)
+```
+
+Same example using pipes
+========================================================
+```{r, eval = FALSE}
+foo_foo %>%
+  hop(through = forest) %>%
+  scoop(up = field_mouse) %>%
+  bop(on = head)
+```
+
+Reproducibility of directory structure
+========================================================
+
+Scenario: 
+- you have an analysis to share with a colleague
+- want to share entire project folder
+- directory calls specific files
+- you use `setwd()` to put yourself in the right place to call scripts
+
+Problem:
+Your working directory name is almost never the same as someone else's!
+
+The here package
+========================================================
+
+- Function in [here package](https://cran.r-project.org/web/packages/here/index.html) anchors you in one directory
+- Call `library(here)` in script
+- Follows algorithm to find the right place:
+  - Looks for .Rproj and uses that directory as reference
+  - Looks for empty ".here" file (can create this using `set_here()`)
+  - Looks for other relevant files such as ".git"
+  
+Reproducibility of packages
+========================================================
+
+Scenario:
+- in September 2019 you want to run an analysis you wrote in September 2018
+- you are using cutting edge packages that may have changed in 1 year
+- some changes impact expected input and output data structure
+
+Problem:
+Your script may fail to run or (much worse) your script runs but produces incorrect output!
+
+Package management solutions
+========================================================
+
+- [checkpoint package](https://cran.r-project.org/web/packages/checkpoint/vignettes/checkpoint.html) couples package install to a date
+  - Based on Microsoft server that is taking daily snapshots of CRAN
+  - Add `library(checkpoint)` and `checkpoint("2018-09-09")` to begining of script
+- [packrat package](https://rstudio.github.io/packrat/) allows explicit specification of package versions
+  - More complex to manage but arguably the "ideal" way to manage packages
+  - RStudio integration with Packages window
+  
+Why use version control?
+========================================================
+
+![One of many justifications for using version control. Source: phdcomics.com](assets/phd_comic_final_version.gif)
+
+Git principles
+========================================================
+
+- Git works by taking snapshots of a set of files over time
+- Most operations are performed on your local machine
+- Every change is captured
+- Git generally adds data and does not remove it (which means it is hard to lose data)
+
+Git workflow
+========================================================
+
+![Git basic workflow. Source: https://git-scm.com/book/en/v2/Getting-Started-Git-Basics](assets/git_basic_workflow.png)
+
+Git setup
+========================================================
+
+If you have not set up Git per the pre-course instructions (https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and signed up for an account on Github.com (https://github.com/join), you will need to do so before you can complete the next exercise.
+
+Exercise 4 walk-through
+========================================================
+
+- Fork repository
+- Open in RStudio
+- Run through modify and commit process
+
+Distributed workflows: central management
+========================================================
+
+
+![Integration manager workflow with Git. Credit: https://git-scm.com/book/en/v2/Distributed-Git-Distributed-Workflows](assets/integration-manager.png)
+
+
+Exercise 5 walk-through
+========================================================
+
+- Push to remote
+- Pull request
+- Sync your repo with main project repo
+
+Additional Git wisdom
+========================================================
+
+- Use branches and couple to features/issues
+- Set up ssh to transfer data
+- Consider what should and shouldn't go into version control
+- [Happy Git and GitHub for the useR](http://happygitwithr.com) online book - Git in RStudio
+- [Pro Git](https://git-scm.com/book/en/v2) - general Git info
+
+Lesson 1 wrap-up
+========================================================
+
+* Reproducible research is the principle that any research result can be reproduced by anybody
+* Practices in reproducible research also offer benefits for to the code author in producing clearer, easier to understand code and being able to easily repeat past work
+* Important practices in reproducible research include:
+  - Developing a standardized but easy-to-use project structure
+  - Adopting a style convention for coding
+  - Enforcing reproducibility when working with projects and packages
+  - Using a version control system to track work and collaborate with others

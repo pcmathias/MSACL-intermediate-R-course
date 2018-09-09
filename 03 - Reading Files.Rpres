@@ -1,0 +1,189 @@
+Reading Files: Beyond the Basics
+========================================================
+author: Patrick Mathias
+date: September 9, 2018
+autosize: true
+
+<style>
+.small-code pre code {
+  font-size: 1em;
+}
+</style>
+
+```{r, echo = FALSE}
+library(tidyverse)
+```
+
+Base reading functions
+========================================================
+
+Problems with `read.csv()` and similar base functions:
+
+- Parsing strings: `stringsAsFactors = TRUE`
+  - Big problem: converting factor back to numeric
+- Consider explicitly defining data types
+  
+Exercise 1: Refresher on reading in files
+========================================================
+
+1. Use the base `read.csv()` function to read the "2017-01-06_s.csv" file in the data folder into a data frame.
+2. What is the internal structure of the object?
+3. Summarize the data.
+4. Repeat the previous steps starting with #2, but include the argument `stringsAsFactors = FALSE` when you read in the data.
+
+General issues with base reading functions
+========================================================
+
+- they are slow for reading large files (slow compared to?)
+- the automatic conversion of strings to factors by default can be annoying to turn off
+- output with row names by default can be annoying to turn off
+
+Improvements with the *readr* package
+========================================================
+
+- Faster (~10x)
+- Strings are preserved by default
+- Writing does not default to include row numbers/names
+- Similar function names to base: `read_csv()`
+- Writing files to csv: `write_excel_csv()`
+
+Syntax and arguments
+========================================================
+
+```{r, eval = FALSE}
+# purely a dummy example, not executable!
+imaginary_data_frame <- read_csv(
+  "imaginary_file.csv",
+  col_types = cols(
+    x = col_integer(),
+    y = col_character(),
+    z = col_datetime()
+  )
+)
+```
+
+Exercise 2: Read with readr
+========================================================
+
+1. Use the `read_csv()` function to read the "2017-01-06_s.csv" file into a data frame.
+2. What is the internal structure of the object?
+3. Summarize the data.
+4. Finally, let's follow some best practices and explicitly define columns with the `col_types` argument. We want to explicitly define compoundName and sampleType as factors. Note that the `col_factor()` expects a definition of the factor levels but you can get around this by supplying a `NULL`. Then run a summary to review the data.
+
+Dealing with Excel files (gracefully)
+========================================================
+
+- [readxl package](http://readxl.tidyverse.org/)
+- no external dependencies like xlsx package
+- Syntax: `read_excel("file_name.xlsx")`
+- Can pull in specific worksheets or subsets of data:
+  - `sheet = "worksheet_name"` argument
+  - `read_excel("file_name.xlsx", range = "B1:D6")`
+  - `read_excel("file_name.xlsx, range = cell_cols("A:F")`
+- [tidyxl package](https://cran.r-project.org/web/packages/tidyxl/vignettes/tidyxl.html) for more complex Excel operations
+
+Exercise 3: Read using readxl
+========================================================
+
+1. Use the `read_excel()` function to read the "orders_data_set.xlsx" file into a data frame
+1. View a summary of the imported data
+1. Now read in only the first 5 columns using the `range` parameter
+1. Review the first 6 lines of the imported data
+
+```{r, echo = FALSE}
+library(readxl)
+readxl_load <- read_excel("data/orders_data_set.xlsx")
+```
+
+Importing dirty data with janitor
+========================================================
+
+[janitor package](https://github.com/sfirke/janitor)
+- `clean_names()` will reformat column names to conform to the tidyverse style guide: spaces are replaced with underscores & uppercase letters are converted to lowercase
+- empty rows and columns are removed with `remove_empty_rows()` or `remove_empty_columns()`
+- `tabyl(variable)` will tabulate into a data frame based on 1-3 variables supplied to it
+
+Clean names example
+========================================================
+class: small-code
+```{r janitor}
+# install.packages("janitor", dependencies = TRUE) # uncomment to install if needed
+library(janitor)
+readxl_load_cleaned <- readxl_load %>%
+  clean_names()
+head(readxl_load_cleaned)
+```
+
+Tabluation example
+========================================================
+class: small-code
+```{r tabyl}
+readxl_load_cleaned %>% tabyl(order_class_c_descr)
+```
+
+Why use iteration when reading files?
+========================================================
+
+Scenario:
+- you have 12 months of data in 12 different files
+- you want to create a single data frame that includes the data
+- files are named systematically and have the same structure & column names
+
+Perfect scenario to iterate through a list
+
+Purrr package and map functions
+========================================================
+
+- [purrr package](https://purrr.tidyverse.org) has a variety of `map()` functions
+- `map()` functions
+  - take a vector as an input
+  - apply a function to elements of the vector
+  - return a vector of identical length to the input vector
+
+`map()` example
+========================================================
+
+```{r}
+df <- tibble(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
+df %>%
+  map_dbl(mean)
+```
+
+Prerequisites to use `map()` to read files
+========================================================
+
+- the underlying file structure must be the same: for spreadsheet-like data, columns must be in the same positions in each with consistent data types
+- the files must have the same file extension
+- if there are multiple different file types (with different data structures) mixed in one directory, the files must organized and named in a way to associate like data sets with like
+
+Reading class data into one large data frame
+========================================================
+class: small-code
+```{r}
+all_samples <- list.files("data", pattern = "_s.csv") %>%
+  file.path("data", .) %>%
+  map_dfr(read_csv) %>%
+  clean_names()
+summary(all_samples)
+```
+
+Word of warning
+========================================================
+
+Don't automate a broken process!
+
+Always thoroughly vet your iteration code
+
+Summary
+========================================================
+
+- The base R functions for reading files `read.delim()`, `read.csv()`, etc. are useful tools but it is important to recognize how they handle strings (and the dangers in automatic conversion to factors)
+- readr functions such as `read_delim()` or `read_csv()` are faster than base R functions and do not automatically convert strings to factors
+- The readxl function `read_excel()` reads Excel files and offers functionality in specifying worksheets or subsets of the spreadsheet
+- The janitor package can help with cleaning up irregularly structured input files
+- The purrr package has useful tools for iterating that can be very powerful when coupled with file reading functions

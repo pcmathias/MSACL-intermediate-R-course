@@ -2,8 +2,8 @@
 title: 'Lesson 2: Getting cozy with R Markdown'
 author: "Patrick Mathias"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -111,17 +111,6 @@ Now let's knit this file and create some output.
 
 The add file options also allow you to create a presentation in R Markdown. This can be a handy alternative to Powerpoint, especially if you want to share code and/or many figures within a presentation. You can find more information about these presentations and the syntax used to set up slides at the RStudio site on [Authoring R Presentations](https://support.rstudio.com/hc/en-us/articles/200486468-Authoring-R-Presentations).
 
-## Creating an R Markdown document that integrates best practices in reproducible research
-
-Let's review the components of a project according to the take home points from Lesson 1:
-- a directory for each project
-- a folder structure the separates raw data, output, documents, etc.
-- clear file naming
-- code written with a style convention
-- code portability/reproducibility with help from here and checkpoint packages
-
-How can we integrate R Markdown documents within the context of these requirements? We already created a project and associated directories for this course so most of our work is done. Now we are going to add our R Markdown file to the project and set it up so we can be efficient and reproducible.
-
 **Exercise 3**
 
 The course repository that your forked and opened as an RStudio project has multiple R Markdown files that contain the course content. If not already open, open up the lesson 2 file: "02 - R Markdown.Rmd".
@@ -130,10 +119,14 @@ In addition to the lesson text documents, there are a few folders that each of t
 
 The "assets" folder contains images and other files that can be pulled into your R Markdown document. Let's practice embedding an image into your document. The syntax for incorporating an image is `![text for image caption](folder_name/image_file.ext)`. Practice embedding the "git_basic_workflow.png" diagram from the assets folder in the space below:
 
+Now knit the lesson 2 document to whatever format you'd like and open it.
 
+<!---
+Note: updated repo to include all course data
 The "data" folder contains some of the data needed to complete future exercises but is incomplete due to file size limitations on GitHub. Prior to class, we requested that your download data for some exercises from a separate site. To continue with the future exercises seamlessly, please place those files (just the files, not the folder) into the "data" folder.
 
 With that step, the subsequent exercises should contain the data and appropriate links to run without a great deal of additional work.
+--->
 
 **End Exercise**
 

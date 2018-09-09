@@ -17,21 +17,21 @@ This course is intended for laboratory professionals with a basic command of R a
 - Install the latest version of R by choosing the closest CRAN mirror here at https://cran.r-project.org/mirrors.html and downloading the version for your operating system
 - Install the latest version of RStudio Desktop at https://www.rstudio.com/products/rstudio/download/#download 
 - Open RStudio and confirm you are able to install packages by running `install.packages(c("tidyverse", "tinytex"), dependencies = TRUE)`
-  - If you do not already have LaTeX installed on your computer, run the following to install TinyTeX: `tinytex::install_tinytex()`. Note that you will get error messages when installing on Windows that are OK to click through.
+  - **If you do not already have LaTeX installed on your computer, run the following from the RStudio console to install TinyTeX: `tinytex::install_tinytex()`.** Note that you will get error messages when installing on Windows that are OK to click through.
 - If not already installed, install Git per instructions at https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
+  - **When installing on a Windows machine, select "Use Git from the Windows Command Prompt"**
 - Go to Github at https://github.com and sign up for an account (if you don't have one already)
+- **Download the class data zip file from [this link](https://indigobio.egnyte.com/fl/Bq6uXMpRKG), park it someplace you will remember for the course, and uncompress.**
 
 **Optional but strongly encouraged**
 - Please make an effort to complete the following Introduction to GitHub: https://services.github.com/on-demand/intro-to-github/
-
-<!---
-- Download the mock database zip file from [this link](https://figshare.com/s/8d9798a03faf7c191013), park it someplace you will remember for the course, and uncompress. If you have problems with that link, the data is also available [here](https://indigobio.egnyte.com/fl/rjfI054C48) and [here](https://drive.google.com/file/d/1ruGqmwp_jfT8_wUCtMmC9hVyoZtT5aR7/view?usp=sharing). We will also have a copy on hand on a thumb drive as well.
---->
 
 ## Accessing/interacting with the course content
 
 There are multiple ways to access and interact with the course content. We want to minimize any headaches with setting up the course and grappling with finicky work computers, but also hope this is a good opportunity to get oriented with version control and git.
 - **Preferred:** Use git functionality in RStudio by creating a project from version control that is "cloned" from the class repository. *We will run through how to do this at the beginning of class.* The advantages of this approach: you won't have to retype or copy & paste code and we will make updates to the repository during class so you will be able to easily pull those to your computer without re-downloading.
+
+There are other options but these are less preferred. *We will likely be making a few tweaks up until the start of the course, so we recommend not downloading and installing ahead of time.*
 - You can refer to this website and copy and paste content as the course goes long.
 - Alternately, you can download this github repository as a zip file and install it on your computer (e.g. C:\Users\jdoe\Desktop\msacl2018).
 - In the event that there are issues with downloading files, we will have a local copy of the course repository that we can share.

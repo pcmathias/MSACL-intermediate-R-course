@@ -226,7 +226,7 @@ The basic functionality of a version control system tracks changes (in addition 
 
 ### A brief intro to Git
 
-This section is a high level summary of many concepts explained in Chapter 1 of the [Pro Git](https://git-scm.com/book/en/v2) textbook. There are other great resources to learn about using Git and using Git with RStudio, including https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN and http://r-bio.github.io/intro-git-rstudio/.
+This section is a high level summary of many concepts explained in Chapter 1 of the [Pro Git](https://git-scm.com/book/en/v2) textbook. There are other great resources to learn about using Git and using Git with RStudio, including http://happygitwithr.com, https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN, and http://r-bio.github.io/intro-git-rstudio/.
 
 Git was originally developed as a tool to support the development of Linux (the open source operating system that powers most web servers and many mobile devices). There were a variety of requirements but to meet the needs of a large open source project, the version control system needed to support many contributors working in parallel in a sizable code base.
 
@@ -259,6 +259,9 @@ We will explain why we "forked" the repository in more detail after the exercise
 
 Opening the repository as a project in RStudio:
 
+1. First we need to set up our git configuration to include our email address and user name. Open either Terminal (Mac) or Git Bash (Windows) and run the following:
+  1. git config --global user.name "*your username*"
+  1. git config --global user.email *your email address*
 1. Before we can use the Git interface in RStudio, we need to enable version control in the application. Navigate to "Global Options" under the Tools menu with RStudio and select "Git/SVN" on the lefthand menu. Ensure that the check box for "Enable version control interface for RStudio projects" is checked.
 1. Under the File menu within the RStudio application, select "New Project".
 1. Select "Version Control" in the first Create Project prompt.
@@ -317,18 +320,27 @@ Now both of your local repo and your remote repo are aligned.
 
 1. Navigate to your MSACL repository webpage (under your username in GitHub) and select the "New pull request" button near the top.
 1. Under "Compare changes", select the link to "compare across forks".
-1. Click the "base fork" button and select "pcmathias/MSACL-intermediate-R-course".
-1. Click the "head fork" button and select your repository.
-1. The "Create pull request" button should be available to select now. Click the button.
+1. Click the "base fork" button and select "pcmathias/MSACL-intermediate-R-course". Click the "base" button adjacent to the "base fork" button and select "class-contributions".
+1. Click the "head fork" button and select your repository, if not already selected.
+1. The "Create pull request" button should be available to select now. Click the button and add any comments to close out the pull request process.
+
+On our end, we will get a notification about a pull request and can choose to incorporate the code into the repository.
 
 **Optional steps:** If you would like to synchronize your MSACL repo with the main course repo in the future
 
 1. Open Terminal within RStudio on the bottom left of the window (tab is adjacent to Console tab).
 1. The Terminal window should be set to your MSACL course repo directory. Run `ls` to confirm that you see the course contents. If not, use `cd` to navigate to the right directory.
-1. Enter `git remote upstream https://github.com/pcmathias/MSACL-intermediate-R-course`.
+1. Enter `git remote add upstream https://github.com/pcmathias/MSACL-intermediate-R-course`.
 1. Enter `git remote -v` to list the remote repositories. You should see the main course repository listed as upstream.
 
-Now your course repository is linked to the main course repo. To sync with the original repository in the future, refer to instructions here: https://help.github.com/articles/syncing-a-fork.
+Now your course repository is linked to the main course repo.
+
+In the future, if you want to retrieve changes to the original course repo:
+1. With your working directory set to the project directory, enter `git fetch upstream` (in Terminal console or Git Bash). This pulls any changes from the upstream repo to your local system.
+1. Enter `git checkout master` to make sure you are on your master branch (explained more below).
+1. Enter `git merge upstream/master` to merge the course repo changes with your local repository.
+
+These instructions were adapted from the following: https://help.github.com/articles/syncing-a-fork.
 
 **End Exercise**
 
@@ -354,7 +366,12 @@ SSH is a useful protocol to know about in general. There is a short tutorial at 
 
 The last thing to consider is a question: should you put everything in your project under version control? Maybe not. Git and similar version control systems typically do not handle raw data files well and the repository site you use may impose file size limits (Github has a 100 MB limit). *Also note that your repository site may be public so storing sensitive data (such as health information) within the repo may be problematic.* The excellent article by [Wilson et al.](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510) covers these issues in more details and provides nice guidance about what should not go into version control. Practically, the .gitignore can help exclude specific files - it is simply a list of files or groups of files to ignore. As an example, including "*.html" in the .gitignore will exclude html pages from your repository. (The reason for doing this will become more obvious in the next lesson.)
 
-Finally, there are variety of resources available to learn Git. The [Pro Git](https://git-scm.com/book/en/v2) textbook has a lot of detail about a variety of Git topics. There is also a downloadable Git tutorial that may be helpful to reinforce many of the above concepts: https://github.com/jlord/git-it-electron.
+#### Additional Git resources
+
+Finally, there are variety of resources available to learn Git.
+- The [Happy Git and GitHub for the useR](http://happygitwithr.com) online book walks through Git in a lot more detail, with a lot more explanation.
+- The [Pro Git](https://git-scm.com/book/en/v2) textbook has a lot of detail about a variety of Git topics outside of the context of R and RStudio. 
+- There is also a downloadable Git tutorial that may be helpful to reinforce many of the above concepts: https://github.com/jlord/git-it-electron.
 
 ## Summary
 

@@ -1,0 +1,49 @@
+Introduction to Data Science 201: Going Further with R
+========================================================
+author: Patrick Mathias & Randall Julian
+date: September 9, 2018
+autosize: true
+
+Introduction to Instructors
+========================================================
+
+- Patrick Mathias
+  - University of Washington Dept of Laboratory Medicine
+  - <pcm10@uw.edu>
+
+- Randall Julian
+  - Indigo BioAutomation
+  - <rkjulian@indigobio.com>
+
+Course Info
+========================================================
+
+- Mix of lectures, live demos of code, and exercises
+- Originally designed as follow-up to introductory R course (Dan Holmes and Steve Master)
+- Targeted to hit range of topics but emphasize reproducibility and more advanced use of R
+- Second time teaching course
+  - Made significant changes from 1st course (MSACL US 2018) - added Git
+  - Please provide feedback
+- Website: https://github.com/pcmathias/MSACL-intermediate-R-course
+  - Website updated as we improve/make additions
+  - Will work from course repository using Git
+
+
+Pre-course survey results
+========================================================
+
+[Course survey](https://docs.google.com/forms/d/1GBTfqDRuhQAgoUXSh-i5Qk2ws49vvn32pXCqxTLNg3U/edit#responses)
+
+Other course mechanics
+========================================================
+
+- One presenter, one floater
+- Raise hand at any time for assistance
+- Let us know right now if you had problems with pre-course installations
+
+Choose your own adventure poll
+========================================================
+
+Does anyone have interest in exploratory analysis of clinical laboratory test orders?
+
+Exploratory analysis vs. expanded method validation/comparison content
