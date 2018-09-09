@@ -1,7 +1,5 @@
 ---
 title: 'Lesson 10: Bringing it all together from import to graph to result'
-author: "Randall Julian, Adam Zabell"
-date: "9/3/2018"
 output:
   html_document: default
   word_document: default
@@ -17,7 +15,7 @@ library(magrittr)
 # From Import to Graph
 These lessons were designed to build and reinforce each other. It's possible to write purely linear code, but **purrr** makes the code easier to read and **rbind** and **dplyr** make it possible to aggregate and discover trends. What follows are the steps to replicate the discovery of one particular problem in the mock data: excessively good R^2^ data.
 
-```{r first_plots}
+```{r}
 oneYearBatches <- list.files("data/", pattern = "_b.csv$") %>%
   file.path("data", .) %>%
   map_dfr(read_csv) %>%
@@ -32,7 +30,7 @@ ggplot(oneYearBatches, aes(x = batchCollectedTimestamp, y = calibrationR2, color
 
 There's something interesting going on with the R^2^ values in the month of May, where a large number of them report a value of 1.0 -- a perfect fit. Let's focus on that month, and spread out the data so we can clarify whether it's all compounds or just oxymorphone (the magenta color on top).
 
-```{r facets}
+```{r}
 mayPlot <- oneYearBatches %>%
   filter(batchCollectedTimestamp > ymd("2017-04-15"), batchCollectedTimestamp < ymd("2017-06-15")) %>%
   ggplot(aes(x = batchCollectedTimestamp, y = calibrationR2, color = compoundName))
@@ -50,7 +48,7 @@ Whatever is going on, it looks like reviewer 'Dave' is the only person it is hap
 
 Based on the batch-level data, we can see that 'Dave' -- and apparently only Dave -- has perfect R^2^ values on every batch of data he reviewed throughout the month of May. Digging deeper will require merging information from the batch level with information at the sample (and possibly peak) level. 
 
-```{r join, message=FALSE}
+```{r, message=FALSE}
 oneYearSamples <- list.files("data/", pattern = "_s.csv$") %>%
   file.path("data", .) %>%
   map_dfr(read_csv)
@@ -66,7 +64,7 @@ davesData <- oneYearSamples %>%
 
 The following plots of `davesData` provide compelling evidence for what happened: Dave unselected the middle five calibrators in order to draw a straight line and maximize the R^2^ term.
 
-```{r plot_dave}
+```{r}
 davesData %>%
   ggplot(aes(x = batchCollectedTimestamp, y = usedForCurve, color = compoundName)) +
   geom_point() +
@@ -94,7 +92,7 @@ The second plot shows that calibrators were dropped regardless of whether they w
 
 We intentionally included several other issues within the database, which will require aggregation and plotting to discover.
 
-**Exercise : Revealing an ion ratio problem** 
+**Exercise 1: Revealing an ion ratio problem** 
 Ion ratios can be particularly sensitive to instrument conditions, and variability is a significant problem in mass spec based assays which use qualifying ions. With the tools that have been demonstrated in this course, we can look for outlier spikes and stability trends, and separate them out across instruments, or compounds, or sample types. First, plot the ion ratio as a function of instrument name. What trends are most obvious, and what is the reason for each of them? What additional variables would help besides the ones captured in the sample data.frame?
 
 ```{r}
@@ -159,3 +157,11 @@ meanByWeek %>%
   geom_smooth() +
   ggtitle("ionRatio by week for oxycodone on grumpy") # basically recreate step 4
 ```
+
+```{r, eval=FALSE}
+
+# put your code here
+
+```
+
+**End of Exercise**
