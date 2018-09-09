@@ -1,0 +1,109 @@
+Getting Cozy with R Markdown
+========================================================
+author: Patrick Mathias
+date: September 9, 2018
+autosize: true
+
+Why integrate your analysis and documentation in one place?
+========================================================
+
+- Principle of literate programming: code is written to align with the programmer's flow of thinking
+- Communication of code to others
+- That communication is expected to produce better programming
+
+Basics of knitr and rmarkdown
+========================================================
+
+- [knitr package](https://yihui.name/knitr/) and [rmarkdown package](https://cran.rstudio.com/web/packages/rmarkdown/index.html) make it easier to generate reports with integrated R code
+- Integration with RStudio
+- 3 components of a typical R Markdown document:
+  - header
+  - text
+  - code chunks
+
+Header
+========================================================
+
+```{r, eval = FALSE}
+---
+title: 'Lesson 2: Getting cozy with R Markdown'
+author: "Patrick Mathias"
+output: html_document
+---
+```
+Text
+========================================================
+
+[R Markdown syntax](http://rmarkdown.rstudio.com/authoring_basics.html)
+
+Examples:
+- Asterisks can be used to *italicize* (`*italicize*`) or **bold** (`**bold**`) text
+- Hyphens can be used to create bullet points
+
+```{r, eval = FALSE}
+- point 1
+- point 2
+- point 3
+```
+
+Code chunks
+========================================================
+
+    ```{r}
+    mean(c(10,20,30))
+    ```
+    
+Flexibility in reporting: types of knitr output
+========================================================
+
+3 most common output formats: 
+- .html: open in most modern web browsers
+- .pdf: professional looking reports
+- Microsoft Word .docx: for collaborations with non-R users
+
+Can also create variety of different presentation formats (these slides are Rpres)
+
+Exercise 1: Sample R Markdown document
+========================================================
+1. Add a file by selecting the add file button on the top left of your screen
+1. Select R Markdown... as the file type
+1. Title the document "Sample R Markdown Document" and select OK
+1. Put the cursor in the "cars" code chunk (should be the 2nd chunk) and hit `Ctrl+Shift+Enter`/`Command+Shift+Enter`. What happened?
+1. Insert a code chunk under the cars code chunk by using the `Ctrl+Alt+i`/`Command+Option+i`(Windows/Mac) shortcut
+1. Create output for the first lines of the cars data frame using the `head(cars)` command and execute the code chunk
+
+Exercise 2: Create output
+========================================================
+1. Click the **Knit** button
+1. You are being prompted to save the .Rmd file. Choose the "src" folder of your project and name the file sample_markdown_document
+1. RStudio should produce output in .html format and display
+1. Click the Open in Browser window and the same output should open in your default internet browser
+1. If you find the folder you saved the .Rmd file there should also be a .html file you can open as well
+1. Now, instead of hitting the **Knit** button, select the down arrow adjacent to it and click Knit to PDF
+1. Repeat the previous step but knit to a Word document
+
+Exercise 3: Embed image into document
+========================================================
+
+Practice embedding the "git_basic_workflow.png" diagram from the assets folder in the space below
+
+Knit lesson 2 document to see output
+
+Notebooks and promise/problems
+========================================================
+
+- Notebooks are very helpful for interactive data analysis
+- But also a problem:
+  - What happens if you run code chunks out of order?
+  - What happens if your environment already has existing variables with the same name?
+  - Code can produce different output
+- Workflow should require periodically knitting entire document and verifying output
+
+
+Summary
+========================================================
+- Integrating code and documentation in one place produces clearer, more reproducible code
+- RStudio provides useful built-in functionality for "knitting" documents into a variety of output formats
+- R Markdown documents can be integrated within a recommended project structure to create a reproducible analysis
+
+**Free online resource: https://bookdown.org/yihui/rmarkdown/**
