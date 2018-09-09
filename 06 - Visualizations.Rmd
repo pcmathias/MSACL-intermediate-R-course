@@ -60,6 +60,8 @@ To maintain the tidy focus of the tidyverse, the **ggplot2** package keeps the s
 
 Syntax follows the format of {'define the data' {+ 'describe the visualization'}} where each description is called a *geom* and multiple geoms can be stacked together. Definitions for the aesthetic mappings (e.g. plotTerms, color, iconShape, lineType) can be supplied when defining the data and are applied to the subsequent stack of geoms. Any mappings can be overridden within an individual geom.
 
+![Syntax for ggplot](assets/ggplot_1.png)
+
 Our first two examples show the ggplot version of the per component plots previously done with lattice. Notice that defining the data can be done as a variable (here it is `g`) and that definition can be used later for any number of geoms.
 
 ```{r gg_plotting_series, eval = FALSE}
