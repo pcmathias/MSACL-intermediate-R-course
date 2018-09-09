@@ -1,9 +1,8 @@
 ---
 title: 'Lesson 4: Data manipulation in the tidyverse'
-author: "Patrick Mathias"
 output:
   html_document: default
-  pdf_document: default
+
 ---
 
 ```{r setup, include=FALSE}

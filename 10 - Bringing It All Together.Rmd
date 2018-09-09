@@ -2,7 +2,6 @@
 title: 'Lesson 10: Bringing it all together from import to graph to result'
 output:
   html_document: default
-  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -15,13 +14,15 @@ library(magrittr)
 # From Import to Graph
 These lessons were designed to build and reinforce each other. It's possible to write purely linear code, but **purrr** makes the code easier to read and **rbind** and **dplyr** make it possible to aggregate and discover trends. What follows are the steps to replicate the discovery of one particular problem in the mock data: excessively good R^2^ data.
 
-```{r}
+```{r, message=FALSE}
 oneYearBatches <- list.files("data/", pattern = "_b.csv$") %>%
   file.path("data", .) %>%
   map_dfr(read_csv) %>%
   as_tibble() %>%
   type_convert()
+```
 
+```{r}
 ggplot(oneYearBatches, aes(x = calibrationR2, color = compoundName, fill = compoundName)) +
   geom_histogram(bins = 30)
 ggplot(oneYearBatches, aes(x = batchCollectedTimestamp, y = calibrationR2, color = compoundName)) +
@@ -64,7 +65,7 @@ davesData <- oneYearSamples %>%
 
 The following plots of `davesData` provide compelling evidence for what happened: Dave unselected the middle five calibrators in order to draw a straight line and maximize the R^2^ term.
 
-```{r}
+```{r, warning=FALSE}
 davesData %>%
   ggplot(aes(x = batchCollectedTimestamp, y = usedForCurve, color = compoundName)) +
   geom_point() +

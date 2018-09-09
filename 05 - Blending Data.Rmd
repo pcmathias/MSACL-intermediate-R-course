@@ -2,8 +2,6 @@
 title: 'Lesson 5: Blending data from multiple files and sources'
 output:
   html_document: default
-  pdf_document: default
-  word_document: default
 ---
 
 ```{r setup, include=FALSE}
