@@ -1,178 +1,330 @@
 ---
-title: 'Lesson 7: Modelling the data'
-author: "Randall Julian, Adam Zabell"
-date: "1/2/2018"
+title: 'Lesson 7: Method Comparison & Fitting Models to the Data'
 output:
-  pdf_document: default
   html_document: default
-  word_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(readxl)
 library(modelr)
 library(magrittr)
 library(lubridate)
-library(here)
 ```
 
-# Data Modelling
+## Overview of data
 
-After enough measurements have been made to consider your data a dataset, the next step is exploring that dataset to find trends and outliers. Most often, this includes a graph as well as a computational model which fits the data to a trendline. Modelling reduces the complexity of individual observations, which is good. However, it can only operate within the limits of the model. The linear model shown below doesn't fit as well as the quadratic model, but deciding whether the quadratic model makes physical sense is not something the model can demonstrate.
-```{r drawing_two_models, eval = FALSE}
-# data taken from http://www.theanalysisfactor.com/r-tutorial-4/
-y <- c(126.6, 101.8, 71.6, 101.6, 68.1, 62.9, 45.5, 41.9, 46.3, 34.1, 38.2, 41.7, 24.7, 41.5, 36.6, 19.6, 22.8, 29.6, 23.5, 15.3, 13.4, 26.8, 9.8, 18.8, 25.9, 19.3)
-x <- c(0, 1, 2, 4, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29, 30)
-x2 <- x ** 2
-raw <- tibble(x, y, x2)
-linearModel <- lm(y ~ x, data = raw)
-quadraticModel <- lm(y ~ x + x2, data = raw)
-plot(x, y)
-sequenceX <- seq(0, 30, by = 0.1)
-modeldata <- data.frame(x = sequenceX, x2 = sequenceX ** 2)
-sequenceYL <- predict(linearModel, modeldata)
-sequenceYQ <- predict(quadraticModel, modeldata)
-lines(sequenceX, sequenceYL, col = "blue", lwd = 2)
-lines(sequenceX, sequenceYQ, col = "darkgreen", lwd = 2)
+A common activity in the clinical laboratory and in translation of an assay into the clinic is performing a method comparison of a new method with a previous method. In this lesson we will explore data from two methods for a human chorionic gonadotropin (hCG), which in this case is part of a panel to assess pregnant women for a fetus with trisomy 21 (Down's syndrome) or a neural tube defect. This data has values for a method A and a method B in a simple spreadsheet, with sheets corresponding to each of the assays in the panel (alpha fetoprotein and unconjugated estriol being the other two tests).
+
+First we start by loading in hCG data from the "MS HCG" sheet.
+
+```{r}
+hcg <- read_excel(path="data/method_validation_data.xlsx", 
+                sheet="MS HCG")
+glimpse(hcg)
 ```
 
-> Exercise 1: Rebuild this plot using ggplot  
-Partially complete commands are commented out in the following code chunk. Start by looking at the data.frame `modeldata` before and after the *mutate* command, to see what changed. Then, use these new columns as values for the two geoms.
+Let's use pipes to summarize and calculate a few statistics:
 
-```{r ex1, eval = FALSE}
-modeldata <- modeldata %>%
-  mutate(linear = sequenceYL, quadratic = sequenceYQ)
-
-g <- ggplot(data = raw, aes(x = x, y = y)) + geom_point()
-# g +
-#  geom_point(data= ,aes(x=x,y= ),color= ) +
-#  geom_point( , , )
+```{r}
+hcg %>%
+  summarize(method_a_mean = mean(method_a), 
+            method_a_sd = sd(method_a),
+            method_b_mean = mean(method_b), 
+            method_b_sd = sd(method_b))
 ```
 
-## Parsing dates and times with *lubridate*
-The context for most of the data we'll encounter involve a time series, where each batch is collected at a specific date and that order of collection is a necessary component of the analysis. Dates within **R** are interpreted using the IEEE "POSIX" format, but reading data from an exterior source such as a CSV means this information arrives as a string. Functions in the **lubridate** package like `ymd` help to convert strings to POSIX, or combine information from multiple columns of a data.frame into a usable date format. 
-```{r lubridate, error=TRUE, eval = FALSE}
-stringOfDates <- c("2017-12-15", "2017-Dec-16", "2017-12-17", "2017-12-18", "2017-12-19", "2017-12-20", "2017-12-21")
-stringOfDates + 7
-oneWeek <- ymd(stringOfDates)
-oneWeek + 7
-tableOfDates <- tibble(
-  year = rep(2017, 8),
-  month = c(rep(4, 3), rep(5, 5)),
-  day = seq(1, 8),
-  hour = rep(4, 8),
-  minute = c(15, 29, 40, 45, 0, 58, 9, 11)
-)
-tableOfDates %$% make_date(year, month, day) # uses the magrittr 'not a pipe' operator
-tableOfDates %$% make_datetime(year, month, day, hour, minute)
-```
-It helps to remember R uses "yyyy-mm-dd" as the default order for dates when viewing or exporting.
+## Overlapping histograms
 
-## Symbolic formula notation
-The difficulty in using R for scientific modelling is that the language was built for statistical modelling. This is most obvious in the Wilkinson-Rogers notation for formula design. It is a versitile and powerful way to quickly describe the interactions between variables, but lacks an intuitive way to express basic transformations (quadratic, logrithmic, etc)
+What if we want to plot the distribution of both `method_a` and `method_b` in the same plot? We've used `geom_histogram` previously. Let's try the related ggplot function `geom_freqpoly`, starting with a single method.
 
-Formula Notation  | Common Understanding
----------------- | --------------------
-y ~ x | y = *a0* + *a1*x
-y ~ x - 1 | y = *a1*x
-y ~ x + z | y = *a0* + *a1*x + *a2*z
-y ~ x * z | y = *a0* + *a1*x + *a2*z + *a3*xz
-y ~ x + I(x^2) | y = *a0* + *a1*x + *a2*x^2^
-y ~ Gauss(amplitude,mu,sigma,x) | fit the data to a formula, defined elsewhere
-
-Wilkinson-Rogers notation comes into it's own when looking for generalized interactions (and their relative importance) between the dependent variable and a collection of independent ones: the formula _y ~ Height * Weight * Age_ would solve for eight coefficients, the linear combination for each of the three terms and the intercept. By comparison, the formula _y ~ Height + Weight + Age_ would solve four coefficients, ignoring any interaction between Height, Weight, and Age. We'll draw a plot in the next section which will hopefully help this to make more sense.
-
-## Linear modelling 
-Most of time a linear model, or transforming the data into a linear model, is sufficient to establish the key relationships between variables. Let's start by expanding the `raw` data.frame with additional observations and two more descriptors for the data.
-```{r linear_modelling_setup, eval = FALSE}
-newraw <- raw %>%
-  mutate(y = raw$y * rnorm(nrow(raw), mean = 1, sd = 0.3)) %>%
-  rbind(raw) %>%
-  arrange(x)
-newraw$instrument <- c(rep("Coarse", 12), rep("Fine", 40))
-newraw$date <- c("07-08-2017", "10-08-2017") %>%
-  rep(times = 26) %>%
-  dmy() 
-# this could also have been done on a single line without pipes: 
-# newraw$date <- dmy( rep(c("07-08-2017","10-08-2017"), times=26) )
+```{r}
+ggplot(data = hcg) + 
+  geom_freqpoly(bins=20, 
+                aes(x=method_a))
 ```
 
-Now we can explore the simple linear model in context of the instrument or the date of collection. Using the `summary` command on each linear model will provide basic statistical results assocaited with that model.  
-```{r linear_modelling_run, eval = FALSE}
-fullModel <- lm(y ~ x * date * instrument, data = newraw)
-interactingTerms <- lm(y ~ x * instrument, data = newraw)
-noninteractingTerms <- lm(y ~ x + instrument, data = newraw)
-summary(interactingTerms)
+Now, let's add a second method and mark the two using `geom_freqpoly`.
+
+```{r}
+ggplot(data = hcg) + 
+  geom_freqpoly(bins=20, aes(x=method_a, color="blue")) +
+  geom_freqpoly(bins=20, aes(x=method_b, color="red")) 
 ```
 
-We can now bulid the `grid` data.frame for plotting both the data and the models. Breaking down the pipe sequence of commands, we begin with our `newraw` data set and restructure it to work as an evenly spaced grid of points using *data_grid*, and then use *gather_predictions* to attach the prediction (y-value) at each obsevation point (x-value) from two of our linear models.
-```{r plot_linear_models, eval = FALSE}
-grid <- newraw %>%
-  data_grid(x, date, instrument) %>%
-  gather_predictions(interactingTerms, noninteractingTerms)
-ggplot(newraw, aes(x, y, shape = factor(date))) +
-  geom_point() +
-  geom_line(data = grid, aes(y = pred, color = model)) +
-  coord_cartesian(ylim = range(y)) +
-  facet_wrap(~ instrument)
+**Exercise 1:**
+
+Make a similar display of method a and method b distributions using the `geom_density` function. Set the `fill` and `color` functions to distinguish between the two methods. Test using the `alpha` parameter to increase the shape translucency
+
+```{r, eval = FALSE}
+ggplot(data = ) + 
+  geom_density(aes(x =, fill = , color = ), alpha = ) +
+  geom_density(aes(x = , fill = , color= ), alpha = )
 ```
 
-> Exercise 2: Modelling with categorical variables  
-> Revise `newraw` so that the last 40 observations include a third instrument called "Ultrafine," and rerun the models. How does this affect the regression and your interpretation?
+**End exercise**
 
-```{r ex2, eval = FALSE}
-newraw$instrument[13:52] <- rep(c(rep("Fine", 2), rep("Ultrafine", 2)), 10)
+### Reorganizing a tibble to facilitate plotting
+
+These plots require making separate calls to the `geom_*` functions for each method. This works, but makes legends needing manual cleanup and does not scale well.
+
+Instead, another way is to wrangle the data for a plot is to create a "long dataframe" using the `gather` function. Recall that this "unpacks" multiple columns into just two columns, where the **first column** is the `key` and the **second column** is the `value`:
+[assets/data_gather.png]()
+
+```{r}
+long_hcg <- hcg %>%
+  gather(key="method", value="value", 
+         -specimen)
+head(long_hcg)
 ```
 
-## Nonlinear modelling
-Although not common when looking for relationships between variables, nonlinear models are a concern for other aspects of data evaluation (e.g. fitting a chromatogram to a Gaussian curve) or assay validation (e.g. instrument response as a function of concentration). Unlike linear modelling, which will find a single solution starting from the data itself, a nonlinear model must iterate from a starting guess for each variable. A well formed guess should converge on the correct value, but there is no general method for finding that guess.
+Take a moment to compare the `hcg` and `long_hcg` objects. How are they different? Note that when we have a "long" datafarme, every row is a named observation (also known as a key-value pair). For reference, the reverse transformation (from "long" to "wide") is done with the `spread` function.
 
-Below are three nonlinear fits to noisy Gaussian data, each starting from a different initial guess of the parameters. Because the noise is randomly applied, your graph shouldn't be an exact match to the plot made by anybody else. Not all the fits are going to look great!  
-```{r nonlinear_modelling, error=TRUE, eval = FALSE}
-Gauss <- function(amplitude, mu, sigma, x) {
-  amplitude * exp(-0.5 * ((x - mu) / sigma) ^ 2)
-}
-x <- seq(1, 5, by = 0.1)
-yExact <- Gauss(10000, 3, 0.4, x)
-yNoisy <- yExact * rnorm(length(yExact), mean = 1, sd = 0.125)
-noisyCurve <- tibble(x = x, y = yNoisy)
-perfectGuess <- nls(
-  y ~ Gauss(a, m, s, x),
-  start = list(a = 10000, m = 3, s = 0.4),
-  data = noisyCurve
-)
-okayGuess <- nls(
-  y ~ Gauss(a, m, s, x),
-  start = list(a = max(yNoisy), m = x[yNoisy == max(yNoisy)], s = 1),
-  data = noisyCurve
-)
-badGuess <- nls(
-  y ~ Gauss(a, m, s, x),
-  start = list(a = 1, m = 1, s = 1),
-  data = noisyCurve
-)
-forPlot <- noisyCurve %>% 
-  rename(yNoisy=y) %>% 
-  cbind(yExact) %>% 
-  gather(yType, y, -x)
-grid <- forPlot %>%
-  data_grid(x = seq_range(x, 100), y) %>%
-  gather_predictions(perfectGuess, okayGuess)
-ggplot(forPlot, aes(x, y)) +
-  geom_point(aes(shape = yType)) +
-  scale_shape_manual(values = c(3, 20), name = "data source") +
-  geom_line(data = grid, aes(y = pred, color = model, linetype = model), size = 1)
-summary(perfectGuess)
+Once in a long-form format, we can tell ggplot to use both the `value` variable for our x-axis and the `method` variable to set the coloring (fill and color) and the resulting legend.
+
+```{r}
+ggplot(long_hcg) + 
+  geom_density(aes(x=value, fill=method, color=method), 
+               alpha=0.5)
 ```
 
-Understanding the reasoning for nonlinear model selection is a critical step before attempting that fit. The risk of non-convergence means the nonlinear model should be avoided, if possible.
+## Method comparison (t-tests, and more)
 
-# Summary
-* **lubridate** functions will convert a text string to a date
-* statistial modelling with Wilkinson-Rogers notation builds possible interactions into the analysis
-* scientific modelling with Wilkinson-Rogers notation requires careful understanding of terms
-* linear models are strongly recommended whenever possible
-    + this may require a transformation of the data
-    + 'linear' doesn't mean 'straight line' when you draw the plot
-* nonlinear models are dependant on a starting guess
+### Using a statistical test
+
+R is a statistical programming language, so simple statistical testing is straightforward:
+
+```{r}
+# Note we are using the paired=TRUE variant of the t.test, since we have paired measurements.
+t.test(hcg$method_a, hcg$method_b, 
+       paired=TRUE)
+```
+
+For more information on the `t.test` function, (follow this link)[https://www.statmethods.net/stats/ttest.html].
+
+**Exercise 2:**
+Evaluate parametric comparability of method means after log-transformation
+
+```{r, eval = FALSE}
+
+```
+
+**End exercise**
+
+### Using the RIGHT statistical test
+Is `t.test` the right function? Consider the histograms above and our previous work with log normalizing the values. 
+
+|Populations|Parametric|Non-parametric|
+|:-------------|:-------------------------:|:-------------------------:|
+|Two populations|t-test|Mann-Whitney U|
+|Many populations|ANOVA|Kruskal Wallis / one-way anova|
+|Populations across several treatments/times|repeated measures ANOVA|Friedman test|
+
+**Exercise 3:** 
+Using the table above, select the _right_ test for comparing `method_a` and `method_b`. Look up the function call using google, R documentation or any other source. Write out the function and calculate a p-value below
+
+```{r, eval = FALSE}
+
+```
+
+**End Exercise** 
+
+## Regression
+
+### Simple linear regression
+
+Let's begin by simply plotting `method_a` and `method_b` as a scatter plot. Notice how we are using the `aes()` to define "mappings" from our data to the x and y coordinates:
+
+```{r}
+ggplot(hcg) +
+  geom_point(aes(x = method_a, y = method_b))
+```
+
+Adding a least-squares regression line is easy with a little bit of magic from `ggplot`. The `lm` (Linear Model) function does all the work here!
+
+```{r}
+ggplot(hcg) +
+  geom_point(aes(x = method_a, y = method_b)) +
+  geom_smooth(method = "lm", aes(x = method_a, y = method_b))
+```
+
+It's tough to see the fit in the low result range, so we can transform our axis:
+
+```{r}
+ggplot(hcg) +
+  geom_point(aes(x = method_a, y = method_b)) +
+  geom_smooth(method = "lm", aes(x = method_a, y = method_b)) +
+  scale_x_log10() + scale_y_log10()
+```
+
+What if we want to just extract the coefficients of the linear model? We can utilize R's formula notation format and the `lm` function:
+
+```{r}
+regression <- lm(method_b ~ method_a, hcg)
+summary(regression)
+coef(regression)
+```
+
+## Deming regression
+
+In fact, a least-squares regression, while a good approximation for this type of data, assumes that the x-dimension has no measurement error so it minimizes errors only in the y-dimension. The *Deming regression* differs from the simple linear regression in that it accounts for errors in observations on both the x- and the y- axes, thus making it more suitable for estimating a best-fit line between two measured variables.
+
+The Deming regression and other similar regressions are not built into the standard linear models function in R. Fortunately, there is a package written by staff at Roche called [mcr](https://cran.r-project.org/web/packages/mcr/mcr.pdf) to perform some of these bread and butter clinical laboratory regression methods. One issue with the package is that the output is not straightforward to work with. Many of the mcr functions produce a complex object that does not fit a standard tidy framework. The useful values can be extracted by digging more deeply into the output.
+
+A Deming regression of methods A and B appears below. To pull the quantitative data we care out of the model, we use the `@` character and call the specific component of the object we care about (in this care "para").
+
+```{r}
+#install.packages("mcr", dependencies = TRUE)
+library(mcr)            # remember, you may need to install.packages("mcr") in the console first!
+deming_results <- mcreg(hcg$method_a, hcg$method_b, 
+                        method.reg = "Deming")
+deming_results@para         # "para" short for "parameters"
+# this is a library/method specific term here
+```
+
+To see what slots (attributes) `deming_results` has beyond `para`, look at `glimpse(deming_results)`
+
+**Exercise 4:**
+
+Another issue in standard regression is if the random error scales with analyte concentration, then the observed absolute errors are higher for the higher concentrations. This means that error at the high-end is more heavily factored into the regression fit. One way of adjusting for this is weighting errors for high concentrations less. 
+
+Run the regression using the weighted deming method of the `mcreg` function. How do the slope and intercept differ?
+
+```{r, eval = FALSE}
+wdeming_results <-
+  
+wdeming_results@para
+```
+
+**End exercise**
+
+Now let's add the lines to our plot. We can use the `geom_abline()` ggplot function to add a line with a slope and intercept. The intercept and slope are stored in `deming_results@para[1]` and `deming_results@para[2]`, respectively.
+
+```{r}
+ggplot(hcg) +
+  geom_point(aes(x = method_a, y = method_b)) +
+  geom_smooth(method = "lm", aes(x = method_a, y = method_b), se = FALSE) +
+  geom_abline(
+    intercept = deming_results@para[1], slope = deming_results@para[2],
+    color = "red"
+  )
+```
+
+What about the weighted deming fit line? What about the subrange between 0 and 40000? Let's also add a 1:1 line to help interpret fit.
+
+```{r}
+wdeming_results <- mcreg(hcg$method_a, hcg$method_b, 
+                        method.reg = "WDeming")
+ggplot(hcg) +
+  geom_point(aes(x=method_a, y=method_b))  +
+  geom_smooth(method = "lm", aes(x=method_a, y=method_b), se=FALSE) +   #blue
+  geom_abline(intercept = deming_results@para[1], slope = deming_results@para[2], 
+              color="red") +
+  geom_abline(intercept = wdeming_results@para[1], slope = wdeming_results@para[2], 
+              color="yellow") +
+  xlim(0, 40000) + ylim(0, 40000) +
+  geom_abline(intercept=0, slope=1, linetype=2, color="gray")
+```
+
+
+## Passing-Bablock
+
+Rather than performing a Deming, we may want to perform a Passing-Bablock regression instead. What is the distinct between Deming and Passing-Bablok? At a high level, the Deming regression assumes that errors are distributed normally, while Passing-Bablok is non-parametric and does not make this assumption.
+
+We extract the useful model parameters similarly to the Deming regression:
+
+```{r}
+PB_results <- mcreg(hcg$method_a, hcg$method_b, method.reg = "PaBa")
+PB_results@para
+```
+
+**Exercise 5:**
+Add another `geom_abline` to the plot above for the Passing-Bablock regression coefficients determined above.
+
+```{r, eval = FALSE}
+ggplot(hcg) +
+  geom_point()  +
+  geom_smooth() +  #blue
+  geom_abline() +
+  xlim(0, 40000) + ylim(0, 40000) +
+  geom_abline() +
+  geom_abline()
+```
+
+**End Exercise**
+
+## Compare methods by concordance relative to decision thresholds
+
+Next, let's compare method A and B using decision thresholds. For the purpose of this tutorial, we will simply use 25,000 as our threshold.
+
+```{r}
+threshold <- 25000
+
+tmp <- hcg %>%
+  mutate(method_a_pos = method_a > threshold,   # Create binary indicator for method_a
+         method_b_pos = method_b > threshold)
+  table(x=tmp$method_a_pos, y=tmp$method_b_pos)
+```
+Looking at this table, method_a and method_b are *discordant* across our threshold in 40 cases, and *concordant* in 58 + 48 cases.
+
+A tidy way to do this without using `tmp` and `table` is:
+
+```{r}
+threshold <- 25000
+
+hcg %>%
+  mutate(method_a_pos = method_a > threshold,   # Create binary indicator for method_a
+         method_b_pos = method_b > threshold) %>%
+  count(method_a_pos, method_b_pos)
+```
+
+Now to convert this into a standard concordance table:
+
+```{r}
+hcg %>%
+  mutate(method_a_pos = method_a > threshold,   # Create binary indicator for method_a
+         method_b_pos = method_b > threshold) %>%
+  count(method_a_pos, method_b_pos)  %>%
+  spread(method_b_pos, n, fill=0, sep=".")   # Spreads method_b_pos from a single variable 
+  # to a variable for each value
+```
+
+
+**Exercise 6**
+
+Write code to compare accuracy across two different decision thresholds (25000 and 50000, for example)
+
+_Hint #1_: In the `mutate` function, use the `case_when` function to break a numerical range into multiple a set of factor levels (categories).
+
+_Hint #2_: Look at previous code for inspiration!
+
+```{r, eval = FALSE}
+hcg %>%
+  mutate(method_a_bin = case_when(
+     ~ ,
+     ~ ,
+     ~ )) %>%
+  mutate(method_b_bin = case_when(
+    ~ ,
+     ~ ,
+     ~ 
+  )) %>%
+    %>%
+   
+```
+
+**End Exercise** 
+
+## Acknowledgement
+
+This lesson was adapted from Daniel Hermann's lesson on method comparison that was taught in the [AACC Basic R Course](https://github.com/pcmathias/AACC-Introduction-to-R).
+
+## Summary
+
+- When comparing methods, a useful first step is a comparison of summary statistics and distributions
+- Performing a statistical test to assess whether the distributions from two methods are likely to have originated from the same distribution is helpful, and the test choice should be informed by the types of distributions
+- Built-in models are available for the most common types of fits in ggplot2
+- However, additional complexity is needed to overlay more sophisticated models such as Deming regression and Passing Bablok
+  - Data from more complex models can be extracted and used to manually generate lines of fit
+

@@ -1,14 +1,11 @@
 ---
 title: 'Lesson 2: Getting cozy with R Markdown'
-author: "Patrick Mathias"
 output:
-  html_document: default
   pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(here)
 ```
 
 ## Why integrate your analysis and documentation in one place?

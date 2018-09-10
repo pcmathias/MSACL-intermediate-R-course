@@ -1,9 +1,8 @@
 ---
 title: 'Lesson 4: Data manipulation in the tidyverse'
-author: "Patrick Mathias"
 output:
   html_document: default
-  pdf_document: default
+
 ---
 
 ```{r setup, include=FALSE}
@@ -148,9 +147,6 @@ Another common operation manipulation is wrangling dates. The [lubridate package
 batch_jan <- read_csv("data/2017-01-06_b.csv") %>%
   clean_names()
 batch_jan_timestamps <- batch_jan %>%
-  mutate(batch_collected_timestamp = mdy_hm(batch_collected_timestamp),
-         review_start_timestamp = mdy_hm(review_start_timestamp),
-         review_complete_timestamp = mdy_hm(review_complete_timestamp)) %>%
   mutate(
     collect_datetime = ymd_hms(batch_collected_timestamp),
     collect_month = month(batch_collected_timestamp),
@@ -169,9 +165,7 @@ How long an average does it take to review each batch? Using the January batch d
 
 ```{r mutate_exercise, eval = FALSE}
 batch_jan_reviews <- batch_jan %>%
-  mutate(review_start_timestamp = ,
-         review_complete_timestamp = ,
-         review_duration = as.numeric(difftime( , , units = "minutes")))
+  mutate(review_duration = as.numeric(difftime( , , units = "minutes")))
 # note: the output of difftime is a time interval, convert to numeric to avoid confusion downstream
 reviews_jan_grouped <- batch_jan_reviews %>%
   distinct(batch_name, review_duration) 
