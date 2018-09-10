@@ -155,7 +155,7 @@ At first it may be confusing that some joins result in making duplicates of rows
 
 ```{r}
 goodDuplication <- inner_join(
-  x = select_samples[, c(1:3, 7)],
+  x = select_samples[, c(1:4, 7)],
   y = select_batches[, c(1:6)],
   by = c("batch_name", "compound_name")
 )
