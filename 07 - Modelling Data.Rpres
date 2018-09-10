@@ -1,0 +1,334 @@
+Method Comparison & Fitting Models to Data
+========================================================
+author: Patrick Mathias & Daniel Herman
+date: September 10, 2018
+autosize: true
+
+<style>
+.small-code pre code {
+  font-size: 1em;
+}
+</style>
+
+```{r, echo = FALSE}
+library(tidyverse)
+library(readxl)
+```
+Data set for lesson
+========================================================
+
+- Common clinical laboratory activity = method comparison of a new method with a previous method
+- Two methods for a human chorionic gonadotropin (hCG) - part of larger panel for Down's syndrome screening assay
+- Values for a method A and a method B in a simple spreadsheet, with sheets corresponding to each of the assays in the panel
+
+Data structure
+========================================================
+class: small-code
+```{r}
+hcg <- read_excel(path="data/method_validation_data.xlsx", 
+                sheet="MS HCG")
+glimpse(hcg)
+```
+
+Summary statistics
+========================================================
+class: small-code
+```{r}
+hcg %>%
+  summarize(method_a_mean = mean(method_a), 
+            method_a_sd = sd(method_a),
+            method_b_mean = mean(method_b), 
+            method_b_sd = sd(method_b))
+```
+
+Exercise 1
+========================================================
+Make a similar display of method a and method b distributions using the `geom_density` function. Set the `fill` and `color` functions to distinguish between the two methods. Test using the `alpha` parameter to increase the shape translucency.
+
+Exercise 1 Answer
+========================================================
+class: small-code
+```{r}
+ggplot(data = hcg) + 
+  geom_density(aes(x=method_a, fill="blue", color="blue"), alpha = 0.5) +
+  geom_density(aes(x=method_b, fill="red", color="red"), alpha = 0.5)
+```
+
+Use `gather()` to make the data ggplot-friendly
+========================================================
+class: small-code
+```{r}
+long_hcg <- hcg %>%
+  gather(key="method", value="value", 
+         -specimen)
+head(long_hcg)
+```
+
+Plot tidy data
+========================================================
+class: small-code
+```{r}
+ggplot(long_hcg) + 
+  geom_density(aes(x=value, fill=method, color=method), 
+               alpha=0.5)
+```
+
+Statistical comparison of distributions
+========================================================
+class: small-code
+```{r}
+# Note we are using the paired=TRUE variant of the t.test, since we have paired measurements.
+t.test(hcg$method_a, hcg$method_b, 
+       paired=TRUE)
+```
+
+Exercise 2
+========================================================
+Evaluate parametric comparability of method means after log-transformation.
+
+Exercise 2 Answer
+========================================================
+class: small-code
+```{r}
+t.test(log(hcg$method_a), log(hcg$method_b), 
+       paired=TRUE)
+```
+
+What is the right test?
+========================================================
+|Populations|Parametric|Non-parametric|
+|:-------------|:-------------------------:|:-------------------------:|
+|Two populations|t-test|Mann-Whitney U|
+|Many populations|ANOVA|Kruskal Wallis / one-way anova|
+|Populations across several treatments/times|repeated measures ANOVA|Friedman test|
+
+Exercise 3
+========================================================
+Using the previous table, select the _right_ test for comparing `method_a` and `method_b`. Look up the function call using google, R documentation or any other source. Write out the function and calculate a p-value below.
+
+Exercise 3 Answer
+========================================================
+class: small-code
+```{r}
+wilcox.test(hcg$method_a, hcg$method_b, paired=TRUE)
+```
+
+Scatterplot to compare results
+========================================================
+class: small-code
+```{r}
+ggplot(hcg) +
+  geom_point(aes(x = method_a, y = method_b))
+```
+
+Add least-squares regression line with built-in ggplot function
+========================================================
+class: small-code
+```{r}
+ggplot(hcg) +
+  geom_point(aes(x = method_a, y = method_b)) +
+  geom_smooth(method = "lm", aes(x = method_a, y = method_b))
+```
+
+Add log transformation
+========================================================
+class: small-code
+```{r}
+ggplot(hcg) +
+  geom_point(aes(x = method_a, y = method_b)) +
+  geom_smooth(method = "lm", aes(x = method_a, y = method_b)) +
+  scale_x_log10() + scale_y_log10()
+```
+
+Extract model coefficients
+========================================================
+class: small-code
+```{r}
+regression <- lm(method_b ~ method_a, hcg)
+summary(regression)
+coef(regression)
+```
+
+Why use other models to fit the data?
+========================================================
+
+- Least squares assumes no measurement error in x-dimension
+- Deming accounts for errors in both axes
+- Weighted Deming can adjust for fact that absolute errors observed at higher concentrations are larger magnitude
+- Standard linear model function does not include these options but [mcr package](https://cran.r-project.org/web/packages/mcr/mcr.pdf) does
+- Challenge: output object from mcr function is complex & requires special parsing
+
+Results of Deming regression
+========================================================
+class: small-code
+```{r}
+library(mcr) 
+deming_results <- mcreg(hcg$method_a, hcg$method_b, method.reg = "Deming")
+deming_results@para
+```
+
+Exercise 4
+========================================================
+Another issue in standard regression is if the random error scales with analyte concentration, then the observed absolute errors are higher for the higher concentrations. This means that error at the high-end is more heavily factored into the regression fit. One way of adjusting for this is weighting errors for high concentrations less. 
+
+Run the regression using the weighted deming method of the `mcreg` function. How do the slope and intercept differ?
+
+Exercise 4 Answer
+========================================================
+class: small-code
+```{r}
+wdeming_results <- mcreg(hcg$method_a, hcg$method_b, 
+                        method.reg = "WDeming")
+wdeming_results@para
+```
+
+Comparison of models
+========================================================
+class: small-code
+```{r, eval = FALSE}
+wdeming_results <- mcreg(hcg$method_a, hcg$method_b, 
+                        method.reg = "WDeming")
+ggplot(hcg) +
+  geom_point(aes(x=method_a, y=method_b))  +
+  geom_smooth(method = "lm", aes(x=method_a, y=method_b), se=FALSE) +   #blue
+  geom_abline(intercept = deming_results@para[1], slope = deming_results@para[2], 
+              color="red") +
+  geom_abline(intercept = wdeming_results@para[1], slope = wdeming_results@para[2], 
+              color="yellow") +
+  xlim(0, 40000) + ylim(0, 40000) +
+  geom_abline(intercept=0, slope=1, linetype=2, color="gray")
+```
+
+Comparison of models
+========================================================
+class: small-code
+```{r, echo = FALSE}
+wdeming_results <- mcreg(hcg$method_a, hcg$method_b, 
+                        method.reg = "WDeming")
+ggplot(hcg) +
+  geom_point(aes(x=method_a, y=method_b))  +
+  geom_smooth(method = "lm", aes(x=method_a, y=method_b), se=FALSE) +   #blue
+  geom_abline(intercept = deming_results@para[1], slope = deming_results@para[2], 
+              color="red") +
+  geom_abline(intercept = wdeming_results@para[1], slope = wdeming_results@para[2], 
+              color="yellow") +
+  xlim(0, 40000) + ylim(0, 40000) +
+  geom_abline(intercept=0, slope=1, linetype=2, color="gray")
+```
+
+Passing-Bablok
+========================================================
+class: small-code
+Non-parametric, without assumptions about error distribution
+```{r}
+PB_results <- mcreg(hcg$method_a, hcg$method_b, method.reg = "PaBa")
+PB_results@para
+```
+
+Exercise 5
+========================================================
+Add another `geom_abline` to the plot above for the Passing-Bablock regression coefficients determined above.
+
+Exercise 5 Answer
+========================================================
+class: small-code
+```{r, eval = FALSE}
+ggplot(hcg) +
+  geom_point(aes(x=method_a, y=method_b))  +
+  geom_smooth(method = "lm", aes(x=method_a, y=method_b), se=FALSE) +  #blue
+  geom_abline(intercept = deming_results@para[1], slope = deming_results@para[2], 
+              color="red") +
+  xlim(0, 40000) + ylim(0, 40000) +
+  geom_abline(intercept=0, slope=1, linetype=2, color="gray") +
+  geom_abline(intercept = PB_results@para[1], slope = PB_results@para[2], color="yellow")
+```
+
+Exercise 5 Answer
+========================================================
+class: small-code
+```{r, echo = FALSE}
+ggplot(hcg) +
+  geom_point(aes(x=method_a, y=method_b))  +
+  geom_smooth(method = "lm", aes(x=method_a, y=method_b), se=FALSE) +  #blue
+  geom_abline(intercept = deming_results@para[1], slope = deming_results@para[2], 
+              color="red") +
+  xlim(0, 40000) + ylim(0, 40000) +
+  geom_abline(intercept=0, slope=1, linetype=2, color="gray") +
+  geom_abline(intercept = PB_results@para[1], slope = PB_results@para[2], color="yellow")
+```
+
+Compare concordance to decision thresholds
+========================================================
+class: small-code
+```{r}
+threshold <- 25000
+
+hcg %>%
+  mutate(method_a_pos = method_a > threshold,   # Create binary indicator for method_a
+         method_b_pos = method_b > threshold) %>%
+  count(method_a_pos, method_b_pos)
+```
+
+Standard concordance table
+========================================================
+class: small-code
+```{r}
+hcg %>%
+  mutate(method_a_pos = method_a > threshold,   # Create binary indicator for method_a
+         method_b_pos = method_b > threshold) %>%
+  count(method_a_pos, method_b_pos)  %>%
+  spread(method_b_pos, n, fill=0, sep=".")   # Spreads method_b_pos from a single variable 
+  # to a variable for each value
+```
+
+Exercise 6
+========================================================
+Write code to compare accuracy across two different decision thresholds (25000 and 50000, for example)
+
+_Hint #1_: In the `mutate` function, use the `case_when` function to break a numerical range into multiple a set of factor levels (categories).
+
+_Hint #2_: Look at previous code for inspiration!
+
+Exercise 6 Answer
+========================================================
+class: small-code
+```{r, eval = FALSE}
+hcg %>%
+  mutate(method_a_bin = case_when(
+    method_a <= 25000 ~ "low",
+    method_a > 25000 & method_a <= 50000 ~ "middle",
+    method_a > 50000 ~ "high")) %>%
+  mutate(method_b_bin = case_when(
+    method_b <= 25000 ~ "low",
+    method_b > 25000 & method_a <= 50000 ~ "middle",
+    method_b > 50000 ~ "high"
+  )) %>%
+  count(method_a_bin, method_b_bin)  %>%
+  spread(method_b_bin, n, fill=0, sep=".") # Spreads method_b_pos from a single variable to a variable for each value
+```
+
+Exercise 6 Answer
+========================================================
+class: small-code
+```{r, echo = FALSE}
+hcg %>%
+  mutate(method_a_bin = case_when(
+    method_a <= 25000 ~ "low",
+    method_a > 25000 & method_a <= 50000 ~ "middle",
+    method_a > 50000 ~ "high")) %>%
+  mutate(method_b_bin = case_when(
+    method_b <= 25000 ~ "low",
+    method_b > 25000 & method_a <= 50000 ~ "middle",
+    method_b > 50000 ~ "high"
+  )) %>%
+  count(method_a_bin, method_b_bin)  %>%
+  spread(method_b_bin, n, fill=0, sep=".") # Spreads method_b_pos from a single variable to a variable for each value
+```
+
+Summary
+========================================================
+- When comparing methods, a useful first step is a comparison of summary statistics and distributions
+- Performing a statistical test to assess whether the distributions from two methods are likely to have originated from the same distribution is helpful, and the test choice should be informed by the types of distributions
+- Built-in models are available for the most common types of fits in ggplot2
+- However, additional complexity is needed to overlay more sophisticated models such as Deming regression and Passing Bablok
+  - Data from more complex models can be extracted and used to manually generate lines of fit

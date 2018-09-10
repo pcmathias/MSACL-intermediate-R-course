@@ -1,9 +1,7 @@
 ---
 title: 'Lesson 6: Stronger visualizations with ggplot2 and lattice'
 output:
-  pdf_document: default
   html_document: default
-  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -17,8 +15,8 @@ Default R comes with several basic plotting commands -- `plot` to draw an X,Y gr
 
 The first major drawback to using these plots is that each requires learning a slightly different syntax to decorate the graph. For example, here are three plots basd on the January sample data, showing the ion ratios for all compounds and samples which exhibit and quant and qual peak. The first is a simple series plot, changing the default plot color to blue.
 
-```{r plot_color_syntax, eval = FALSE}
-january_samples <- read_csv("data/2017-01-06_s.csv"))
+```{r}
+january_samples <- read_csv("data/2017-01-06_s.csv")
 january_samples$idx <- c(1:nrow(january_samples))
 hasIonRatio <- january_samples$ionRatio > 0
 plot(january_samples$ionRatio[which(hasIonRatio)],col='blue')
@@ -26,19 +24,19 @@ plot(january_samples$ionRatio[which(hasIonRatio)],col='blue')
 
 If you want a histogram instead of a sequential series, the function changes but based on how `plot` looked, the coloring results may not be what you expected.
 
-```{r plot_hist1, eval = FALSE}
+```{r}
 hist(january_samples$ionRatio[which(hasIonRatio)],col='blue')
 ```
 
 In order to plot the histogram with blue outline, to match the blue open circles of the first plot, you need to specify a different variable.
 
-```{r plot_hist2, eval = FALSE}
+```{r}
 hist(january_samples$ionRatio[which(hasIonRatio)],border='blue',main='Histogram')
 ```
 
 The second drawback is that these plots, while drawn quickly, require detailed sort and select mechanisms in order to display complex data on a single graph. Plotting a matrix of graphs (as shown below) is even more difficult and you may spend more time troubleshooting the graph than actually analyzing the data. Here is a simple example which colors the series data by compound. 
 
-```{r plot_by_compound, eval = FALSE}
+```{r}
 compounds <- unique(january_samples$compoundName)
 for (i in 1:length(compounds)) {
   if (i == 1) {
@@ -62,9 +60,11 @@ To maintain the tidy focus of the tidyverse, the **ggplot2** package keeps the s
 
 Syntax follows the format of {'define the data' {+ 'describe the visualization'}} where each description is called a *geom* and multiple geoms can be stacked together. Definitions for the aesthetic mappings (e.g. plotTerms, color, iconShape, lineType) can be supplied when defining the data and are applied to the subsequent stack of geoms. Any mappings can be overridden within an individual geom.
 
+![Syntax for ggplot](assets/ggplot_1.png)
+
 Our first two examples show the ggplot version of the per component plots previously done with lattice. Notice that defining the data can be done as a variable (here it is `g`) and that definition can be used later for any number of geoms.
 
-```{r gg_plotting_series, eval = FALSE}
+```{r}
 g <- january_samples %>%
   filter(ionRatio > 0) %>%
   ggplot(aes(x = idx, y = ionRatio, colour = sampleType))
@@ -73,7 +73,7 @@ g + geom_smooth() + facet_wrap(~compoundName)
 ```
 
 For the histogram, we override the aesthetic because this plot only uses 'one dimension' of the source data.  
-```{r gg_plotting_hist, eval = FALSE}
+```{r}
 g + 
   geom_histogram(mapping=aes(x=ionRatio,colour=sampleType),inherit.aes=FALSE) + 
   facet_wrap(~compoundName)
@@ -85,12 +85,12 @@ We could easily spend the whole class session on this package, but the above plo
 
 The default histogram paramaters for ggplot will stack the sample types in the same bin, making it difficult to determine if the trend for qc and standard samples is the same as the unknowns. The first plot in this exercise makes adjacent bars, but what does the second plot do? 
 
-```{r ex1, eval = FALSE}
+```{r, eval = FALSE}
 g <- january_samples %>%
   filter() %>%
   ggplot(aes(x = , colour = , fill = ))
-# g + geom_histogram(position='dodge', bins= ) + facet_wrap(~compoundName)
-# g + geom_histogram(aes(y=..density..), bins= ) + facet_grid(sampleType~compoundName)
+  g + geom_histogram(position='dodge', bins= ) + facet_wrap(~compoundName)
+  g + geom_histogram(aes(y=..density..), bins= ) + facet_grid(sampleType~compoundName)
 ```
 
 **End Exercise**
