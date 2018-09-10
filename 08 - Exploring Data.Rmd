@@ -1,9 +1,9 @@
 ---
-title: 'Lesson 8: Exploratory Data Analysis'
+title: 'Lesson 8: Exploratory data analysis'
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup_8, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readxl)

@@ -1,10 +1,10 @@
 ---
-title: 'Lesson 6: Stronger visualizations with ggplot2 and lattice'
+title: 'Lesson 6: Stronger visualizations with ggplot2'
 output:
   html_document: default
 ---
 
-```{r setup, include=FALSE}
+```{r setup_6, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```

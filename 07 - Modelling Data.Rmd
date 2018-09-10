@@ -1,10 +1,10 @@
 ---
-title: 'Lesson 7: Method Comparison & Fitting Models to the Data'
+title: 'Lesson 7: Method comparison & fitting models to the data'
 output:
   html_document: default
 ---
 
-```{r setup, include=FALSE}
+```{r setup_7, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readxl)
