@@ -1,6 +1,5 @@
 ---
 title: 'Lesson 2: Getting cozy with R Markdown'
-author: "Patrick Mathias"
 output:
   pdf_document: default
 ---
