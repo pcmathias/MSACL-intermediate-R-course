@@ -2,8 +2,6 @@
 title: 'Lesson 5: Blending data from multiple files and sources'
 output:
   html_document: default
-  pdf_document: default
-  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -93,14 +91,14 @@ Using *dplyr* there is another way of binding data which does not require the it
 
 A key is the variable in a tibble -- or combination of variables in a tibble -- that uniquely defines every row. In our data, `batch_name` is present in each tibble but is insufficient to define a specific row. As it turns out for this data set, no single column operates as a key. We can build a key by combinging two (or three) columns. Here is how to combine values which are not unique to an individual observation in order to create a key which is unique to each observation. We create the key for the `select_peaks` data using a dplyr alternative function to `paste()` (base R) called `unite()`. This function takes the data as the first argument (piped in this examples), and then will put together specified columns using a separator you specify. If you don't want to remove the variables used to construct the key, you add the "remove = FALSE" argument.
 
-```{r, eval = FALSE}
+```{r}
 select_batches <- select_batches %>%
   unite(keyB, c(batch_name, compound_name), sep=":", remove = FALSE)
 ```
 
 This creates what is call a *primary key*, which is the unique identifier for each observation in a specific tibble. A *foreign key* is the same thing, only it uniqely identifies an observation in another tibble. The `left_join` command joins two tibbles based on matching the *primary key* in the first tibble with the *foreign key* in the second tibble.  
 
-```{r, eval = FALSE}
+```{r}
 select_samples <- select_samples %>%
   unite(keyB, c(batch_name, compound_name), sep=":", remove = FALSE)
 combined <- left_join(select_samples, select_batches, by="keyB")
@@ -112,7 +110,7 @@ Relational databases operate using operations from set theory. Joining two datas
 
 These three commands will return a vector which is the unduplicated combination of the two input vectors. `union(A,B)` includes all the values found in both A and B. `intersect(A,B)` returns only those values found in both A and B. `setdiff(A,B)` is order dependent, and returns the values of the first vector which are not also in the second vector. 
 
-```{r, eval = FALSE}
+```{r}
 A <- rep(seq(1, 10), 2)
 B <- seq(2, 20, 2)
 union(A, B)
@@ -123,7 +121,7 @@ setdiff(B, A)
 
 These commands are good for checking matches between two vectors, and we can use them to rebuild the `select_peaks$keyB` foreign key without the risk of incorrect naming. First, let's reset `select_peaks`.
 
-```{r, eval = FALSE}
+```{r}
 select_peaks <- january_peaks %>% 
   filter(batch_name %in% c("b802253","b252474")) %>%
   unite(keyP, sample_name, compound_name, chromatogram_name, sep=":", remove=FALSE)
@@ -131,7 +129,7 @@ select_peaks <- january_peaks %>%
 
 Now let's construct our `select_peaks$keyB` foreign key by creating and then using a new variable called *analyte*, taking advantage of set operations.
 
-```{r, eval = FALSE}
+```{r}
 all_names <- unique(select_peaks$compound_name)
 select_peaks$analyte <- NA
 for (name in all_names[1:6]) {
@@ -147,7 +145,7 @@ for (name in all_names[1:6]) {
 
 Mutating joins operate in much the same way as the set operations, but on data frames instead of vectors, and with one critical difference: repeated values are retained. We took advantage of this earlier when using the left_join command, so that the `select_batches$keyB` got repeated for both the Quant and the Qual peak entries in `select_peaks`. Having built the `select_batches` primary key, and correctly included it as a foreign key in `select_peaks`, correctly joining them into a single data frame is straightforward. 
 
-```{r, eval = FALSE}
+```{r}
 select_peaksWide <- left_join(select_peaks,select_batches)
 ```
 
@@ -155,9 +153,9 @@ There are four kinds of mutating joins, differing in how the rows of the source 
 
 At first it may be confusing that some joins result in making duplicates of rows from one tibble. However, it is extremely handy when you are using one dataset to label another.
 
-```{r, eval = FALSE}
+```{r}
 goodDuplication <- inner_join(
-  x = select_samples[, c(1:3, 7)],
+  x = select_samples[, c(1:4, 7)],
   y = select_batches[, c(1:6)],
   by = c("batch_name", "compound_name")
 )
