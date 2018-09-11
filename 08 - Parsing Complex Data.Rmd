@@ -25,8 +25,8 @@ One of the more useful XML packages for mass spectrometry is currently **mzR** w
 
 ```{r}
 ## try http:// if https:// URLs are not supported
-source("https://bioconductor.org/biocLite.R")
-biocLite("mzR")
+#source("https://bioconductor.org/biocLite.R")
+#biocLite("mzR")
 
 library(mzR)
 ```

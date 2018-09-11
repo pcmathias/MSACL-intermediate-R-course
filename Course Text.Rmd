@@ -1,15 +1,18 @@
 ---
 title: "MSACL Data Science 201 Textbook"
-author: 
-- "Patrick Mathias"
-- "Randall Julian"
-- "Adam Zabell"
-output: 
+author:
+- Patrick Mathias
+- Randall Julian
+- Adam Zabell
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
   html_document:
-    toc: true
-    toc_float: true
+    number_sections: yes
+    toc: yes
     toc_depth: 2
-    number_sections: true
+    toc_float: yes
 ---
 
 # Adopting principles of reproducible research
