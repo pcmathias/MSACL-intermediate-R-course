@@ -50,6 +50,7 @@ We have a data set that is spread out over a couple files, with varying formats 
 **Exercise 1**
 
 Let's work on addressing the above issues.
+
 1. Import the data from each file
 1. Clean variable names
 1. Assess the relationship between the data in both files. Evaluate whether there is a one-to-one mapping, a many-to-one mapping, etc. (Hint: doing some exploration with various join functions can help answers quickly - [helpful reference](http://stat545.com/bit001_dplyr-cheatsheet.html))
