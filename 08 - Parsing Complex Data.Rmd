@@ -1,5 +1,5 @@
 ---
-title: 'Lesson 9: Beyond the csv -- parsing xml files'
+title: 'Lesson 8: Beyond the csv -- parsing xml files'
 output:
   html_document: default
 ---
@@ -9,10 +9,12 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
-# Flat and Structured Files
+## Flat and Structured Files
+
 The functions from readr *read_csv*, *read_tsv*, and *read_excel* (discussed in Lesson 5) open so called "Flat" files that are often called 'flat' because they have a simple structure of delimited rows and columns. Some raw instrument data is difficult to describe fully using a simple row and column approach. Several formats have been created to represent more structured data, and some have evolved into standards used across instrument applications. XML is an example of a sophisticated format that has been used to implement many standards and defacto standards. 
 
 ## The extensible markup language (xml)
+
 XML is first, simply a text file which follows very specific grammaric rules. On top of this grammar, there is a semantic layer which is application specific. There are  packages for reading generic XML files such as **xml2**. For this lesson, we will focus on a more specific XML file format for representing mass spectrometry raw data. Using XML, several specifications (definition of how the semantic content for mass spectrometry data is represented using the XML grammar)
 
 XML is a topic all to itself with whole books available on almost ever aspect of the system. In general, if you find you need to read an XML file, it's best to look for a package to read the specific type of XML file you need. XML was designed for programmers, and unless you have a very specific reason, often the most pragmatic approach to XML is to look for a way to avoid having to read it directly.
@@ -28,8 +30,6 @@ biocLite("mzR")
 
 library(mzR)
 ```
-
-
 
 ```{r}
 # More on the mzR package: https://bioconductor.org/packages/devel/bioc/vignettes/mzR/inst/doc/mzR.html
@@ -47,29 +47,48 @@ hdx<-header(mzXML)
 ```
 
 **Exercise 1: Find the MS Level 1 (Survey) Scans**
+
 Notice that the header contains the variable `msLevel` which is set to 1 for a survey scan (MS) or 2 for an MS/MS scan (MS^n). In the exercise, you will create chromatogram from the total ion current of all the MS survey scans. Step 1 will be to create a vector of the survey scan numbers:
 
-```{r, eval=FALSE}
+```{r, echo = FALSE, eval = FALSE}
 survey <- which( )
 ```
+
+```{r}
+survey <- which(hdx$msLevel == 1)
+```
+
 **End of Exercise**
 
 **Exercise 2: Create a `tibble` to hold and label the desired spectra**
 Next create a tibble to hold the sum of the ion current from each survey spectrum:
 
-```{r, eval=FALSE}
+```{r, echo = FALSE, eval = FALSE}
 totalIonCurrent = tibble( )
 ```
+
+```{r}
+totalIonCurrent = tibble(index = survey, time = 0.0, inten = 0.0)
+```
+
 **End of Exercise**
 
 **Exercise 3: Load the `tibble` with the total ion current from each spectrum**
 Finally fill the tibble with the information from the XML file using functions of mzR
 
-```{r, eval=FALSE}
+```{r, echo = FALSE, eval = FALSE}
 for(  ) {
 # put your code here
 }
 ```
+
+```{r}
+for( i in 1:length(survey)) {
+  totalIonCurrent$time[i] <- header(mzXML,survey[i])$retentionTime
+  totalIonCurrent$inten[i] <- sum(peaks(mzXML,survey[i])[,2])
+}
+```
+
 **End of Exercise**
 
 Now the TIC can be plotted using either base or ggplot functions:
@@ -80,6 +99,7 @@ plot(totalIonCurrent$time, totalIonCurrent$inten, type="l")
 
 
 ## Summary
-* **xml2** can be used for for reading and writing generic xml files
-* **mzR** can be used to read and write most mass spectrometry file formats
-* XML formats are text files which are verbose, large and slow to process, but they are resistent to changes in instrumentation, computer platforms and experimental designs.
+
+- **xml2** can be used for for reading and writing generic xml files
+- **mzR** can be used to read and write most mass spectrometry file formats
+- XML formats are text files which are verbose, large and slow to process, but they are resistent to changes in instrumentation, computer platforms and experimental designs.

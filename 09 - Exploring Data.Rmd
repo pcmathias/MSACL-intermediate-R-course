@@ -1,5 +1,5 @@
 ---
-title: 'Lesson 8: Exploratory data analysis'
+title: 'Lesson 9: Exploratory data analysis'
 output: html_document
 ---
 
@@ -58,12 +58,37 @@ Let's work on addressing the above issues.
 1. Assess the time span for orders and consider if there are specific time periods over which you may want to aggregate orders to view trends (eg. daily, weekly, monthly, yearly). Add additional variables to parse out these date components (and save yourself some work in the future). Refer to lesson 4 and [lubridate documentation](https://cran.r-project.org/web/packages/lubridate/vignettes/lubridate.html).
 1. Summarize the data
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 orders_raw <-
 order_details <-
 
 orders <- orders_joined %>%
 
+summary(orders)
+```
+
+```{r}
+orders_raw <- read_excel("data/orders_data_set.xlsx") %>%
+  clean_names()
+order_details <- read_csv("data/order_details.csv") %>%
+  clean_names()
+# relationship is one-to-one so inner_join/left_join/right_join all work
+orders_joined <- orders_raw %>%
+  left_join(order_details, by = "order_id")
+# may be some variation in which fields you choose to turn into factors
+# numeric codes could be factors too
+orders <- orders_joined %>%
+  mutate(description = as.factor(description),
+         proc_code = as.factor(proc_code),
+         order_class_c_descr = as.factor(order_class_c_descr),
+         lab_status_c_descr = as.factor(lab_status_c_descr),
+         order_status_c_descr = as.factor(order_status_c_descr),
+         reason_for_canc_c_descr = as.factor(reason_for_canc_c_descr),
+         department = as.factor(department),
+         ordering_route = as.factor(ordering_route),
+         pref_list_type = as.factor(pref_list_type)) %>%
+  mutate(order_month = month(order_time),
+         order_week = week(order_time))
 summary(orders)
 ```
 
@@ -83,26 +108,63 @@ General hint for upcoming exercises: review documentation on [janitor package](h
 
 1. Plot the order volume over the duration of the data set, at the level of day and week. (Keep in mind how ggplot parses time some geoms - it may be based on seconds.)
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 
+```
+
+```{r}
+ggplot(data = orders) + 
+  geom_histogram(mapping = aes(x = order_time), binwidth = 60*60*24)
+ggplot(data = orders) + 
+  geom_histogram(mapping = aes(x = order_time), binwidth = 60*60*24*7)
 ```
 
 2. Plot or tabulate the breakdown of test orders in the data set (using description or procedure code). Focus on the top 25 tests.
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 
+```
+
+```{r}
+orders %>%
+  tabyl(description) %>%
+  arrange(desc(n)) %>%
+  top_n(25)
 ```
 
 3. Plot and/or tabulate cancellations over time for the data set.
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 
+```
+
+```{r}
+ggplot(data = orders) + 
+  geom_histogram(mapping = aes(x = order_time, fill = order_status_c_descr), binwidth = 60*60*24*7)
+orders %>%
+  tabyl(order_status_c_descr, order_week) %>%
+  adorn_totals("row") %>% # tabulate operations below across rows
+  adorn_percentages("row") %>% # express counts as percentages
+  adorn_pct_formatting() %>% # clean up percentages for nicer printing
+  adorn_ns() # add back in counts (N's)
 ```
 
 4. Explore whether there are specific tests that are cancelled more frequently than others. Focus on the top 25 tests.
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 
+```
+
+```{r}
+orders %>%
+  #filter(description %in% orders_top25$description) %>%
+  tabyl(description, order_status_c_descr) %>%
+  arrange(desc(Completed)) %>%
+  top_n(25, Completed) %>%
+  adorn_totals("row") %>% # tabulate operations below across rows
+  adorn_percentages("row") %>% # express counts as percentages
+  adorn_pct_formatting() %>% # clean up percentages for nicer printing
+  adorn_ns() # add back in counts (N's)
 ```
 
 **End Exercise**
@@ -120,8 +182,60 @@ The following is a list of questions regarding clinic-specific characteristics o
 - Which clinics are using SmarSets (order sets) most extensively?
 - Which clinics continue to use Provider Preference Lists, which are discouraged?
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 
+```
+
+Clinics ordering the highest volume of tests:
+```{r}
+orders %>% 
+  tabyl(department) %>%
+  arrange(desc(n))
+```
+
+Clinics with the highest numbers and rates of cancels:
+```{r}
+orders %>% 
+  tabyl(department, order_status_c_descr) %>%
+  arrange(desc(Completed)) %>%
+  adorn_totals("row") %>% 
+  adorn_percentages("row") %>% 
+  adorn_pct_formatting() %>% 
+  adorn_ns() 
+```
+
+Rates of clinic collections:
+```{r}
+orders %>% 
+  tabyl(department, order_class_c_descr) %>%
+  arrange(desc(`Clinic Collect`)) %>%
+  adorn_totals("row") %>% 
+  adorn_percentages("row") %>% 
+  adorn_pct_formatting() %>% 
+  adorn_ns() 
+```
+
+Rate of SmartSet usage:
+```{r}
+orders %>% 
+  tabyl(department, ordering_route) %>%
+  arrange(desc(`SmartSet`)) %>%
+  adorn_totals("row") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting() %>% 
+  adorn_ns() %>%
+  select(department, SmartSet)
+```
+
+Rates of Provider Preference List Usage:
+```{r}
+orders %>% 
+  tabyl(department, pref_list_type) %>%
+  arrange(desc(`Provider Preference List`)) %>%
+  adorn_totals("row") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting() %>% 
+  adorn_ns()
 ```
 
 **End Exercise**
@@ -134,8 +248,16 @@ Unfortunately this data set is missing crucial timestamps needed to assess lab t
 
 Develop a visualization that shows the distribution of different result-to-review intervals, separated by clinic.
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 
+```
+
+```{r}
+orders <- orders %>%
+  mutate(rr_interval = as.numeric(difftime(review_time, result_time, units = "days")))
+ggplot(orders, aes(x = department, y = rr_interval)) +
+  geom_boxplot() +
+  coord_flip()
 ```
 
 **End Exercise**
