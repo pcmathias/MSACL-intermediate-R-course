@@ -17,7 +17,7 @@ The database example for this class has three different tibbles: one for batch-l
 
 ```{r, message=FALSE}
 january_batches <- read_csv("data/2017-01-06_b.csv") %>%
-  clean_names()
+  clean_names() #use help to check out what this does
 january_samples <- read_csv("data/2017-01-06_s.csv") %>%
   clean_names()
 january_peaks <- read_csv("data/2017-01-06_p.csv") %>%
@@ -45,20 +45,24 @@ february_samples <- read_csv("data/2017-02-06_s.csv") %>%
   clean_names()
 as_tibble(february_samples[1:5,])
 two_months <- bind_rows(january_samples, february_samples)
+two_months_id <- bind_rows(january_samples, february_samples, .id = "month")
 ```
 
-Notice the continuation from the last rows of january to the first rows of february and that the number of rows in the combined data frame two_months is the sum of the first two months of sample-level data.
+Notice the continuation from the last rows of january to the first rows of february and that the number of rows in the combined data frame two_months is the sum of the first two months of sample-level data. Another way to see this is to add a column name for the ".id" argment in the `bind_rows` call.
 
 ```{r}
 two_months[187195:187204,]
 c(nrow(january_samples), nrow(february_samples), nrow(two_months))
+
+two_months_id[187195:187204,]
+
 ```
 
-As long as the two tibbles have the same number of columns and the same column names, the `bind_rows` command will correctly associate the data using the column order from the first variable. And if they aren't the same, you get an error that tells you what is wrong. That makes `bind_rows` useful but remeber to the data are clean before you use.
+As long as the two tibbles have the same number of columns and the same column names, the `bind_rows` command will correctly associate the data using the column order from the first variable. And if they aren't the same, you get an error that tells you what is wrong. That makes `bind_rows` useful but remember to the data are clean before you use.
 
 **Exercise 1**
 
-Try to use `bind_rows()` to combine all of the sample data from February and each of these three tibbles containing January data. Do any of them work? What does the data look like? What error messages do you get?  
+Try to use `bind_rows()` to combine all of the sample data from February and each of the three tibbles containing January data. Do any of them work? What does the data look like? What error messages do you get?  
 
 ```{r, echo = FALSE, eval = FALSE}
 bind_rows()
@@ -95,11 +99,12 @@ Using *dplyr* there is another way of binding data which does not require the it
 
 ### Primary and foreign keys
 
-A key is the variable in a tibble -- or combination of variables in a tibble -- that uniquely defines every row. In our data, `batch_name` is present in each tibble but is insufficient to define a specific row. As it turns out for this data set, no single column operates as a key. We can build a key by combinging two (or three) columns. Here is how to combine values which are not unique to an individual observation in order to create a key which is unique to each observation. We create the key for the `select_peaks` data using a dplyr alternative function to `paste()` (base R) called `unite()`. This function takes the data as the first argument (piped in this examples), and then will put together specified columns using a separator you specify. If you don't want to remove the variables used to construct the key, you add the "remove = FALSE" argument.
+A key is the variable in a tibble -- or combination of variables in a tibble -- that uniquely defines every row. In our data, `batch_name` is present in each tibble but is insufficient to define a specific row. If we want to join data from different tables and ensure it matches to the correct row, we need a key. As it turns out for this data set, no single column operates as a key. We can build a key by combining two (or three) columns. Here is how to combine values which are not unique to an individual observation in order to create a key which is unique to each observation. We create the key for the `select_peaks` data using a dplyr alternative function to `paste()` (base R) called `unite()`. This function takes the data as the first argument (piped in this examples), and then will put together specified columns using a separator you specify. If you don't want to remove the variables used to construct the key, you add the "remove = FALSE" argument.
 
 ```{r}
 select_batches <- select_batches %>%
   unite(keyB, c(batch_name, compound_name), sep=":", remove = FALSE)
+
 ```
 
 This creates what is call a *primary key*, which is the unique identifier for each observation in a specific tibble. A *foreign key* is the same thing, only it uniqely identifies an observation in another tibble. The `left_join` command joins two tibbles based on matching the *primary key* in the first tibble with the *foreign key* in the second tibble.  
@@ -107,7 +112,8 @@ This creates what is call a *primary key*, which is the unique identifier for ea
 ```{r}
 select_samples <- select_samples %>%
   unite(keyB, c(batch_name, compound_name), sep=":", remove = FALSE)
-combined <- left_join(select_samples, select_batches, by="keyB")
+combined <- left_join(select_samples, select_batches, by= "keyB")
+
 ```
 
 ### Set operations `union`, `intersect`, and `setdiff`
@@ -133,7 +139,7 @@ select_peaks <- january_peaks %>%
   unite(keyP, sample_name, compound_name, chromatogram_name, sep=":", remove=FALSE)
 ```
 
-Now let's construct our `select_peaks$keyB` foreign key by creating and then using a new variable called *analyte*, taking advantage of set operations.
+Now let's construct our `select_peaks$keyB` foreign key by creating and then using a new variable called *analyte*, taking advantage of set operations. This code shows a programmatic way to link the compound-internal standard pairs and deduce the analyte from the name similarity for the compound and internal standards.
 
 ```{r}
 all_names <- unique(select_peaks$compound_name)
