@@ -16,6 +16,13 @@ This course is intended for laboratory professionals with a basic command of R a
 - Install the latest version of RStudio Desktop at https://www.rstudio.com/products/rstudio/download/#download 
 - Open RStudio and confirm you are able to install packages by running `install.packages(c("tidyverse", "tinytex"), dependencies = TRUE)`
   - **If you do not already have LaTeX installed on your computer, run the following from the RStudio console to install TinyTeX: `tinytex::install_tinytex()`.** Note that you will get error messages when installing on Windows that are OK to click through.
+  - In addition to the tidyverse set of packages and tinytex, install additional packges with the following command: `install.packages(c("fs", "janitor", "tinytex"), dependencies = TRUE)`
+  - There is also a Bioconductor package that we may use if time permits. Install by running the following:
+  ```
+  if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+  BiocManager::install("mzR", version = "3.8")
+  ```
 - If not already installed, install Git per instructions at https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
   - **When installing on a Windows machine, select "Use Git from the Windows Command Prompt"**
 - Go to Github at https://github.com and sign up for an account (if you don't have one already)
