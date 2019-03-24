@@ -3,17 +3,15 @@ Course content for MSACL Data Science 201: Going Further with R
 
 This course is intended for laboratory professionals with a basic command of R and is a follow-up course to Daniel Holmes' and Steve Master's basic R course at MSACL. The emphasis of this course will be best practices in applying R to solve problems in mass spectrometry and in the clinical laboratory.
 
-- Instructors: Patrick Mathias & Randall Julian
-
-<!---
-- Teaching assistant: Adam Zabell
---->
+- Instructors: Patrick Mathias & Shannon Haymond
+- Teaching assistant (floating): Dustin Bunch
+- Past instructors and assistants: Randy Julian & Adam Zabell
 
 ## Pre-course work/requirements
 
 - A laptop with wifi, access to the internet, and the ability to download files is required
   - Confirm you can connect to conference wifi prior to class
-- Complete the following survey so we can better understand your R experience and what you want out of the course: [MSACL Intermediate R Course Survey](https://goo.gl/forms/p4l2sbFMfRN9Qiad2)
+- Complete the following survey so we can better understand your R experience and what you want out of the course: [MSACL Intermediate R Course Survey](https://goo.gl/forms/0BdeU8YGtM5YBkPm1)
 - Install the latest version of R by choosing the closest CRAN mirror here at https://cran.r-project.org/mirrors.html and downloading the version for your operating system
 - Install the latest version of RStudio Desktop at https://www.rstudio.com/products/rstudio/download/#download 
 - Open RStudio and confirm you are able to install packages by running `install.packages(c("tidyverse", "tinytex"), dependencies = TRUE)`
