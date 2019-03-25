@@ -5,6 +5,11 @@ output:
   html_document: default
 ---
 
+```{r setup_1, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(fs)
+```
+
 ## What is reproducible research?
 
 In its simplest form, reproducible research is the principle that any research result can be reproduced by anybody. Or, per Wikipedia: "The term reproducible research refers to the idea that the ultimate product of academic research is the paper along with the laboratory notebooks and full computational environment used to produce the results in the paper such as the code, data, etc. that can be used to reproduce the results and create new work based on the research."
@@ -48,20 +53,20 @@ Putting projects into their own directories helps to ensure that everything you 
 
 What is a project? Wilson et al. suggest dividing projects based on "overlap in data and code files." I tend to think about this question from the perspective of output, so a project is going to be the unit of work that creates an analysis document that will go on to wider consumption. If I am going to create multiple documents from the same data set, that will likely be included in the same project. It gets me to the same place that Wilson et al. suggest, but very often you start a project with a deliverable document in mind and then decide to branch out or not down the road.
 
-Now that we're thinking about creating directories for projects and directory structure in general, let's take the opportunity to review some basic commands and configuration related to directories in R.
+Now that we're thinking about creating directories for projects and directory structure in general, let's take the opportunity to review some basic commands and configuration related to directories in R. We are going to use functions available in both base R as well as the [fs package](https://github.com/r-lib/fs), which provides clearer names for functions as well as clearer output for directors and filenames. The fs package should have been installed if you completed the pre-course instructions, and you can load it if needed by running `library(fs)`.
 
 **Exercise 1**
 
 1. Navigate to "Global Options" under the Tools menu in the RStudio application and note the *Default working directory (when not in a project)*
 2. Navigate to your Console and get the working directory using `getwd()`
-3. Review the contents of your current folder using `list.files()`
+3. Review the contents of your current folder using `dir_ls()`. (Base equivalent: `list.files()`)
 4. Now try to set your working directory using `setwd("test_dir")`. What happened?
-5. Create a new test directory using `dir.create("test_dir")`
+5. Create a new test directory using `dir_create("test_dir")`. (Base equivalent: `dir.create("test_dir")`)
 6. Review your current directory
 7. Set your directory to the test directory you just created
 8. Using the Files window (bottom right in RStudio, click on **Files** tab if on another tab), navigate to the test directory you just created and list the files. *Pro tip: The More menu here has shortcuts to set the currently displayed directory as your working directory and to navigate to the current working directory*
 9. Navigate back to one level above the directory you created using `setwd("..")` and list the files
-10. Delete the directory you created using the `unlink()` function. Learn more about how to use the function by reviewing the documentation: `?unlink`. Pay special attention to comments about deleting directories.
+10. Delete the directory you created using the `dir_delete()` function. Learn more about how to use the function by reviewing the documentation: `?dir_delete`. (Base equivalent: `unlink()` + additional arguments)
 
 **End Exercise**
 
@@ -73,7 +78,7 @@ Now that you're warmed up with navigating through directories using R, let's use
 3. Set your directory to the "Projects" directory
 
 ```{r, eval = FALSE}
-dir.create("Projects")
+dir_create("Projects")
 setwd("/Projects")
 ```
 
@@ -109,10 +114,10 @@ One solution to help avoid these issues in maintaining the separation of church 
 Let's go ahead and create a minimal project structure:
 
 ```{r, eval = FALSE}
-dir.create("data") # raw data
-dir.create("output") # output from analysis
-dir.create("cache") # intermediate data (after processing raw data)
-dir.create("src") # code goes into this folder
+dir_create("data") # raw data
+dir_create("output") # output from analysis
+dir_create("cache") # intermediate data (after processing raw data)
+dir_create("src") # code goes into this folder
 ```
 
 This is a bare bones structure that should work for our purposes.
