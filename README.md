@@ -1,7 +1,7 @@
 # MSACL-intermediate-R-course
 Course content for MSACL Data Science 201: Going Further with R
 
-This course is intended for laboratory professionals with a basic command of R and is a follow-up course to Daniel Holmes' and Steve Master's basic R course at MSACL. The emphasis of this course will be best practices in applying R to solve problems in mass spectrometry and in the clinical laboratory.
+This course is intended for laboratory professionals with a basic command of R and is a follow-up course to the basic R course at MSACL (Data Science 101) developed by Daniel Holmes and Steve Master. The emphasis of this course will be best practices in applying R to solve problems in mass spectrometry and in the clinical laboratory.
 
 - Instructors: Patrick Mathias & Shannon Haymond
 - Teaching assistant (floating): Dustin Bunch
@@ -36,12 +36,10 @@ This course is intended for laboratory professionals with a basic command of R a
 ## Accessing/interacting with the course content
 
 There are multiple ways to access and interact with the course content. We want to minimize any headaches with setting up the course and grappling with finicky work computers, but also hope this is a good opportunity to get oriented with version control and git.
-- **Preferred:** Use git functionality in RStudio by creating a project from version control that is "cloned" from the class repository. *We will run through how to do this at the beginning of class.* The advantages of this approach: you won't have to retype or copy & paste code and we will make updates to the repository during class so you will be able to easily pull those to your computer without re-downloading.
-
-There are other options but these are less preferred. *We will likely be making a few tweaks up until the start of the course, so we recommend not downloading and installing ahead of time.*
-- You can refer to this website and copy and paste content as the course goes long.
-- Alternately, you can download this github repository as a zip file and install it on your computer (e.g. C:\Users\jdoe\Desktop\msacl2018).
-- In the event that there are issues with downloading files, we will have a local copy of the course repository that we can share.
+1. Use git functionality in RStudio by creating a project from version control that is "cloned" from the class repository. *We will run through how to do this at the beginning of class.* The advantages of this approach: you won't have to retype or copy & paste code and we will make updates to the repository during class so you will be able to easily pull those to your computer without re-downloading.
+1. Download this github repository as a zip file and install it on your computer (e.g. C:\Users\jdoe\Desktop\msacl2018).
+1. You can refer to this website and copy and paste content as the course goes long.
+1. In the event that there are issues with downloading files, we will have a local copy of the course repository that we can share.
 
 <!---
 ## Course content
