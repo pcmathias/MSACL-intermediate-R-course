@@ -111,16 +111,19 @@ One solution to help avoid these issues in maintaining the separation of church 
 
 **Exercise 3**
 
-Let's go ahead and create a minimal project structure:
+Be sure to work within the RStudio window that contains your "sample-project-structure" project. Refer to the top right of the window and you should see the project name displayed there. Let's go ahead and create a minimal project structure by running the following code within the console:
 
 ```{r, eval = FALSE}
+library(fs)
 dir_create("data") # raw data
 dir_create("output") # output from analysis
 dir_create("cache") # intermediate data (after processing raw data)
 dir_create("src") # code goes into this folder
 ```
 
-This is a bare bones structure that should work for our purposes.
+This is a bare bones structure that should work for future projects you create. Refer to the content below if you decide you want to adopt a standard directory structure for your projects on top of using RStudio Projects.
+
+Go ahead and close out the RStudio window with your "sample-project-structure" by clicking on the arrow next to the project name and selecting "Close Project".
 
 **End Exercise**
 
