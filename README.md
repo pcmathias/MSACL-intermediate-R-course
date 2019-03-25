@@ -16,7 +16,7 @@ This course is intended for laboratory professionals with a basic command of R a
 - Install the latest version of RStudio Desktop at https://www.rstudio.com/products/rstudio/download/#download 
 - Open RStudio and confirm you are able to install packages by running `install.packages(c("tidyverse", "tinytex"), dependencies = TRUE)`
   - **If you do not already have LaTeX installed on your computer, run the following from the RStudio console to install TinyTeX: `tinytex::install_tinytex()`.** Note that you will get error messages when installing on Windows that are OK to click through.
-  - In addition to the tidyverse set of packages and tinytex, install additional packges with the following command: `install.packages(c("fs", "janitor", "tidylog"), dependencies = TRUE)`
+  - In addition to the tidyverse set of packages and tinytex, install additional packges with the following command: `install.packages(c("fs", "janitor", "tidylog", "pROC"), dependencies = TRUE)`
   - There is also a Bioconductor package that we may use if time permits. Install by running the following:
   ```
   if (!requireNamespace("BiocManager", quietly = TRUE))
@@ -52,9 +52,9 @@ There are other options but these are less preferred. *We will likely be making 
 - **Lesson 4**: [Data manipulation in the tidyverse](lesson4/lesson4.Rmd)
 - **Lesson 5**: [Blending data sets](lesson5/lesson5.Rmd)
 - **Lesson 6**: [Taking plotting to the next level](lesson6/lesson6.Rmd)
-- **Lesson 7**: [Modelling data](lesson7/lesson7.Rmd)
-- **Lesson 8**: [Beyond flat files](lesson8/lesson8.Rmd)
-- **Lesson 9**: [Scaling - don't make me repeat myself](lesson9/lesson9.Rmd)
+- **Lesson 7**: [Exploring data](lesson7/lesson7.Rmd)
+- **Lesson 8**: [Predictions using linear regression](lesson8/lesson8.Rmd)
+- **Lesson 9**: [Classifications using linear regression](lesson9/lesson9.Rmd)
 - **Lesson 10**: [End-to-end - from file import to communication](lesson10/lesson10.Rmd)
 --->
 
