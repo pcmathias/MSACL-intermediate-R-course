@@ -8,6 +8,7 @@ output:
 ```{r setup_4, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(tidylog, warn.conflicts = FALSE)
 library(janitor)
 library(readxl)
 library(lubridate)
