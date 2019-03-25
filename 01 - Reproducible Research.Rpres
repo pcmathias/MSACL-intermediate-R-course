@@ -47,9 +47,9 @@ Exercise 1: Refresher on navigating file structure in R
 ========================================================
 1. Navigate to "Global Options" under the Tools menu in the RStudio application and note the *Default working directory (when not in a project)*
 2. Navigate to your Console and get the working directory using `getwd()`
-3. Review the contents of your current folder using `list.files()`
+3. Review the contents of your current folder using `dir_ls()`. (Base equivalent: `list.files()`)
 4. Now try to set your working directory using `setwd("test_dir")`. What happened?
-5. Create a new test directory using `dir.create("test_dir")`
+5. Create a new test directory using `dir_create("test_dir")`. (Base equivalent: `dir.create("test_dir")`)
 
 Exercise 1: Refresher on navigating file structure in R
 ========================================================
@@ -57,14 +57,14 @@ Exercise 1: Refresher on navigating file structure in R
 7. Set your directory to the test directory you just created
 8. Using the Files window (bottom right in RStudio, click on **Files** tab if on another tab), navigate to the test directory you just created and list the files.
 9. Navigate back to one level above the directory you created using `setwd("..")` and list the files
-10. Delete the directory you created using the `unlink()` function. Learn more about how to use the function by reviewing the documentation: `?unlink`.
+10. Delete the directory you created using the `dir_delete()` function. Learn more about how to use the function by reviewing the documentation: `?dir_delete`.
 
 Exercise 1 Comments
 ========================================================
 
 - Be aware of your working directory: `getwd()` 
 - Set it when needed: `setwd()`
-- Directories created and removed with `dir.create()` and `unlink()`, respectively
+- Directories created and removed with `dir_create()` and `dir_delete()`, respectively
 - Create a projects directory to house projects
 
 Exercise 2: Create a project using RStudio
@@ -94,7 +94,7 @@ Create a data directory and a results directory
 Exercise 3: Create a minimal project structure
 ========================================================
 
-Use `dir.create()` to create a project structure
+Load the fs package within your new project and use `dir_create()` to create a project structure that includes the following directories: data, output, cache, and src.
 
 - Can convert code into a function that will build project structure for you [Refresher on writing functions](https://swcarpentry.github.io/r-novice-inflammation/02-func-R/)
 - Alternately, use an existing package to create your project structure: eg. [Project Template](http://projecttemplate.net/index.html)
