@@ -12,8 +12,9 @@ This course is intended for laboratory professionals with a basic command of R a
 - A laptop with wifi, access to the internet, and the ability to download files is required
   - Confirm you can connect to conference wifi prior to class
 - Complete the following survey so we can better understand your R experience and what you want out of the course: [MSACL Intermediate R Course Survey](https://goo.gl/forms/0BdeU8YGtM5YBkPm1)
-- Install the latest version of R by choosing the closest CRAN mirror here at https://cran.r-project.org/mirrors.html and downloading the version for your operating system
-- Install the latest version of RStudio Desktop at https://www.rstudio.com/products/rstudio/download/#download 
+- You are welcome to continue using whatever version of R and RStudio you already have on your computer, but you may run into issues running old versions. Our recommendation:
+  - Install the latest version of R by choosing the closest CRAN mirror here at https://cran.r-project.org/mirrors.html and downloading the version for your operating system
+  - Install the latest version of RStudio Desktop at https://www.rstudio.com/products/rstudio/download/#download 
 - Open RStudio and confirm you are able to install packages by running `install.packages(c("tidyverse", "tinytex"), dependencies = TRUE)`
   - **If you do not already have LaTeX installed on your computer, run the following from the RStudio console to install TinyTeX: `tinytex::install_tinytex()`.** Note that you will get error messages when installing on Windows that are OK to click through.
   - In addition to the tidyverse set of packages and tinytex, install additional packges with the following command: `install.packages(c("fs", "janitor", "tidylog", "pROC"), dependencies = TRUE)`
@@ -23,10 +24,11 @@ This course is intended for laboratory professionals with a basic command of R a
   install.packages("BiocManager")
   BiocManager::install("mzR", version = "3.8")
   ```
+  
+- **Download the class data zip file from [this link](https://drive.google.com/file/d/1BHP-CXE-_WB4KKO1XtbEl4O3yvZOd5xI/view?usp=sharing) (hit the download button), park it someplace you will remember for the course, and uncompress.**
 - If not already installed, install Git per instructions at https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
   - **When installing on a Windows machine, select "Use Git from the Windows Command Prompt"**
 - Go to Github at https://github.com and sign up for an account (if you don't have one already)
-- **Download the class data zip file from [this link](https://drive.google.com/file/d/1BHP-CXE-_WB4KKO1XtbEl4O3yvZOd5xI/view?usp=sharing), park it someplace you will remember for the course, and uncompress.**
 
 **Optional but strongly encouraged**
 - Please make an effort to complete the following Introduction to GitHub: https://services.github.com/on-demand/intro-to-github/
