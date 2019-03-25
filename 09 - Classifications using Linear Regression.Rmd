@@ -1,5 +1,5 @@
 ---
-title: 'Lesson 10: Classifications using linear regression'
+title: 'Lesson 09: Classifications using linear regression'
 output:
   html_document: default
 ---
