@@ -1,5 +1,5 @@
 ---
-title: 'Lesson 00: Predictions using linear regression'
+title: 'Lesson 08: Predictions using linear regression'
 output:
   html_document: default
 ---
