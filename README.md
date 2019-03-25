@@ -26,7 +26,7 @@ This course is intended for laboratory professionals with a basic command of R a
 - If not already installed, install Git per instructions at https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
   - **When installing on a Windows machine, select "Use Git from the Windows Command Prompt"**
 - Go to Github at https://github.com and sign up for an account (if you don't have one already)
-- **Download the class data zip file from [this link](https://indigobio.egnyte.com/fl/Bq6uXMpRKG), park it someplace you will remember for the course, and uncompress.**
+- **Download the class data zip file from [this link](https://drive.google.com/open?id=1lIvZd64gMIgD3DCmjNEdixbJrLw6ZS6_), park it someplace you will remember for the course, and uncompress.**
 
 **Optional but strongly encouraged**
 - Please make an effort to complete the following Introduction to GitHub: https://services.github.com/on-demand/intro-to-github/
