@@ -1,7 +1,7 @@
 # MSACL-intermediate-R-course
 Course content for MSACL Data Science 201: Going Further with R
 
-This course is intended for laboratory professionals with a basic command of R and is a follow-up course to the basic R course at MSACL (Data Science 101) developed by Daniel Holmes and Steve Master. The emphasis of this course will be best practices in applying R to solve problems in mass spectrometry and in the clinical laboratory.
+This course is intended for laboratory professionals with a basic command of R and is a follow-up course to the introductory R course at MSACL (Data Science 101) developed by Daniel Holmes and Steve Master. The emphasis of this course will be best practices in applying R to solve problems in mass spectrometry and in the clinical laboratory.
 
 - Instructors: Patrick Mathias & Shannon Haymond
 - Teaching assistant (floating): Dustin Bunch
