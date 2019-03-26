@@ -12,19 +12,18 @@ This course is intended for laboratory professionals with a basic command of R a
 - A laptop with wifi, access to the internet, and the ability to download files is required
   - Confirm you can connect to conference wifi prior to class
 - Complete the following survey so we can better understand your R experience and what you want out of the course: [MSACL Intermediate R Course Survey](https://goo.gl/forms/0BdeU8YGtM5YBkPm1)
-- You are welcome to continue using whatever version of R and RStudio you already have on your computer, but you may run into issues running old versions. Our recommendation:
+- You are welcome to continue using whatever version of R and RStudio you already have on your computer, but you may run into issues running old versions. Our recommendation (if it won't disrupt your working R environment too much):
   - Install the latest version of R by choosing the closest CRAN mirror here at https://cran.r-project.org/mirrors.html and downloading the version for your operating system
   - Install the latest version of RStudio Desktop at https://www.rstudio.com/products/rstudio/download/#download 
 - Open RStudio and confirm you are able to install packages by running `install.packages(c("tidyverse", "tinytex"), dependencies = TRUE)`
   - **If you do not already have LaTeX installed on your computer, run the following from the RStudio console to install TinyTeX: `tinytex::install_tinytex()`.** Note that you will get error messages when installing on Windows that are OK to click through.
-  - In addition to the tidyverse set of packages and tinytex, install additional packges with the following command: `install.packages(c("fs", "janitor", "tidylog", "corrplot", "RColorBrewer", "Metrics", "car", "pROC"), dependencies = TRUE)`
+  - In addition to the tidyverse set of packages and tinytex, install additional packages with the following command: `install.packages(c("fs", "janitor", "tidylog", "corrplot", "RColorBrewer", "Metrics", "car", "pROC"), dependencies = TRUE)`
   - There is also a Bioconductor package that we may use if time permits. Install by running the following:
   ```
   if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
   BiocManager::install("mzR", version = "3.8")
   ```
-  
 - **Download the class data zip file from [this link](https://drive.google.com/file/d/1BHP-CXE-_WB4KKO1XtbEl4O3yvZOd5xI/view?usp=sharing) (hit the download button), park it someplace you will remember for the course, and uncompress.**
 - If not already installed, install Git per instructions at https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
   - **When installing on a Windows machine, select "Use Git from the Windows Command Prompt"**
@@ -40,6 +39,7 @@ There are multiple ways to access and interact with the course content. We want 
 1. Download this github repository as a zip file and install it on your computer (e.g. C:\Users\jdoe\Desktop\msacl2018).
 1. You can refer to this website and copy and paste content as the course goes long.
 1. In the event that there are issues with downloading files, we will have a local copy of the course repository that we can share.
+1. We have set up a web-based RStudio instance through RStudio Cloud that has the course content pre-loaded. However, we do want attendees to be comfortable with running RStudio locally so will reserve the use of RStudio Cloud for those with installation issues.
 
 <!---
 ## Course content
