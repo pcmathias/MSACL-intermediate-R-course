@@ -8,6 +8,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readxl)
+library(fs)
 ```
 
 This is a much shorter and less philosophical lesson than the previous lessons but hopefully is very useful when considering how to pull data into R.
@@ -281,8 +282,7 @@ In the last lesson we placed our large mass spec data set in the data folder. Th
 - Finally we feed that character to `map_df()`, which takes the `read_csv()` function as its argument. With the map family of functions, there is no need to include the parentheses in the function name if there arent' arguments.
 
 ```{r}
-all_samples <- list.files("data", pattern = "_s.csv") %>%
-  file.path("data", .) %>%
+all_samples <- dir_ls("data", glob = "*_s.csv") %>%
   map_dfr(read_csv) %>%
   clean_names()
 summary(all_samples)
