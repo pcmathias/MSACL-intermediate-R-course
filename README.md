@@ -17,7 +17,7 @@ This course is intended for laboratory professionals with a basic command of R a
   - Install the latest version of RStudio Desktop at https://www.rstudio.com/products/rstudio/download/#download 
 - Open RStudio and confirm you are able to install packages by running `install.packages(c("tidyverse", "tinytex"), dependencies = TRUE)`
   - **If you do not already have LaTeX installed on your computer, run the following from the RStudio console to install TinyTeX: `tinytex::install_tinytex()`.** Note that you will get error messages when installing on Windows that are OK to click through.
-  - In addition to the tidyverse set of packages and tinytex, install additional packges with the following command: `install.packages(c("fs", "janitor", "tidylog", "pROC"), dependencies = TRUE)`
+  - In addition to the tidyverse set of packages and tinytex, install additional packges with the following command: `install.packages(c("fs", "janitor", "tidylog", "corrplot", "RColorBrewer", "Metrics", "car", "pROC"), dependencies = TRUE)`
   - There is also a Bioconductor package that we may use if time permits. Install by running the following:
   ```
   if (!requireNamespace("BiocManager", quietly = TRUE))
