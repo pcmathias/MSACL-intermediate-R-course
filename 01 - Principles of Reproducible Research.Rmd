@@ -1,6 +1,5 @@
 ---
 title: 'Lesson 1: Adopting principles of reproducible research'
-author: "Patrick Mathias"
 output:
   html_document: default
 ---
