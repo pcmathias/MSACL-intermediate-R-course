@@ -2,6 +2,7 @@
 title: "MSACL Data Science 201 Textbook"
 author:
 - Patrick Mathias
+- Shannon Haymond 
 - Randall Julian
 - Adam Zabell
 output:
