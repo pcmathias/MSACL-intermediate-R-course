@@ -8,40 +8,41 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(lubridate)
-library(magrittr)
+library(fs)
 ```
 
 ## From Import to Graph
 
-These lessons were designed to build and reinforce each other. It's possible to write purely linear code, but **purrr** makes the code easier to read and **rbind** and **dplyr** make it possible to aggregate and discover trends. What follows are the steps to replicate the discovery of one particular problem in the mock data: excessively good R^2^ data.
+Let's pull all oru data together and explore the big data set. What follows are the steps to replicate the discovery of one particular problem in the mock data: excessively good R^2^ data.
 
 ```{r, message=FALSE}
-oneYearBatches <- list.files("data/", pattern = "_b.csv$") %>%
-  file.path("data", .) %>%
+all_batches <- dir_ls("data", glob = "*_b.csv") %>%
+  #list.files("data/", pattern = "_b.csv$") %>%
+  #file.path("data", .) %>%
   map_dfr(read_csv) %>%
-  as_tibble() %>%
-  type_convert()
+  clean_names() %>%
+  as_tibble()
 ```
 
 ```{r}
-ggplot(oneYearBatches, aes(x = calibrationR2, color = compoundName, fill = compoundName)) +
+ggplot(all_batches, aes(x = calibration_r2, color = compound_name, fill = compound_name)) +
   geom_histogram(bins = 30)
-ggplot(oneYearBatches, aes(x = batchCollectedTimestamp, y = calibrationR2, color = compoundName)) +
+ggplot(all_batches, aes(x = batch_collected_timestamp, y = calibration_r2, color = compound_name)) +
   geom_line()
 ```
 
 There's something interesting going on with the R^2^ values in the month of May, where a large number of them report a value of 1.0 -- a perfect fit. Let's focus on that month, and spread out the data so we can clarify whether it's all compounds or just oxymorphone (the magenta color on top).
 
 ```{r}
-mayPlot <- oneYearBatches %>%
-  filter(batchCollectedTimestamp > ymd("2017-04-15"), batchCollectedTimestamp < ymd("2017-06-15")) %>%
-  ggplot(aes(x = batchCollectedTimestamp, y = calibrationR2, color = compoundName))
-mayPlot +
+may_plot <- all_batches %>%
+  filter(batch_collected_timestamp > ymd("2017-04-15"), batch_collected_timestamp < ymd("2017-06-15")) %>%
+  ggplot(aes(x = batch_collected_timestamp, y = calibration_r2, color = compound_name))
+may_plot +
   geom_line() +
-  facet_wrap(~ compoundName)
-mayPlot +
+  facet_wrap(~ compound_name)
+may_plot +
   geom_point() +
-  facet_grid(reviewerName ~ instrumentName)
+  facet_grid(reviewer_name ~ instrument_name)
 ```
 
 Whatever is going on, it looks like reviewer 'Dave' is the only person it is happening to. 
@@ -51,39 +52,38 @@ Whatever is going on, it looks like reviewer 'Dave' is the only person it is hap
 Based on the batch-level data, we can see that 'Dave' -- and apparently only Dave -- has perfect R^2^ values on every batch of data he reviewed throughout the month of May. Digging deeper will require merging information from the batch level with information at the sample (and possibly peak) level. 
 
 ```{r, message=FALSE}
-oneYearSamples <- list.files("data/", pattern = "_s.csv$") %>%
-  file.path("data", .) %>%
-  map_dfr(read_csv)
-davesData <- oneYearSamples %>%
-  left_join(select(oneYearBatches, -calibrationSlope, -calibrationIntercept)) %>%
+all_samples <- dir_ls("data", glob = "*_s.csv") %>%
+  map_dfr(read_csv) %>%
+  clean_names()
+daves_data <- all_samples %>%
+  left_join(select(all_batches, -calibration_slope, -calibration_intercept)) %>%
   filter(
-    batchCollectedTimestamp > ymd("2017-04-20"),
-    batchCollectedTimestamp < ymd("2017-06-10"),
-    sampleType == "standard",
-    reviewerName == "Dave"
+    batch_collected_timestamp > ymd("2017-04-20"),
+    batch_collected_timestamp < ymd("2017-06-10"),
+    sample_type == "standard",
+    reviewer_name == "Dave"
   )
 ```
 
-The following plots of `davesData` provide compelling evidence for what happened: Dave unselected the middle five calibrators in order to draw a straight line and maximize the R^2^ term.
+The following plots of `daves_data` provide compelling evidence for what happened: Dave unselected the middle five calibrators in order to draw a straight line and maximize the R^2^ term.
 
 ```{r, warning=FALSE}
-davesData %>%
-  ggplot(aes(x = batchCollectedTimestamp, y = usedForCurve, color = compoundName)) +
+daves_data %>%
+  ggplot(aes(x = batch_collected_timestamp, y = used_for_curve, color = compound_name)) +
   geom_point() +
-  facet_grid(compoundName ~ expectedConcentration) +
+  facet_grid(compound_name ~ expected_concentration) +
   geom_vline(xintercept = as.numeric(as_datetime(c("2017-05-01", "2017-06-01"))),
     linetype = 1,
     colour = "black")
 
-davesData %<>% mutate(
-  pctDiff = (concentration - expectedConcentration) / expectedConcentration,
-  within20 = abs(pctDiff) <= 0.2
-)
-davesData %>%
-  filter(compoundName == "codeine") %>%
-  ggplot(aes(x = batchCollectedTimestamp, y = pctDiff, color = within20)) +
+daves_data <- daves_data %>% 
+  mutate(pct_diff = (concentration - expected_concentration) / expected_concentration,
+         within_20 = abs(pct_diff) <= 0.2)
+daves_data %>%
+  filter(compound_name == "codeine") %>%
+  ggplot(aes(x = batch_collected_timestamp, y = pct_diff, color = within_20)) +
   geom_point() +
-  facet_wrap(~ expectedConcentration) +
+  facet_wrap(~ expected_concentration) +
   ggtitle("Codeine Only") +
   geom_vline(xintercept = as.numeric(as_datetime(c("2017-05-01", "2017-06-01"))), 
     linetype = 1, 
@@ -106,65 +106,68 @@ Ion ratios can be particularly sensitive to instrument conditions, and variabili
 
 ```{r}
 # 1 #
-oneYearSamples %>%
-  left_join(oneYearBatches) %>%
-  ggplot(aes(x = batchCollectedTimestamp, y = ionRatio, color = compoundName)) +
+all_samples %>%
+  left_join(all_batches) %>%
+  ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = compound_name)) +
   geom_smooth() +
-  facet_grid(compoundName ~ instrumentName) # doc is grossly out of step, 
+  theme(axis.text.x = element_text(angle = 90)) +
+  facet_grid(compound_name ~ instrument_name) # doc is grossly out of step, 
 # investigate later
 # Quants and quals got flipped
 
 # 2 #
-oneYearSamples %>%
-  left_join(oneYearBatches) %>%
-  filter(instrumentName != "doc") %>%
-  ggplot(aes(x = batchCollectedTimestamp, y = ionRatio, color = compoundName)) +
+all_samples %>%
+  left_join(all_batches) %>%
+  filter(instrument_name != "doc") %>%
+  ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = compound_name)) +
   geom_smooth() +
-  facet_grid(compoundName ~ instrumentName) # grumpy+oxycodone looks least like the others
+  facet_grid(compound_name ~ instrument_name) # grumpy+oxycodone looks least like the others
 
 # 3 #
-oneYearSamples %>%
-  left_join(oneYearBatches) %>%
-  filter(compoundName == "oxycodone" & instrumentName != "doc") %>%
-  ggplot(aes(x = batchCollectedTimestamp, y = ionRatio, color = instrumentName)) +
+all_samples %>%
+  left_join(all_batches) %>%
+  filter(compound_name == "oxycodone" & instrument_name != "doc") %>%
+  ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = instrument_name)) +
   ggtitle("oxycodone") +
   geom_smooth() # grumpy+oxycodone clearly outlying
 
 # 4 #
-oneYearSamples %>%
-  left_join(oneYearBatches) %>%
-  filter(compoundName == "oxycodone" & instrumentName != "doc" & ionRatio > 0) %>%
-  ggplot(aes(x = batchCollectedTimestamp, y = ionRatio, color = instrumentName)) +
+all_samples %>%
+  left_join(all_batches) %>%
+  filter(compound_name == "oxycodone" & instrument_name != "doc" & ion_ratio > 0) %>%
+  ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = instrument_name)) +
   ggtitle("oxycodone") +
-  geom_smooth() # ionRatio!=0 makes it even more clear
+  geom_smooth() # ion_ratio!=0 makes it even more clear
 
 # 5 #
-oneYearPeaks <- list.files("data/", pattern = "_p.csv$") %>%
-  file.path("data", .) %>%
-  map_dfr(read_csv, col_types = cols())
+all_peaks <- dir_ls("data", glob = "*_b.csv") %>%
+  #list.files("data/", pattern = "_p.csv$") %>%
+  #file.path("data", .) %>%
+  map_dfr(read_csv, col_types = cols()) %>%
+  clean_names()
 
-meanByWeek <- oneYearPeaks %>%
-  left_join(oneYearBatches) %>%
-  filter(compoundName == "oxycodone" & instrumentName == "grumpy" & peakArea > 0) %>%
-  mutate(week = week(batchCollectedTimestamp)) %>%
-  group_by(week, chromatogramName) %>%
-  summarise(mean = mean(peakArea), sd = sd(peakArea), n = n())
+mean_by_week <- all_peaks %>%
+  left_join(all_batches) %>%
+  filter(compound_name == "oxycodone" & instrument_name == "grumpy" & peakArea > 0) %>%
+  mutate(week = week(batch_collected_timestamp)) %>%
+  group_by(week, chromatogram_name) %>%
+  summarise(mean = mean(peak_area), sd = sd(peak_area), n = n())
 
-ggplot(meanByWeek, aes(x = week, y = mean, color = chromatogramName)) +
+ggplot(mean_by_week, aes(x = week, y = mean, color = chromatogram_name)) +
   geom_line() +
   geom_smooth() +
   ggtitle("oxycodone + grumpy") +
-  facet_grid(chromatogramName ~ ., scales = "free_y") # quant is constant, qual drops
+  facet_grid(chromatogram_name ~ ., scales = "free_y") # quant is constant, qual drops
 
 # 6 #
-meanByWeek %>%
+mean_by_week %>%
   mutate(sd = NULL, n = NULL) %>%
-  spread(chromatogramName, mean) %>%
-  mutate(ionRatio = quant / qual) %>%
-  ggplot(aes(x = week, y = ionRatio)) +
+  spread(chromatogram_name, mean) %>%
+  mutate(ion_ratio = quant / qual) %>%
+  ggplot(aes(x = week, y = ion_ratio)) +
   geom_line() +
   geom_smooth() +
-  ggtitle("ionRatio by week for oxycodone on grumpy") # basically recreate step 4
+  ggtitle("ion_ratio by week for oxycodone on grumpy") # basically recreate step 4
 ```
 
 **End of Exercise**
