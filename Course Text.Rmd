@@ -47,17 +47,17 @@ output:
 
 # Method comparison & fitting models to the data
 
-```{r lesson_7, child = '07 - Modelling Data.Rmd'}
+```{r lesson_7, child = '07 - Exploring Data.Rmd'}
 ```
 
 # Beyond the csv -- parsing xml files
 
-```{r lesson_8, child = '08 - Parsing Complex Data.Rmd'}
+```{r lesson_8, child = '08 - Predictions using Linear Regression.Rmd'}
 ```
 
 # Exploratory data analysis
 
-```{r lesson_9, child = '09 - Exploring Data.Rmd'}
+```{r lesson_9, child = '09 - Classifications using Linear Regression.Rmd'}
 ```
 
 # Bringing it all together from import to graph to result
