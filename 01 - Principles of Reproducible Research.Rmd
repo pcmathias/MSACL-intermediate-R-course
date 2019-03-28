@@ -57,17 +57,38 @@ Now that we're thinking about creating directories for projects and directory st
 **Exercise 1**
 
 1. Navigate to "Global Options" under the Tools menu in the RStudio application and note the *Default working directory (when not in a project)*
-2. Navigate to your Console and get the working directory using `getwd()`
-3. Review the contents of your current folder using `dir_ls()`. (Base equivalent: `list.files()`)
-4. Now try to set your working directory using `setwd("test_dir")`. What happened?
-5. Create a new test directory using `dir_create("test_dir")`. (Base equivalent: `dir.create("test_dir")`)
-6. Review your current directory
-7. Set your directory to the test directory you just created
-8. Using the Files window (bottom right in RStudio, click on **Files** tab if on another tab), navigate to the test directory you just created and list the files. *Pro tip: The More menu here has shortcuts to set the currently displayed directory as your working directory and to navigate to the current working directory*
-9. Navigate back to one level above the directory you created using `setwd("..")` and list the files
-10. Delete the directory you created using the `dir_delete()` function. Learn more about how to use the function by reviewing the documentation: `?dir_delete`. (Base equivalent: `unlink()` + additional arguments)
+1. Navigate to your Console and get the working directory using `getwd()`
+1. If you haven't already installed the fs package (from the pre-course instructions), do so now: `install.packages("fs")`. Then load the package with `library(fs)` if you did not already run the set up chunk above.
+1. Review the contents of your current folder using `dir_ls()`. (Base equivalent: `list.files()`)
+1. Now try to set your working directory using `setwd("test_dir")`. What happened?
+1. Create a new test directory using `dir_create("test_dir")`. (Base equivalent: `dir.create("test_dir")`)
+1. Review your current directory
+1. Set your directory to the test directory you just created
+1. Using the Files window (bottom right in RStudio, click on **Files** tab if on another tab), navigate to the test directory you just created and list the files. *Pro tip: The More menu here has shortcuts to set the currently displayed directory as your working directory and to navigate to the current working directory*
+1. Navigate back to one level above the directory you created using `setwd("..")` and list the files
+1. Delete the directory you created using the `dir_delete()` function. Learn more about how to use the function by reviewing the documentation: `?dir_delete`. (Base equivalent: `unlink()` + additional arguments)
 
 **End Exercise**
+
+The functions in the fs package include arguments and capabilities that can be helpful for finding directories or files with names that have a specific pattern. From our project directory, we may want to see the files in a specific folder, without changing the directory of the folder. We can use the path argument in the function:
+
+```{r}
+dir_ls(path = "data")
+```
+
+Another really handy argument to the `dir_ls` function is glob. This allows you to supply a "wild card" pattern to retrieve records fitting a specific pattern. The syntax is to use an asterisk to indicate any pattern, either at the beginning or end of an expression. For example, we may only want to retrieve the Excel files from our data directory, so we would match to a file extension:
+
+```{r}
+dir_ls(path = "data", glob = "*.xlsx")
+```
+
+Or, we may be interested in only the sample csv files that are denoted by "_s":
+
+```{r}
+dir_ls(path = "data", glob = "*_s.csv")
+```
+
+Note that the asterisk at the beginning of the pattern followed by characters to match against at the end requires that the text pattern be at the very end of the string.
 
 **Optional Exercise (If you do not already have a project directory)**
 
@@ -121,8 +142,6 @@ dir_create("src") # code goes into this folder
 ```
 
 This is a bare bones structure that should work for future projects you create. Refer to the content below if you decide you want to adopt a standard directory structure for your projects on top of using RStudio Projects.
-
-Go ahead and close out the RStudio window with your "sample-project-structure" by clicking on the arrow next to the project name and selecting "Close Project".
 
 **End Exercise**
 
