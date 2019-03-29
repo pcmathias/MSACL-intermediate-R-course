@@ -1,5 +1,5 @@
 ---
-title: 'Lesson 09: Classifications using linear regression'
+title: 'Lesson 9: Classifications using linear regression'
 output:
   html_document: default
 ---
@@ -108,6 +108,7 @@ ckd_test <- ckd[test, ] %>%
 ```
 
 ### Fit the model
+
 We will fit a new model, modGLM, that uses SCr, BUN, and Kynurenine to predict Stage in the training set. As before, we will add the predicted probability values to the training set as a new variable, Stage_prob. The function `contrasts` shows what `R` is considering as the reference state for the prediction.
 
 ```{r}
@@ -137,9 +138,11 @@ ggplot(ckd_train, aes(Stage_prob, color = Stage)) +
 ```
 
 ### Examining our model
+
 Recalling the helpful functions we used from the `broom` package, we can examine our model. We see that the parameters for the logistic regression model are different than those we saw in the previous lesson on linear regression. R2 is not relevant for logistic regression. Instead, to compare models, we rely on parameters called AIC and BIC. These are the Akaike Information Criterion and the Bayesian Information Criterion. Each tries to balance model fit and parsimony and each penalizes differently for number of parameters. Models with the lowest AIC and lowest BIC are preferred.
 
 **Exercise 1:**
+
 Examine modGLM using the `glance()` and `tidy()` functions of the `broom` package. What is the AIC and BIC for this model? What are the coefficients for each term of the model? 
 ```{r, echo = FALSE, eval = FALSE}
 
@@ -162,6 +165,7 @@ exp(coef(modGLM))
 # Now we can say that for a one unit increase in SCr, the odds of being in group CKD3b (vs in CKD2) increase by a factor of 1.27
 
 ```
+
 **End exercise**
 
 ### Examining collinearity
@@ -191,6 +195,7 @@ mean(ckd_test$Stage_pred == ckd_test$Stage) #0.98
 ```
 
 **Exercise 2:**
+
 Select a different threshold and determine the accuracy of the model for that threshold setting.
 ```{r, echo = FALSE, eval = FALSE}
 
@@ -201,6 +206,7 @@ Select a different threshold and determine the accuracy of the model for that th
 ckd_test$Stage_pred<- ifelse(ckd_test$Stage_prob > 0.6, "CKD3b", "CKD2")
 mean(ckd_test$Stage_pred == ckd_test$Stage) #0.96
 ```
+
 **End exercise**
 
 

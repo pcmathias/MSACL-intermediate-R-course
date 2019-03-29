@@ -1,5 +1,5 @@
 ---
-title: 'Lesson 08: Predictions using linear regression'
+title: 'Lesson 8: Predictions using linear regression'
 output:
   html_document: default
 ---
@@ -130,6 +130,7 @@ glance(slr.fit)
 
 
 **Exercise 1:**
+
 Select a variable (other than SCr) and perform a single variable regression for iGFRc using the ckd dataset. Determine the model equation and R2 value. How did your model fit compare to our SCr example?  
 
 ```{r, echo = FALSE, eval = FALSE}
@@ -143,6 +144,7 @@ my.slr.fit <- lm(iGFRc ~ SDMA, ckd)
 tidy(my.slr.fit) #equation: iGFRc = -24.7*SDMA + 73.5
 glance(my.slr.fit) #R2: 0.48
 ```
+
 **End exercise**
 
 ### Making predictions from our model
@@ -238,6 +240,7 @@ Looks pretty reasonable and much improved over the simple linear regression mode
 Let's predict the iGFRc values for our test set to see how the model does when predicting new data.
 
 **Exercise 2:**
+
 Predict the iGFRc values for the test set using the mod.full and plot the actual vs predicted values.
 
 ```{r, echo = FALSE, eval = FALSE}
@@ -318,6 +321,7 @@ As we expected! There are several VIF above 5 or 10 in our model. Though it seem
 When multicollinearity is present, a first consideration is to remove highly correlated variables, since the presence of multicollinearity implies that the information that this variable provides about the response is redundant in the presence of the other variables. Removal of one or more variables may have an unexpected effect on other variables. 
 
 ### Feature engineering
+
 Feature engineering is the process of creating and selecting the best predictors for a model. This is an area where the 'art' of modeling is practiced and can have a great impact on results. The scope of this topic is beyond our time in this course, but we will do a brief exercise in variable selection to attempt to resolve our collinearity problem. 
 
 Let's go back and review the information from our full model fit to get an idea of what variables we may want to keep and not. 
@@ -335,6 +339,7 @@ To specify a formula for multiple variables, we use the y ~ a + b + c format, wh
 
 
 **Exercise 3:** 
+
 (1) Run the code chunk below to reset the data variables. 
 
 ```{r}
@@ -374,7 +379,7 @@ ckd_train <- ckd_train %>%
               mutate(iGFR_pred = round(augment(mod2)$.fitted,0))
 ```
 
-(2) Write out the equation for this model. Does it make sense, based on your prior knowledge?
+(3) Write out the equation for this model. Does it make sense, based on your prior knowledge?
 ```{r, echo = FALSE, eval = FALSE}
 
 ```
@@ -384,7 +389,7 @@ ckd_train <- ckd_train %>%
 # iGFRc = 0.44*Trp - 2.95*Kynurenine - 0.43*BUN - 5.94*CYC_DB - 12.2*ADMA - 0.13*Phe
 ```
 
-(3) Find the R2, RMSE, and MAPE values for the model fit on the training set.
+(4) Find the R2, RMSE, and MAPE values for the model fit on the training set.
 ```{r, echo = FALSE, eval = FALSE}
 
 ```
@@ -396,7 +401,7 @@ rmse(ckd_train$iGFRc, mod2$fitted.values) #7.08
 mape(ckd_train$iGFRc, mod2$fitted.values) #0.14 or 14%
 ```
 
-(4) Check for collinearity.
+(5) Check for collinearity.
 ```{r, echo = FALSE, eval = FALSE}
 
 ```
@@ -406,7 +411,7 @@ mape(ckd_train$iGFRc, mod2$fitted.values) #0.14 or 14%
 vif(mod2) #yay!!
 ```
 
-(5) Examine the residuals and actual vs predicted.
+(6) Examine the residuals and actual vs predicted.
 ```{r, echo = FALSE, eval = FALSE}
 
 ```
@@ -426,6 +431,7 @@ ggplot(ckd_train, aes(x = iGFR_pred, y = iGFRc)) +
   geom_point() +
   geom_abline(color = "blue")
 ```
+
 **End Exercise** 
 
 As the last step, we'll confirm the performance on our test set.
