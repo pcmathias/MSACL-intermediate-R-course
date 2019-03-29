@@ -43,7 +43,7 @@ You can load the core tidyverse packages by loading tidyverse: `library(tidyvers
 
 ## Manipulating data with dplyr
 
-The [dplyr package](http://dplyr.tidyverse.org/) provides functions to carve, expand, and collapse a data frame (or tibble).
+The [dplyr package](http://dplyr.tidyverse.org/) provides functions to carve, expand, and collapse a data frame (or tibble). To complement dplyr, we have also loaded the [tidylog package](https://github.com/elbersb/tidylog), which provides additional output to clarify exactly what the dplyr package did when you run certain commands.
 
 ### Carving your data set
 
@@ -185,9 +185,7 @@ max()
 
 ```{r}
 batch_jan_reviews <- batch_jan %>%
-  mutate(review_start_timestamp = mdy_hm(review_start_timestamp),
-         review_complete_timestamp = mdy_hm(review_complete_timestamp),
-         review_duration = as.numeric(difftime(review_complete_timestamp, review_start_timestamp,
+  mutate(review_duration = as.numeric(difftime(review_complete_timestamp, review_start_timestamp,
                                                units = "mins")))
 # note: the output of difftime is a time interval, convert to numeric to avoid confusion downstream
 reviews_jan_grouped <- batch_jan_reviews %>%
