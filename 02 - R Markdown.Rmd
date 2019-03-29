@@ -1,6 +1,8 @@
 ---
 title: 'Lesson 2: Getting cozy with R Markdown'
 output:
+  html_document:
+    df_print: paged
   pdf_document: default
 ---
 
@@ -79,6 +81,7 @@ There is additional functionality in RStudio that allows you to create an R Note
 **Exercise 1**
 
 Let's use the built-in functionality in RStudio to create an R Markdown document.
+
 1. Add a file by selecting the add file button on the top left of your screen
 1. Select R Markdown... as the file type
 1. Title the document "Sample R Markdown Document" and select OK
