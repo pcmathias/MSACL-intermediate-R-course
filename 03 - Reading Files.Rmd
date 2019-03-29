@@ -82,21 +82,6 @@ summary(base_load_nofactors)
 
 **End Exercise**
 
-### Writing files
-
-The functions for reading files in base R have equivalents for [writing files](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/write.table.html) as well: `write.table()` and `write.csv()`. The first argument in these functions is the data frame or matrix to be written and the second argument is the file name (in quotes).
-```{r, eval = FALSE}
-write.table(x, file = "", append = FALSE, quote = TRUE, sep = " ",
-            eol = "\n", na = "NA", dec = ".", row.names = TRUE,
-            col.names = TRUE, qmethod = c("escape", "double"),
-            fileEncoding = "")
-```
-There are a few other important parameters:
-- `sep` indicates the field separator ("\t" for tab)
-- `row.names` is set to TRUE by default - in general this makes for an ugly output file becuase the first column shows the row number (I almost always set this to FALSE when I use the base function)
-- `na` indicates the string to use for missing data and is set to R's standard of "NA" by default
-- `append` can be set to TRUE if you would like to append your data frame/matrix to an existing file
-
 ## Speeding things up with the *readr* package
 
 Base R functions get the job done, but they have some weaknesses:
@@ -130,7 +115,7 @@ readr_load <-
 ```
 
 ```{r}
-readr_load <- read_csv("data/2017-01-06_b.csv")
+readr_load <- read_csv("data/2017-01-06_s.csv")
 ```
 
 2. What is the internal structure of the object?
@@ -166,7 +151,7 @@ summary( )
 ```
 
 ```{r}
-readr_load_factors <- read_csv("data/2017-01-06_b.csv",
+readr_load_factors <- read_csv("data/2017-01-06_s.csv",
                                col_types = cols(
                                  compoundName = col_factor(NULL),
                                  sampleType = col_factor(NULL)
@@ -180,14 +165,38 @@ summary(readr_load_factors)
 For reference we can compare the time required to run the base `read.csv()` function with the readr `read_csv()` function using `system.time()`.
 
 *Time to read with base:*
-```{r, eval = FALSE}
+```{r}
 system.time(base_load <- read.csv("data/2017-01-06_p.csv"))
 ```
 
 *Time to read with readr:*
-```{r, eval = FALSE}
+```{r}
 system.time(readr_load <- read_csv("data/2017-01-06_p.csv"))
 ```
+
+### Writing files
+
+The functions for reading files in base R have equivalents for [writing files](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/write.table.html) as well: `write.table()` and `write.csv()`. The first argument in these functions is the data frame or matrix to be written and the second argument is the file name (in quotes).
+```{r, eval = FALSE}
+write.table(x, file = "", append = FALSE, quote = TRUE, sep = " ",
+            eol = "\n", na = "NA", dec = ".", row.names = TRUE,
+            col.names = TRUE, qmethod = c("escape", "double"),
+            fileEncoding = "")
+```
+
+There are a few other important parameters:
+
+- `sep` indicates the field separator ("\t" for tab)
+- `row.names` is set to TRUE by default - in general this makes for an ugly output file becuase the first column shows the row number (I almost always set this to FALSE when I use the base function)
+- `na` indicates the string to use for missing data and is set to R's standard of "NA" by default
+- `append` can be set to TRUE if you would like to append your data frame/matrix to an existing file
+
+As you might predict, readr has it's own equivalents for writing files that work similarly with less arguments: `write_delim()`, `write_csv()`, and `write_tsv()` (tab-separated values text file) are examples. `write_excel_csv()` is a handy function that writes Excel-friendly csv files. 
+
+Advantages of the readr functions include:
+
+- similar to readr functions for reading files, writing is generally twice as fast
+- by default, row names (actually row numbers) are not printed in the first column
 
 ## Dealing with Excel files (gracefully)
 
