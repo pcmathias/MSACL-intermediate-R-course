@@ -7,6 +7,7 @@ output:
 ```{r setup_5, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library("tidylog", warn.conflicts = FALSE)
 library(readxl)
 library(janitor)
 ```
@@ -62,20 +63,45 @@ As long as the two tibbles have the same number of columns and the same column n
 
 **Exercise 1**
 
-Try to use `bind_rows()` to combine all of the sample data from February and each of the three tibbles containing January data. Do any of them work? What does the data look like? What error messages do you get?  
+Try to use `bind_rows()` to combine all of the sample data from February and each of the three tibbles containing January data. Do any of them work? What does the data look like?
+
+First try binding a peaks file with the February samples file:
 
 ```{r, echo = FALSE, eval = FALSE}
-bind_rows()
-bind_rows()
-bind_rows()
+peaks_samples <- bind_rows()
+summary(peaks_samples)
 ```
 
 ```{r}
-bind_rows(january_peaks,   february_samples)
-bind_rows(january_batches, february_samples)
-bind_rows(january_samples, february_samples) # the only January data frame with matching columns
+peaks_samples <- bind_rows(january_peaks, february_samples)
+summary(peaks_samples) # bind_rows completes, but adds all columns in data set with NAs
 ```
 
+Observe the number of columns and visualize the new data frame directly.
+
+Next try the batches and samples file:
+
+```{r, echo = FALSE, eval = FALSE}
+batches_samples <- bind_rows()
+summary(batches_samples)
+```
+
+```{r}
+batches_samples <- bind_rows(january_batches,   february_samples)
+summary(batches_samples) # bind_rows completes, but adds all columns in data set with NAs
+```
+
+Now bind both samples files:
+
+```{r, echo = FALSE, eval = FALSE}
+batches_samples <- bind_rows()
+summary(batches_samples)
+```
+
+```{r}
+samples_samples <- bind_rows(january_samples, february_samples) # no extra columns
+summary(samples_samples)
+```
 **End Exercise**
 
 There is an related command called `bind_cols` which will append columns to a tibble, but it also requires very clean data. This command will not check to make sure the order of values are correct between the two things being bound.
@@ -89,7 +115,7 @@ incomplete_data <- tibble(sampleName="123456",
 additional_columns <- tibble(expectedConcentration=c(20,30,40,40),
                              sampleType="standard")
 
-desired_bind   <- bind_cols(incomplete_data,additional_columns)
+desired_bind   <- bind_cols(incomplete_data, additional_columns)
 head(desired_bind)
 ```
 
@@ -212,6 +238,7 @@ exercise_two <- left_join(, ,)
 select_peaks$analyte <- sub("-.*$", "", select_peaks$analyte) # ensure the variable has been modified
 exercise_two <- left_join(select_batches, select_peaks, 
                           by=c("batch_name","compound_name" = "analyte"))
+summary(exercise_two)
 ```
 
 **End Exercise**
