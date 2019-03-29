@@ -109,11 +109,12 @@ Alternately, you can do the above steps within your operating system (eg. on a M
 **Exercise 2**
 
 Let's start a new project :
+
 1. Navigate to the **File** menu and select **New Project...** OR Select the **Create a project** button on the global toolbar (2nd from the left)
-2. Select **New Directory** option
-3. In the Project Type prompt, select **New Project**
-4. In the Directory Name prompt under Create New Project, enter "sample-project-structure"
-5. In the Create Project as a Subdirectory of prompt under Create New Project, navigate to the Projects folder you just created (or another directory of your choosing). You can type in the path or hit the **Browse** button to find the directory. Check the option for "Open in a new session" and create your project.
+1. Select **New Directory** option
+1. In the Project Type prompt, select **New Project**
+1. In the Directory Name prompt under Create New Project, enter "sample-project-structure"
+1. In the Create Project as a Subdirectory of prompt under Create New Project, navigate to the Projects folder you just created (or another directory of your choosing). You can type in the path or hit the **Browse** button to find the directory. Check the option for "Open in a new session" and create your project.
 
 **End Exercise**
 
@@ -143,9 +144,13 @@ dir_create("src") # code goes into this folder
 
 This is a bare bones structure that should work for future projects you create. Refer to the content below if you decide you want to adopt a standard directory structure for your projects on top of using RStudio Projects.
 
+Keep this project open in a separate window for now. We will revisit it as we learn about version control.
+
 **End Exercise**
 
-*Further exploration/tools for creating projects*: The directory creation code in the above exercise can be packaged into a function that creates the folder structure for you (either within or outside of a project). Software Carpentry has a nice refresher on writing functions: https://swcarpentry.github.io/r-novice-inflammation/02-func-R/.
+*Further exploration/tools for creating projects:* 
+
+The directory creation code in the above exercise can be packaged into a function that creates the folder structure for you (either within or outside of a project). Software Carpentry has a nice refresher on writing functions: https://swcarpentry.github.io/r-novice-inflammation/02-func-R/.
 
 There is also a dedicated Project Template package that has a nice "minimal project layout" that can be a good starting point if you want R to do more of the work for you: [Project Template](http://projecttemplate.net/index.html). This package duplicates some functionality that the RStudio Project does for you, so you probably want to run it outside of an RStudio Project but it is a good tool to be aware of.
 
@@ -268,43 +273,43 @@ When working in Git, there are three states that files live in: modified, staged
 
 ### Hands-on with Git
 
-We have placed the contents of this course into a Git repository (central hub - we will discuss in more detail later) for the class to download and work with. This will help cut down on the scripting you need to run through the exercises for this course and will also give you the chance to work with Git. In the following exercise you will use Git with the existing course repository to move through the typical workflow using RStudio.
+First we need to learn how to interact with Git locally. We can do this easily within a RStudio project.
 
 *If you have not set up Git per the pre-course instructions (https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and signed up for an account on Github.com (https://github.com/join), you will need to do so before you can complete the next exercise.*
 
 **Exercise 4**
 
-Forking the course repository:
-
-1. Navigate to the course repository at https://github.com/pcmathias/MSACL-intermediate-R-course.
-1. Select the "Fork" button at the top right of the repository page. If you are not already signed in, you will be asked to sign in.
-1. You should now have the course repository under your account at Github (github.com/*your-user-name*/MSACL-intermediate-R-course). 
-
-We will explain why we "forked" the repository in more detail after the exercise.
-
-Opening the repository as a project in RStudio:
+If you have not previously set up Git and the interface within RStudio on your system, first follow these steps:
 
 1. First we need to set up our git configuration to include our email address and user name. Open either Terminal (Mac) or Git Bash (Windows) and run the following:
   1. git config --global user.name "*your username*"
   1. git config --global user.email *your email address*
 1. Before we can use the Git interface in RStudio, we need to enable version control in the application. Navigate to "Global Options" under the Tools menu with RStudio and select "Git/SVN" on the lefthand menu. Ensure that the check box for "Enable version control interface for RStudio projects" is checked.
-1. Under the File menu within the RStudio application, select "New Project".
-1. Select "Version Control" in the first Create Project prompt.
-1. Select "Git" in the next Create Project from Version Control prompt.
-1. Copy and paste the URL for the repository you just forked (github.com/*your-user-name*/MSACL-intermediate-R-course) into the prompt for Repository URL.
-1. Select a project name as well as a destination folder for your project (perhaps under a newly created Projects folder?).
 
-Creating a file and using the Git workflow:
+Next we will take our sample project and enable Git within the project to demonstrate the workflow.
 
-1. Let's create a new file within the repository by navigating to "New File" under the File menu and selecting "R Script".
-1. Add a title to the first line by inserting a comment (using #) with a title: "# My First Commit".
-1. Add another comment line: "# Author: *your-user-name*".
-1. Add a single line of code, eg. `print("Hello world")`.
-1. Save the file in the your repository folder with the following convention:  username_first_commit.R.
-1. If not already open, open up the Git window in the top left of the RStudio window (click the Git tab). You should see your new file in that window with two boxes containing yellow question marks. Check the box for the file under Staged and you should see a green box with an "A" under the Status box. This has taken a new file (with a modified status) and staged it.
-1. Now press the "Commit" button in the Git window. A new window will pop up showing the file(s) in the Git window, with a Commit message window on the right and the code below. Add "My first commit" to the Commit message window and hit the "Commit" button below.
+1. Navigate to your sample-project-structure RStudio window (refer to upper right hand corner to see project name)
+1. Note the tabs you see on the upper right quadrant. You should see tabs for Environment, History, and Connections (depending on version of RStudio and any personal window customizations)
+1. Navigate to the Tools menu in your menubar and select "Version Control", then "Project Setup..."
+1. In the Project Options window that pops up, navigate to the "Git/SVN" menu (if not already there).
+1. Select "Git" in the "Version control system" options.
+1. A prompt for "Confirm New Git Repository" should pop up. Select "Yes".
+1. A "Confirm Restart RStudio" prompt will pop up. Select "Yes".
 
-That is the general workflow you will use within RStudio. Modify (or add) a file, stage it by checking the box in the Git window, and then commit it. Be sure to include helpful comments when you commit, in case you need to go back to a previous version. All of these changes have happened locally on your machine.
+Capturing changes using the Git window:
+
+1. Create a new R file (one quick way: click shortcut button on top left of window above console and select "R Script").
+1. Add a few comment lines (recall that comments are denoted by #) with any content you'd like (e.g. title, author, date).
+1. Save the file (can use disk button) to the src folder and give it a name (e.g. sample).
+1. Now navigate to the Git window on the top right.
+1. There is a list of files and directories (that include files) within the project directory. Click the checkbox under "Staged" for the "src/" folder. The status column changed to include a green A icon. This indicates you are adding the file to the version control system.
+1. Hit the "Commit" button (menu options within Git window).
+1. A new "RStudio: Review Changes" window will pop up. Highlight the "src/sample.R" file (or whatever you named it) that you added. You will see your code highlighted in green to indicate additions to the code.
+1. Type "My first commit" (or anything else you'd like) in the Commit message window on the top right, and hit the "Commit" button under it. A Git commit window will pop up showing some details of the commit you made. Close that window and close the Review Changes window.
+1. Go back to your R script and delete at least one line and add another, then save.
+1. Navigate back to the Git window, and repeat the steps of checking the box to stage, hitting the Commit button (note the red and green highlights in the Review Changes), writing a commit message, and commiting.
+
+Congratulations! You have learned to stage and commit changes in your local Git repository.
 
 **End Exercise**
 
@@ -329,9 +334,43 @@ A common workflow in GitHub is one in which there is a single official project r
 
 ![Integration manager workflow with Git. Credit: https://git-scm.com/book/en/v2/Distributed-Git-Distributed-Workflows](assets/integration-manager.png)
 
-When we first pulled the course repository, we completed the first few steps of this workflow. We took the central version of the course repo and made a local copy on our Github accounts ("forked" the repository). Then we started making local changes and committing them. Now we can work through updating the remote repository.
+We have placed the contents of this course into a shared Git repository (central hub) for the class to download and work with. This will help cut down on the scripting you need to run through the exercises for this course and will also give you the chance to work with Git. In the following exercise you will use Git with the existing course repository to move through the typical workflow using RStudio.
 
 **Exercise 5**
+
+Forking the course repository:
+
+1. Navigate to the course repository at https://github.com/pcmathias/MSACL-intermediate-R-course.
+1. Select the "Fork" button at the top right of the repository page. If you are not already signed in, you will be asked to sign in.
+1. You should now have the course repository under your account at Github (github.com/*your-user-name*/MSACL-intermediate-R-course). 
+
+We will explain why we "forked" the repository in more detail after the exercise.
+
+Opening the repository as a project in RStudio:
+
+1. Under the File menu within the RStudio application, select "New Project".
+1. Select "Version Control" in the first Create Project prompt.
+1. Select "Git" in the next Create Project from Version Control prompt.
+1. Copy and paste the URL for the repository you just forked (github.com/*your-user-name*/MSACL-intermediate-R-course) into the prompt for Repository URL.
+1. Select a project name as well as a destination folder for your project (perhaps under a newly created Projects folder?).
+
+Creating a file and using the Git workflow:
+
+1. Let's create a new file within the repository by navigating to "New File" under the File menu and selecting "R Script".
+1. Add a title to the first line by inserting a comment (using #) with a title: "# My Commit".
+1. Add another comment line: "# Author: *your-user-name*".
+1. Add a single line of code, eg. `print("Hello world")`.
+1. Save the file in the your repository folder with the following convention:  username_commit.R.
+1. If not already open, open up the Git window in the top left of the RStudio window (click the Git tab). You should see your new file in that window with two boxes containing yellow question marks. Check the box for the file under Staged and you should see a green box with an "A" under the Status box. This has taken a new file (with a modified status) and staged it.
+1. Stage and commit the file per the steps outlined in the previous exercise. Add "My first commit" to the Commit message window and hit the "Commit" button below.
+
+That is the general workflow you will use within RStudio. Modify (or add) a file, stage it by checking the box in the Git window, and then commit it. Be sure to include helpful comments when you commit, in case you need to go back to a previous version. All of these changes have happened locally on your machine.
+
+**End Exercise**
+
+When we first pulled the course repository, we completed the first few steps of this workflow. We took the central version of the course repo and made a local copy on our Github accounts ("forked" the repository). Then we started making local changes and committing them. Now we can work through updating the remote repository.
+
+**Exercise 6**
 
 *These steps are dependent on completing the previous exercise*
 
@@ -341,7 +380,13 @@ When we first pulled the course repository, we completed the first few steps of 
 
 Now both of your local repo and your remote repo are aligned.
 
-**Optional steps:** If you would like to try the pull request workflow
+**End Exercise**
+
+In software projects that have multiple contributors, you need a workflow that allows contributors to work on different pieces of code and contribute changes in a structured fashion, ideally so a single owner of the repository can review and incorporate changes. The common way this is done with open source projects on GitHub is the pull request workflow: a contributor forks a repository, makes some changes in their repo, and then sends a pull request to the original contributor
+
+**Optional Exercise** 
+
+If you would like to try the pull request workflow
 
 1. Navigate to your MSACL repository webpage (under your username in GitHub) and select the "New pull request" button near the top.
 1. Under "Compare changes", select the link to "compare across forks".
@@ -351,12 +396,16 @@ Now both of your local repo and your remote repo are aligned.
 
 On our end, we will get a notification about a pull request and can choose to incorporate the code into the repository.
 
-**Optional steps:** If you would like to synchronize your MSACL repo with the main course repo in the future
+**End Exercise**
+
+You can keep your repository synchronized with the original by following steps below.
+
+If you would like to synchronize your MSACL repo with the main course repo in the future
 
 1. Open Terminal within RStudio on the bottom left of the window (tab is adjacent to Console tab).
 1. The Terminal window should be set to your MSACL course repo directory. Run `ls` to confirm that you see the course contents. If not, use `cd` to navigate to the right directory.
 1. Enter `git remote add upstream https://github.com/pcmathias/MSACL-intermediate-R-course`.
-1. Enter `git remote -v` to list the remote repositories. You should see the main course repository listed as upstream.
+1. Enter `git remote -v` to list the remote repositories. You should see the main course repository listed as upstream. 
 
 Now your course repository is linked to the main course repo.
 
@@ -366,8 +415,6 @@ In the future, if you want to retrieve changes to the original course repo:
 1. Enter `git merge upstream/master` to merge the course repo changes with your local repository.
 
 These instructions were adapted from the following: https://help.github.com/articles/syncing-a-fork.
-
-**End Exercise**
 
 The Git workflow for keeping changes updated is not as seamless as many modern document editors such as Office 365 or Google Docs, which continuously update changes for you without manual saving. One reason Git does not work that way is that your commits are expected to be strategic and coupled with changes that you may want to roll back. This is important to give you confidence that you do not need to create backup copies of your work, but the trade off is that you have to do extra work to make sure updates are captured. This is especially important when working with a remote repository. We made local changes and pushed those to the remote to update it. But imagine another scenario where you are working on multiple computers and made changes on computer A yesterday but are working on computer B today. If you pushed your changes from computer A to the remote yesterday, you can perform the opposite function on computer B today. You would use the "Pull" button to pull the contents of the remote repository onto your local computer B.
 
