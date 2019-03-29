@@ -1,5 +1,5 @@
 ---
-title: 'Lesson 7: Exploratory data analysis'
+title: 'Lesson 7: Exploring lab order data'
 output: html_document
 ---
 
@@ -176,6 +176,7 @@ Based on some preliminary analysis and past knowledge, we want to dig into clini
 **Exercise 3**
 
 The following is a list of questions regarding clinic-specific characteristics of orders that we would like to answer:
+
 - Which clinics order the highest volume of tests?
 - Which clinics have the highest numbers and rates of test cancellation?
 - Are there any clinics collecting blood at the clinic as opposed to at blood draw?
