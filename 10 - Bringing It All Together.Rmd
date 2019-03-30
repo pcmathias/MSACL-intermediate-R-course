@@ -94,9 +94,16 @@ The second plot shows that calibrators were dropped regardless of whether they w
 
 We intentionally included several other issues within the database, which will require aggregation and plotting to discover.
 
-**Exercises: Revealing an ion ratio problem** 
-Ion ratios can be particularly sensitive to instrument conditions, and variability is a significant problem in mass spec based assays which use qualifying ions. With the tools that have been demonstrated in this course, we can look for outlier spikes and stability trends, and separate them out across instruments, or compounds, or sample types. First, plot the ion ratio as a function of instrument name. What trends are most obvious, and what is the reason for each of them? What additional variables would help besides the ones captured in the sample data.frame?
+**Exercise: Revealing problems based on ion ratios**
 
+Ion ratios can be particularly sensitive to instrument conditions, and variability is a significant problem in mass spec based assays which use qualifying ions. With the tools that have been demonstrated in this course, we can look for outlier spikes and stability trends, and separate them out across instruments, or compounds, or sample types. Within the 1 year of data provided, identify any potential issues with the data that might suggest problems with workflows, training, or other issues that could impact quality of the results.
+
+This is a very open ended exercise, so consider the following areas to explore:
+
+- Consider all of the qualitative data elements that could influence the observed ion ratios: visualize data as a function of combinations of these variables
+- Time-based trending can make abrupt changes very obvious
+- Data from all three file types (batches, samples, and peaks) are important in isolating isssues
+- When there are a lot of data point to visualize, consider aggregation and/or visualizations that represent statistical summaries or fitting
 
 ```{r, echo = FALSE, eval = FALSE}
 
@@ -114,7 +121,9 @@ all_samples %>%
   facet_grid(compound_name ~ instrument_name) # doc is grossly out of step, 
 # investigate later
 # Quants and quals got flipped
+```
 
+```{r}
 # 2 #
 all_samples %>%
   left_join(all_batches) %>%
@@ -122,7 +131,9 @@ all_samples %>%
   ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = compound_name)) +
   geom_smooth() +
   facet_grid(compound_name ~ instrument_name) # grumpy+oxycodone looks least like the others
+```
 
+```{r}
 # 3 #
 all_samples %>%
   left_join(all_batches) %>%
@@ -130,17 +141,23 @@ all_samples %>%
   ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = instrument_name)) +
   ggtitle("oxycodone") +
   geom_smooth() # grumpy+oxycodone clearly outlying
+```
 
+```{r}
 # 4 #
 all_samples %>%
   left_join(all_batches) %>%
   filter(compound_name == "oxycodone" & instrument_name != "doc" & ion_ratio > 0) %>%
   ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = instrument_name)) +
   ggtitle("oxycodone") +
+  #geom_point() +
   geom_smooth() # ion_ratio!=0 makes it even more clear
+```
 
+
+```{r}
 # 5 #
-all_peaks <- dir_ls("data", glob = "*_b.csv") %>%
+all_peaks <- dir_ls("data", glob = "*_p.csv") %>%
   #list.files("data/", pattern = "_p.csv$") %>%
   #file.path("data", .) %>%
   map_dfr(read_csv, col_types = cols()) %>%
@@ -148,17 +165,21 @@ all_peaks <- dir_ls("data", glob = "*_b.csv") %>%
 
 mean_by_week <- all_peaks %>%
   left_join(all_batches) %>%
-  filter(compound_name == "oxycodone" & instrument_name == "grumpy" & peakArea > 0) %>%
+  filter(compound_name == "oxycodone" & instrument_name == "grumpy" & peak_area > 0) %>%
   mutate(week = week(batch_collected_timestamp)) %>%
   group_by(week, chromatogram_name) %>%
   summarise(mean = mean(peak_area), sd = sd(peak_area), n = n())
 
 ggplot(mean_by_week, aes(x = week, y = mean, color = chromatogram_name)) +
   geom_line() +
+  geom_point() +
   geom_smooth() +
   ggtitle("oxycodone + grumpy") +
   facet_grid(chromatogram_name ~ ., scales = "free_y") # quant is constant, qual drops
+```
 
+
+```{r}
 # 6 #
 mean_by_week %>%
   mutate(sd = NULL, n = NULL) %>%
@@ -168,6 +189,7 @@ mean_by_week %>%
   geom_line() +
   geom_smooth() +
   ggtitle("ion_ratio by week for oxycodone on grumpy") # basically recreate step 4
+```
 ```
 
 **End of Exercise**
