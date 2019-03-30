@@ -3,7 +3,7 @@ title: 'Lesson 7: Exploring lab order data'
 output: html_document
 ---
 
-```{r setup_8, include=FALSE}
+```{r setup_7, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readxl)
