@@ -362,7 +362,7 @@ Creating a file and using the Git workflow:
 1. Add a single line of code, eg. `print("Hello world")`.
 1. Save the file in the your repository folder with the following convention:  username_commit.R.
 1. If not already open, open up the Git window in the top left of the RStudio window (click the Git tab). You should see your new file in that window with two boxes containing yellow question marks. Check the box for the file under Staged and you should see a green box with an "A" under the Status box. This has taken a new file (with a modified status) and staged it.
-1. Stage and commit the file per the steps outlined in the previous exercise. Add "My first commit" to the Commit message window and hit the "Commit" button below.
+1. Stage and commit the file per the steps outlined in the previous exercise. Add "My commit" to the Commit message window and hit the "Commit" button below.
 
 That is the general workflow you will use within RStudio. Modify (or add) a file, stage it by checking the box in the Git window, and then commit it. Be sure to include helpful comments when you commit, in case you need to go back to a previous version. All of these changes have happened locally on your machine.
 
