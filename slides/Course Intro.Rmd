@@ -1,0 +1,43 @@
+---
+title: "Course Intro"
+author: "Patrick Mathias & Shannon Haymond"
+date: "3/31/2019"
+output: powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+### Introduction to Instructors
+
+- Patrick Mathias
+  - Department of Laboratory Medicine
+  - University of Washington School of Medicine 
+  - <pcm10@uw.edu>
+
+- Shannon Haymond
+  - Lurie Children's Hospital
+  - Northwestern University Feinberg School of Medicine
+  - <SHaymond@luriechildrens.org>
+
+
+### Course Info
+
+- Lectures, live demos of code, and exercises
+- Originally designed as follow-up to introductory R course (Dan Holmes and Steve Master)
+- Targeted to hit range of topics but emphasize reproducibility and more advanced use of R
+- Website: https://github.com/pcmathias/MSACL-intermediate-R-course
+  - Website updated as we improve/make additions
+  - Will work from course repository using Git
+
+### Pre-course survey results
+
+[Course survey](https://docs.google.com/forms/d/1YnnYzcgXe1rx9brOXPr57IWRmMrH3-3u25yK_ZJEb4c)
+
+### Other course mechanics
+
+- One instructor presenting, one instructor assisting
+  - Teaching assistant floating in from 101
+- Raise hand at any time for assistance
+- Let us know right now if you had problems with pre-course installations
