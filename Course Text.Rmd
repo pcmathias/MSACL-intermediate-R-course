@@ -46,22 +46,22 @@ output:
 ```{r lesson_6, child = '06 - Visualizations.Rmd'}
 ```
 
-# Method comparison & fitting models to the data
+# Exploring lab order data
 
 ```{r lesson_7, child = '07 - Exploring Data.Rmd'}
 ```
 
-# Beyond the csv -- parsing xml files
+# Predictions using linear regression
 
 ```{r lesson_8, child = '08 - Predictions using Linear Regression.Rmd'}
 ```
 
-# Exploratory data analysis
+# Classifications using linear regression
 
 ```{r lesson_9, child = '09 - Classifications using Linear Regression.Rmd'}
 ```
 
-# Bringing it all together from import to graph to result
+# Bringing it all together
 
 ```{r lesson_10, child = '10 - Bringing It All Together.Rmd'}
 ```
