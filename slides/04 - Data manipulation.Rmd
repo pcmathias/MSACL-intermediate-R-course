@@ -1,0 +1,386 @@
+---
+title: "Data manipulation in the tidyverse"
+author: "Patrick Mathias"
+output: powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
+library(tidylog, warn.conflicts = FALSE)
+library(janitor)
+library(readxl)
+library(lubridate)
+```
+
+## What is the tidyverse?
+
+- According to the [tidyverse website](https://www.tidyverse.org/), "the tidyverse is an *opinionated* collection of R packages designed for data science
+- Consistent interface for functions
+- Special version of data frame - [tibble](http://tibble.tidyverse.org/articles/tibble.html)
+  - Better printed output
+  - More predictable behavior (does not change data types unexpectedly)
+
+## Key concept: tidy data
+
+1. Each variable must have its own column.
+2. Each observation must have its own row.
+3. Each value must have its own cell.
+
+## Consider different formats for 1 data set
+
+4 variables: 
+
+- country
+- year
+- population
+- cases
+
+## Representation 1
+
+```{r, echo=FALSE}
+table2
+```
+
+## Representation 2
+
+```{r, echo=FALSE}
+table3
+```
+
+## Representation 3 - tidy
+
+```{r, echo=FALSE}
+table1
+```
+
+## Manipulating data with dplyr
+
+[dplyr package](http://dplyr.tidyverse.org/) provides functions to manipulate data frames (tibbles) 
+Conceptually broad categories of manipulation:
+
+- carve
+- expand
+- collapse 
+
+## select() allows you to select specific columns by name
+
+![Syntax for `select()`](../assets/select.png)
+
+## Refresher on sample data
+
+```{r, eval = FALSE}
+samples_jan <- read_csv("data/2017-01-06_s.csv",
+  col_types = cols(
+    compoundName = col_factor(NULL),
+    sampleType = col_factor(NULL)
+    )
+  ) %>% 
+  clean_names()
+str(samples_jan)
+```
+
+## Refresher on sample data
+
+```{r, echo = FALSE}
+samples_jan <- read_csv(here::here("data/2017-01-06_s.csv"),
+  col_types = cols(
+    compoundName = col_factor(NULL),
+    sampleType = col_factor(NULL)
+    )
+  ) %>% 
+  clean_names()
+str(samples_jan)
+```
+
+## Example: select()
+
+```{r, eval = FALSE}
+samples_jan_subset <- samples_jan %>%
+  select(batch_name:expected_concentration)
+head(samples_jan_subset)
+```
+
+## Example: select()
+
+```{r, echo = FALSE}
+samples_jan_subset <- samples_jan %>%
+  select(batch_name:expected_concentration)
+head(samples_jan_subset)
+```
+
+## Example: select()
+
+```{r, eval = FALSE}
+samples_jan_subset <- samples_jan %>%
+  select(batch_name:compound_name, concentration)
+head(samples_jan_subset)
+```
+
+## Example: select()
+
+```{r, echo = FALSE}
+samples_jan_subset <- samples_jan %>%
+  select(batch_name:compound_name, concentration)
+head(samples_jan_subset)
+```
+
+## filter() allows you to pick rows (cases) based on values
+
+![Syntax for `filter()`](../assets/filter.png)
+
+## Example: filter()
+
+```{r, eval = FALSE}
+samples_jan %>%
+  filter(compound_name == "morphine") %>% # note the two equal signs (one equal for assignment)
+  head()
+```
+
+## Example: filter()
+
+```{r, echo = FALSE}
+samples_jan %>%
+  filter(compound_name == "morphine") %>% # note the two equal signs (one equal for assignment)
+  head()
+```
+
+## Example: filter() with more than one condition
+
+```{r}
+samples_jan %>%
+  filter(sample_type == "unknown", concentration > 0) %>%
+  head()
+```
+
+
+## Example: filter() with OR condition
+
+```{r}
+samples_jan %>%
+  filter(sample_type == "unknown" | concentration > 0) %>%
+  head()
+```
+
+## Exercise 1
+
+Carve the January data set in both directions. Extract sample information (batch, sample, compound) and ion ratio data for only oxycodone measurements in unknown sample types with a concentration > 0. Provide a summary of the data.
+
+## Exercise 1 Comments
+
+- Order of operations may be very important
+- tidylog package can be helpful to clarify how each operation impacted data set
+
+## Expanding your data set
+
+- `mutate()` function provides a quick and clean way to add additional variables
+- argument(s): name of the new column = value
+
+## Example: mutate()
+
+```{r, eval = FALSE}
+samples_jan %>%
+  filter(sample_type == "standard", expected_concentration > 0) %>%
+  mutate(conc_ratio = concentration/expected_concentration) %>%
+  select(batch_name:compound_name, concentration, expected_concentration, conc_ratio) %>%
+  head(20)
+```
+
+## Example: mutate()
+
+```{r, echo = FALSE}
+samples_jan %>%
+  filter(sample_type == "standard", expected_concentration > 0) %>%
+  mutate(conc_ratio = concentration/expected_concentration) %>%
+  select(batch_name:compound_name, concentration, expected_concentration, conc_ratio) %>%
+  head(20)
+```
+
+## Example: mutate() with case_when() logic
+
+```{r, eval = FALSE}
+samples_jan %>%
+  filter(sample_type == "standard") %>%
+  mutate(
+    conc_ratio = case_when(
+      expected_concentration == 0 ~ (concentration + 0.001)/(expected_concentration + 0.001),
+      TRUE ~ concentration/expected_concentration
+    )
+  ) %>%
+  select(batch_name:compound_name, concentration, expected_concentration, conc_ratio) %>%
+  head(20)
+```
+
+## Example: mutate() with case_when() logic
+
+```{r, echo = FALSE}
+samples_jan %>%
+  filter(sample_type == "standard") %>%
+  mutate(
+    conc_ratio = case_when(
+      expected_concentration == 0 ~ (concentration + 0.001)/(expected_concentration + 0.001),
+      TRUE ~ concentration/expected_concentration
+    )
+  ) %>%
+  select(batch_name:compound_name, concentration, expected_concentration, conc_ratio) %>%
+  head(20)
+```
+
+## Example: mutate() with lubridate functions
+
+```{r, eval = FALSE}
+batch_jan <- read_csv("data/2017-01-06_b.csv") %>%
+  clean_names()
+batch_jan_timestamps <- batch_jan %>%
+  mutate(
+    collect_datetime = ymd_hms(batch_collected_timestamp),
+    collect_month = month(batch_collected_timestamp),
+    collect_day_of_week = wday(batch_collected_timestamp),
+    collect_week = week(batch_collected_timestamp)
+  )
+glimpse(batch_jan_timestamps)
+```
+
+## Example: mutate() with lubridate functions
+
+```{r, eval = FALSE}
+batch_jan <- read_csv("data/2017-01-06_b.csv") %>%
+  clean_names()
+batch_jan_timestamps <- batch_jan %>%
+  mutate(
+    collect_datetime = ymd_hms(batch_collected_timestamp),
+    collect_month = month(batch_collected_timestamp),
+    collect_day_of_week = wday(batch_collected_timestamp),
+    collect_week = week(batch_collected_timestamp)
+  )
+glimpse(batch_jan_timestamps)
+```
+
+## Example: mutate() with lubridate functions
+
+```{r, echo = FALSE}
+batch_jan <- read_csv(here::here("data/2017-01-06_b.csv")) %>%
+  clean_names()
+batch_jan_timestamps <- batch_jan %>%
+  mutate(
+    collect_datetime = ymd_hms(batch_collected_timestamp),
+    collect_month = month(batch_collected_timestamp),
+    collect_day_of_week = wday(batch_collected_timestamp),
+    collect_week = week(batch_collected_timestamp)
+  )
+glimpse(batch_jan_timestamps)
+```
+
+## Exercise 2
+
+How long an average does it take to review each batch? 
+
+## Exercise 2 Comments
+
+Probably want to coerce difftime function output to a number, for downstream analyses
+
+## Collapse (summarize) your data set
+
+- Group data by a variable using the `group_by()` function
+- Couples with its summary function `summarize()`
+- Allows summary calculations on specific groups within data set
+
+## Example: grouping and summarizing
+
+```{r}
+samples_jan %>%
+  filter(sample_type == "unknown", concentration > 0) %>%
+  group_by(compound_name) %>%
+  summarize(median_ir = median(ion_ratio),
+            mean_ir = mean(ion_ratio),
+            std_dev_ir = sd(ion_ratio))
+```
+
+## Example: grouping and summarizing by 2 variables
+
+```{r}
+samples_jan %>%
+  filter(sample_type == "unknown", concentration > 0) %>%
+  group_by(batch_name, compound_name) %>%
+  summarize(median_ir = median(ion_ratio),
+            mean_ir = mean(ion_ratio),
+            std_dev_ir = sd(ion_ratio)) %>%
+  head()
+```
+
+## Example: grouping and summarizing by 3 variables
+
+```{r}
+batch_jan_timestamps %>%
+  group_by(instrument_name, compound_name, collect_week) %>%
+  summarize(median_cor = median(calibration_r2),
+            mean_cor = mean(calibration_r2),
+            min_cor = min(calibration_r2),
+            max_cor = max(calibration_r2))
+```
+
+## Exercise 3
+
+From the January sample dataset, for samples with unknown sample type, what is the minimum, median, mean, and maximum concentration for each compound by batch? What is the mean of the within-batch means by compound?
+
+## Shaping and tidying data with tidyr
+
+Consider non-tidy data:
+
+```{r, eval = FALSE}
+samples_jan_messy <- read_csv("data/messy/2017-01-06-sample-messy.csv")
+head(samples_jan_messy)
+```
+
+## Shaping and tidying data with tidyr
+
+```{r, echo = FALSE}
+samples_jan_messy <- read_csv(here::here("data/messy/2017-01-06-sample-messy.csv"))
+head(samples_jan_messy)
+```
+
+## Gathering data with gather()
+- key argument to name the variable you are gathering
+- value argument to name the new column with the values you extract from the old column
+
+![Gather operation](../assets/data_gather.png)
+
+## Example: gather()
+
+```{r}
+samples_jan_tidy <- samples_jan_messy %>%
+  gather("morphine", "hydromorphone", "oxymorphone", "codeine", "hydrocodone", "oxycodone",
+         key = "compound_name", value = "concentration")
+head(samples_jan_tidy)
+```
+
+## Making data untidy
+
+- Inverse operation of `gather()` is `spread()`
+- Specify the key, which is the variable than needs to be used to generate multiple new columns
+- Specify the value, which takes the variable that will need to populate those new columns
+
+## Example: spread()
+
+```{r}
+samples_jan_remessy <- samples_jan_tidy %>%
+  spread(key = "compound_name", value = "concentration")
+head(samples_jan_remessy)
+```
+
+## Exercise 4
+
+Tidy a messy data set
+
+## Summary
+
+- The dplyr package offers a number of useful functions for manipulating data sets
+  - `select()` subsets columns by name and `filter()` subset rows by condition
+  - `mutate()` adds additional columns, typically with calculations or logic based on other columns
+  - `group_by()` and `summarize()` allow grouping by one or more variables and performing calculations within the group
+  
+## Summary
+
+- Manipulating dates and times with the lubridate package can make grouping by time periods easier
+- The tidyr package provides functions to tidy and untidy data
