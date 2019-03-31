@@ -256,6 +256,11 @@ These assumptions include:
 
 We can examine the residuals to make sure our assumptions are valid for a particular model. We are looking for low residuals that have similar variance over the range of predicted values and are normally distributed. We also look for a linear trend in the actual vs observed values. 
 
+```{r, include = FALSE}
+ckd_test <- ckd_test %>%
+              mutate(iGFR_pred = round(predict(mod.full, ckd_test),0))
+```
+
 ```{r}
 # Make a residual plot (prediction on x axis). 
 ckd_test <- ckd_test %>%
@@ -370,6 +375,15 @@ ckd_test <- ckd[test, ] %>%
 **End Exercise** 
 
 As the last step, we'll confirm the performance on our test set.
+
+```{r, include = FALSE}
+# results from exercise needed for future code chunks
+mod2 <- lm(iGFRc ~ Trp + Kynurenine + BUN + CYC_DB 
+               + Phe + ADMA, data = ckd_train)
+glance(mod2)
+tidy(mod2) %>%
+    arrange(p.value)
+```
 
 ```{r}
 #predict values for test set and add as new column, iGFR_pred

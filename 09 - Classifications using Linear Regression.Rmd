@@ -144,6 +144,7 @@ Recalling the helpful functions we used from the `broom` package, we can examine
 **Exercise 1:**
 
 Examine modGLM using the `glance()` and `tidy()` functions of the `broom` package. What is the AIC and BIC for this model? What are the coefficients for each term of the model? 
+
 ```{r, eval = FALSE}
 
 
@@ -180,6 +181,7 @@ mean(ckd_test$Stage_pred == ckd_test$Stage) #0.98
 **Exercise 2:**
 
 Select a different threshold and determine the accuracy of the model for that threshold setting.
+
 ```{r, eval = FALSE}
 
 
