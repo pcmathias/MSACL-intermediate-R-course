@@ -57,12 +57,13 @@ table1
 
 ## Manipulating data with dplyr
 
-[dplyr package](http://dplyr.tidyverse.org/) provides functions to manipulate data frames (tibbles) 
+[dplyr package](http://dplyr.tidyverse.org/) provides functions to manipulate data frames (tibbles)
+
 Conceptually broad categories of manipulation:
 
-- carve
-- expand
-- collapse 
+- carve: extract variables or cases
+- expand: create new columns
+- collapse: summarize data
 
 ## select() allows you to select specific columns by name
 
@@ -102,8 +103,6 @@ samples_jan_subset <- samples_jan %>%
 head(samples_jan_subset)
 ```
 
-## Example: select()
-
 ```{r, echo = FALSE}
 samples_jan_subset <- samples_jan %>%
   select(batch_name:expected_concentration)
@@ -118,12 +117,18 @@ samples_jan_subset <- samples_jan %>%
 head(samples_jan_subset)
 ```
 
-## Example: select()
-
 ```{r, echo = FALSE}
 samples_jan_subset <- samples_jan %>%
   select(batch_name:compound_name, concentration)
 head(samples_jan_subset)
+```
+
+## select() combined with starts_with()
+
+```{r}
+samples_jan_vars <- samples_jan %>%
+  select(starts_with("sample"))
+glimpse(samples_jan_vars)
 ```
 
 ## filter() allows you to pick rows (cases) based on values
@@ -138,8 +143,6 @@ samples_jan %>%
   head()
 ```
 
-## Example: filter()
-
 ```{r, echo = FALSE}
 samples_jan %>%
   filter(compound_name == "morphine") %>% # note the two equal signs (one equal for assignment)
@@ -153,7 +156,6 @@ samples_jan %>%
   filter(sample_type == "unknown", concentration > 0) %>%
   head()
 ```
-
 
 ## Example: filter() with OR condition
 
@@ -270,6 +272,28 @@ batch_jan_timestamps <- batch_jan %>%
     collect_week = week(batch_collected_timestamp)
   )
 glimpse(batch_jan_timestamps)
+```
+
+## Scoped variants of mutate()
+
+- mutate_all() to apply to all variables
+- mutate_at() to apply to a list of columns
+- mutate_if() to apply to select variables with some condition
+
+## mutate_if to convert characters to factors
+
+```{r, echo = TRUE, eval = FALSE}
+batch_jan_factors<- batch_jan %>%
+  mutate_if(is.character, as.factor)
+summary(batch_jan_factors)
+```
+
+## mutate_if to convert characters to factors
+
+```{r, echo = FALSE}
+batch_jan_factors<- batch_jan %>%
+  mutate_if(is.character, as.factor)
+summary(batch_jan_factors)
 ```
 
 ## Exercise 2
