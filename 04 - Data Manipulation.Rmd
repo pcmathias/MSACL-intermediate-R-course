@@ -109,18 +109,11 @@ samples_jan %>%
 
 Carve the January data set in both directions. Extract sample information (batch, sample, compound) and ion ratio data for only oxycodone measurements in unknown sample types with a concentration > 0. Provide a summary of the data.
 
-```{r carving_exercise, echo = FALSE, eval = FALSE}
+```{r carving_exercise, eval = FALSE}
 samples_jan_oxy_ir <- samples_jan %>%
   filter() %>%
   select()
 summary()
-```
-
-```{r}
-samples_jan_oxy_ir <- samples_jan %>%
-  filter(sample_type == "unknown", concentration > 0, compound_name == "oxycodone") %>%
-  select(batch_name, sample_name, compound_name, ion_ratio)
-summary(samples_jan_oxy_ir)
 ```
 
 **End Exercise**
@@ -171,7 +164,7 @@ You can see from the above example that these functions provide a great deal of 
 
 How long an average does it take to review each batch? Using the January batch data, convert the review start timestamp and review complete timestamp fields into variables with a datetime type, then generate a new field the calculates the duration of the review in minutes. There are multiple approaches to this, but the `difftime()` function may be the most transparent - read the help on this function. The data will need to be collapsed by batch (which I do for you using the `distinct()` function) and display the min, max, median, and mean review times.
 
-```{r mutate_exercise, echo = FALSE, eval = FALSE}
+```{r mutate_exercise, eval = FALSE}
 batch_jan_reviews <- batch_jan %>%
   mutate(review_duration = as.numeric(difftime( , , units = "minutes")))
 # note: the output of difftime is a time interval, convert to numeric to avoid confusion downstream
@@ -181,19 +174,6 @@ min()
 median()
 mean()
 max()
-```
-
-```{r}
-batch_jan_reviews <- batch_jan %>%
-  mutate(review_duration = as.numeric(difftime(review_complete_timestamp, review_start_timestamp,
-                                               units = "mins")))
-# note: the output of difftime is a time interval, convert to numeric to avoid confusion downstream
-reviews_jan_grouped <- batch_jan_reviews %>%
-  distinct(batch_name, review_duration) 
-min(reviews_jan_grouped$review_duration)
-median(reviews_jan_grouped$review_duration)
-mean(reviews_jan_grouped$review_duration)
-max(reviews_jan_grouped$review_duration)
 ```
 
 **End Exercise**
@@ -237,7 +217,7 @@ A relatively new package that provides nice grouping functionality based on time
 
 From the January sample dataset, for samples with unknown sample type, what is the minimum, median, mean, and maximum concentration for each compound by batch? What is the mean of the within-batch means by compound?
 
-```{r collapsing_exercise, echo = FALSE, eval = FALSE}
+```{r collapsing_exercise, eval = FALSE}
 sample_stats_jan <- samples_jan %>%
   filter() %>%
   group_by() %>%
@@ -249,22 +229,6 @@ head()
 sample_means_jan <- sample_stats_jan %>%
   group_by() %>%
   summarize(overall_mean = )
-sample_means_jan
-```
-
-```{r}
-sample_stats_jan <- samples_jan %>%
-  filter(sample_type == "unknown") %>%
-  group_by(batch_name, compound_name) %>%
-  summarize(min_conc = min(concentration),
-            median_conc = median(concentration),
-            mean_conc = mean(concentration),
-            max_conc = max(concentration)
-            )
-head(sample_stats_jan)
-sample_means_jan <- sample_stats_jan %>%
-  group_by(compound_name) %>%
-  summarize(overall_mean = mean(mean_conc))
 sample_means_jan
 ```
 
@@ -311,23 +275,12 @@ The "2017-01-06-batch-messy.csv" file in the messy subdirectory of the data dir 
 
 After solving these problems, each row should contain a single compound with all three parameters appearing on that single row. Use `gather()` and `spread()` to tidy this data.
 
-```{r tidyr_exercise, echo = FALSE, eval = FALSE}
+```{r tidyr_exercise, eval = FALSE}
 batch_jan_messy <- read_csv("data/messy/")
 batch_jan_gathered <- batch_jan_messy %>%
   gather()
 batch_jan_tidy <- batch_jan_gathered %>%
   spread()
-```
-
-```{r}
-batch_jan_messy <- read_csv("data/messy/2017-01-06-batch-messy.csv")
-head(batch_jan_messy, 10)
-batch_jan_gathered <- batch_jan_messy %>%
-  gather("codeine",	"hydrocodone", "hydromorphone",	"morphine",	"oxycodone", 
-         "oxymorphone", key = "compound_name", value = "value")
-batch_jan_tidy <- batch_jan_gathered %>%
-  spread(key = "parameter", value = "value")
-head(batch_jan_tidy, 10)
 ```
 
 ## Summary

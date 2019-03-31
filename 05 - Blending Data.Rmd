@@ -67,41 +67,27 @@ Try to use `bind_rows()` to combine all of the sample data from February and eac
 
 First try binding a peaks file with the February samples file:
 
-```{r, echo = FALSE, eval = FALSE}
+```{r, eval = FALSE}
 peaks_samples <- bind_rows()
 summary(peaks_samples)
-```
-
-```{r}
-peaks_samples <- bind_rows(january_peaks, february_samples)
-summary(peaks_samples) # bind_rows completes, but adds all columns in data set with NAs
 ```
 
 Observe the number of columns and visualize the new data frame directly.
 
 Next try the batches and samples file:
 
-```{r, echo = FALSE, eval = FALSE}
+```{r, eval = FALSE}
 batches_samples <- bind_rows()
 summary(batches_samples)
-```
-
-```{r}
-batches_samples <- bind_rows(january_batches,   february_samples)
-summary(batches_samples) # bind_rows completes, but adds all columns in data set with NAs
 ```
 
 Now bind both samples files:
 
-```{r, echo = FALSE, eval = FALSE}
+```{r, eval = FALSE}
 batches_samples <- bind_rows()
 summary(batches_samples)
 ```
 
-```{r}
-samples_samples <- bind_rows(january_samples, february_samples) # no extra columns
-summary(samples_samples)
-```
 **End Exercise**
 
 There is an related command called `bind_cols` which will append columns to a tibble, but it also requires very clean data. This command will not check to make sure the order of values are correct between the two things being bound.
@@ -229,15 +215,9 @@ justMatch <- semi_join(select_peaks, select_batches,
 
 Join the batch and peak data. Start from the reset tibbles (`select_batches` and `select_peaks`) built in the prior code chunk, so the `keyB` and `keyP` variables are not present.
 
-```{r, echo = FALSE, eval = FALSE}
+```{r, eval = FALSE}
  <- sub("", "", ) # ensure the variable has been modified
 exercise_two <- left_join(, ,)
-```
-
-```{r}
-select_peaks$analyte <- sub("-.*$", "", select_peaks$analyte) # ensure the variable has been modified
-exercise_two <- left_join(select_batches, select_peaks, 
-                          by=c("batch_name","compound_name" = "analyte"))
 summary(exercise_two)
 ```
 

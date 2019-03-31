@@ -176,16 +176,10 @@ ggplot(data = known_samples) +
 
 The default histogram paramaters for ggplot will stack the sample types in the same bin, making it difficult to determine if the trend for qc and standard samples is the same as the unknowns. Starting with the data that only includes samples with non-zero ion ratios, create a plot that compares ion ratio between different sample types and compounds. Because the number of samples with different sample types is quite disparate, oberving trends may be challenging with raw counts: look at the hint below to plot the density of the distribution rather than raw counts.
 
-```{r, echo = FALSE, eval = FALSE}
+```{r, eval = FALSE}
 g <- ggplot(data = , aes(x = , color = , fill = ))
 g + geom_histogram(aes(y = ..density..), bins = ) +
   
-```
-
-```{r}
-g <- ggplot(data = january_pos_ir, aes(x = ion_ratio, colour = sample_type, fill = sample_type))
-# g + geom_histogram(binwidth = 0.01) + facet_grid(sample_type~compound_name)
-g + geom_histogram(aes(y=..density..), binwidth = 0.01) + facet_grid(sample_type~compound_name)
 ```
 
 **End Exercise**

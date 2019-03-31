@@ -133,16 +133,9 @@ glance(slr.fit)
 
 Select a variable (other than SCr) and perform a single variable regression for iGFRc using the ckd dataset. Determine the model equation and R2 value. How did your model fit compare to our SCr example?  
 
-```{r, echo = FALSE, eval = FALSE}
+```{r, eval = FALSE}
 
 
-```
-
-```{r}
-my.slr.fit <- lm(iGFRc ~ SDMA, ckd)
-
-tidy(my.slr.fit) #equation: iGFRc = -24.7*SDMA + 73.5
-glance(my.slr.fit) #R2: 0.48
 ```
 
 **End exercise**
@@ -243,21 +236,8 @@ Let's predict the iGFRc values for our test set to see how the model does when p
 
 Predict the iGFRc values for the test set using the mod.full and plot the actual vs predicted values.
 
-```{r, echo = FALSE, eval = FALSE}
+```{r, eval = FALSE}
 
-
-```
-
-```{r}
-#predict values for test set and add as new column, iGFR_pred
-ckd_test <- ckd_test %>%
-              mutate(iGFR_pred = round(predict(mod.full, ckd_test),0))
-
-
-#plot actual vs predicted for test set
-ggplot(ckd_test, aes(x = iGFR_pred, y = iGFRc)) + 
-  geom_point() +
-  geom_abline(color = "blue")
 
 ```
 
@@ -363,73 +343,28 @@ ckd_test <- ckd[test, ] %>%
 
 
 (2) Fit a new model, mod2, that uses Trp, Kynurenine, BUN, CYC_DB, Phe, ADMA to predict iGFRc in the training set. Add the predicted values to the training set as a new variable, iGFR_pred.
-```{r, echo = FALSE, eval = FALSE}
+```{r, eval = FALSE}
 
-```
-
-```{r}
-mod2 <- lm(iGFRc ~ Trp + Kynurenine + BUN + CYC_DB 
-               + Phe + ADMA, data = ckd_train)
-glance(mod2)
-tidy(mod2) %>%
-    arrange(p.value)
-
-#add the predicted values to the train set
-ckd_train <- ckd_train %>%
-              mutate(iGFR_pred = round(augment(mod2)$.fitted,0))
 ```
 
 (3) Write out the equation for this model. Does it make sense, based on your prior knowledge?
-```{r, echo = FALSE, eval = FALSE}
+```{r, eval = FALSE}
 
-```
-
-
-```{r}
-# iGFRc = 0.44*Trp - 2.95*Kynurenine - 0.43*BUN - 5.94*CYC_DB - 12.2*ADMA - 0.13*Phe
 ```
 
 (4) Find the R2, RMSE, and MAPE values for the model fit on the training set.
-```{r, echo = FALSE, eval = FALSE}
+```{r, eval = FALSE}
 
-```
-
-
-```{r}
-glance(mod2)$r.squared #0.870
-rmse(ckd_train$iGFRc, mod2$fitted.values) #7.08
-mape(ckd_train$iGFRc, mod2$fitted.values) #0.14 or 14%
 ```
 
 (5) Check for collinearity.
-```{r, echo = FALSE, eval = FALSE}
+```{r, eval = FALSE}
 
-```
-
-
-```{r}
-vif(mod2) #yay!!
 ```
 
 (6) Examine the residuals and actual vs predicted.
-```{r, echo = FALSE, eval = FALSE}
+```{r, eval = FALSE}
 
-```
-
-
-```{r}
-# Make a residual plot (prediction on x axis). 
-ckd_train <- ckd_train %>%
-        mutate(residuals = iGFRc - iGFR_pred)
-
-ggplot(ckd_train, aes(x = iGFR_pred, y = residuals)) + 
-  geom_point() +
-  geom_hline(yintercept = 0, color = "blue")
-
-#plot actual vs predicted
-ggplot(ckd_train, aes(x = iGFR_pred, y = iGFRc)) + 
-  geom_point() +
-  geom_abline(color = "blue")
 ```
 
 **End Exercise** 
