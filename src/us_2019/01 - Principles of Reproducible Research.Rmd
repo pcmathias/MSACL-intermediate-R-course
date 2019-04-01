@@ -1,0 +1,456 @@
+---
+title: 'Lesson 1: Adopting principles of reproducible research'
+output:
+  html_document: default
+---
+
+```{r setup_1, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(fs)
+```
+
+## What is reproducible research?
+
+In its simplest form, reproducible research is the principle that any research result can be reproduced by anybody. Or, per Wikipedia: "The term reproducible research refers to the idea that the ultimate product of academic research is the paper along with the laboratory notebooks and full computational environment used to produce the results in the paper such as the code, data, etc. that can be used to reproduce the results and create new work based on the research."
+
+Reproducibility can be achieved when the following criteria are met [(Marecelino 2016)](https://www.r-bloggers.com/what-is-reproducible-research/):
+- All methods are fully reported
+- All data and files used for the analysis are available
+- The process of analyzing raw data is well reported and preserved
+
+*But I'm not doing research for a publication, so why should I care about reproducible research?*
+
+- Someone else may need to run your analysis (or you may want someone else to do the analysis so it's less work for you)
+- You may want to improve on that analysis
+- You will probably want to run the same exact analysis or a very similar analysis on the same data set or a new data set in the future
+
+**"Everything you do, you will probably have to do over again."** [(Noble 2009)](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1000424)
+
+There are core practices we will cover in this lesson to help get your code to be more reproducible and reusable:
+
+- Develop a standardized but easy-to-use project structure
+- Adopt a style convention for coding
+- Enforce reproducibility when working with projects and packages
+- Use a version control system
+
+## Develop a standard project structure
+
+In their article "Good enough practices in scientific computing", Wilson et al. highlight useful recommendations for organizing projects [(Wilson 2017)](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510):
+
+- **Put each project in its own directory, which is named after the project**
+- Put text documents associated with the project in the doc directory
+- **Put raw data and metadata in a data directory and files generated during cleanup and analysis in a results directory**
+- Put project source code in the src directory
+- Put compiled programs in the bin directory
+- **Name all files to reflect their content or function**
+
+Because we are focusing on using RMarkdown, notebooks, and less complex types of analyses, we are going to focus on the recommendations in bold in this course. All of these practices are recommended and we encourage everyone to read the original article to better understand motivations behind the recommendations.
+
+### Put each project in its own directory, which is named after the project
+
+Putting projects into their own directories helps to ensure that everything you need to run an analysis is in one place. That helps you minimize manual navigation to try and tie everything together (assuming you create the directory as a first step in the project).
+
+What is a project? Wilson et al. suggest dividing projects based on "overlap in data and code files." I tend to think about this question from the perspective of output, so a project is going to be the unit of work that creates an analysis document that will go on to wider consumption. If I am going to create multiple documents from the same data set, that will likely be included in the same project. It gets me to the same place that Wilson et al. suggest, but very often you start a project with a deliverable document in mind and then decide to branch out or not down the road.
+
+Now that we're thinking about creating directories for projects and directory structure in general, let's take the opportunity to review some basic commands and configuration related to directories in R. We are going to use functions available in both base R as well as the [fs package](https://github.com/r-lib/fs), which provides clearer names for functions as well as clearer output for directors and filenames. The fs package should have been installed if you completed the pre-course instructions, and you can load it if needed by running `library(fs)`.
+
+**Exercise 1**
+
+1. Navigate to "Global Options" under the Tools menu in the RStudio application and note the *Default working directory (when not in a project)*
+1. Navigate to your Console and get the working directory using `getwd()`
+1. If you haven't already installed the fs package (from the pre-course instructions), do so now: `install.packages("fs")`. Then load the package with `library(fs)` if you did not already run the set up chunk above.
+1. Review the contents of your current folder using `dir_ls()`. (Base equivalent: `list.files()`)
+1. Now try to set your working directory using `setwd("test_dir")`. What happened?
+1. Create a new test directory using `dir_create("test_dir")`. (Base equivalent: `dir.create("test_dir")`)
+1. Review your current directory
+1. Set your directory to the test directory you just created
+1. Using the Files window (bottom right in RStudio, click on **Files** tab if on another tab), navigate to the test directory you just created and list the files. *Pro tip: The More menu here has shortcuts to set the currently displayed directory as your working directory and to navigate to the current working directory*
+1. Navigate back to one level above the directory you created using `setwd("..")` and list the files
+1. Delete the directory you created using the `dir_delete()` function. Learn more about how to use the function by reviewing the documentation: `?dir_delete`. (Base equivalent: `unlink()` + additional arguments)
+
+**End Exercise**
+
+The functions in the fs package include arguments and capabilities that can be helpful for finding directories or files with names that have a specific pattern. From our project directory, we may want to see the files in a specific folder, without changing the directory of the folder. We can use the path argument in the function:
+
+```{r}
+dir_ls(path = "data")
+```
+
+Another really handy argument to the `dir_ls` function is glob. This allows you to supply a "wild card" pattern to retrieve records fitting a specific pattern. The syntax is to use an asterisk to indicate any pattern, either at the beginning or end of an expression. For example, we may only want to retrieve the Excel files from our data directory, so we would match to a file extension:
+
+```{r}
+dir_ls(path = "data", glob = "*.xlsx")
+```
+
+Or, we may be interested in only the sample csv files that are denoted by "_s":
+
+```{r}
+dir_ls(path = "data", glob = "*_s.csv")
+```
+
+Note that the asterisk at the beginning of the pattern followed by characters to match against at the end requires that the text pattern be at the very end of the string.
+
+**Optional Exercise (If you do not already have a project directory)**
+
+Now that you're warmed up with navigating through directories using R, let's use functionality that's built into RStudio to make our project-oriented lives easier. To enter this brave new world of project directories, let's make a home for our projects. (Alternately, if you already have a directory that's a home for your projects, set your working directory there.)
+1. Using the Files navigation window (bottom right, Files tab), navigate to your home directory or any directory you'd like to place your future RStudio projects
+2. Create a "Projects" directory
+3. Set your directory to the "Projects" directory
+
+```{r, eval = FALSE}
+dir_create("Projects")
+setwd("/Projects")
+```
+
+Alternately, you can do the above steps within your operating system (eg. on a Mac, open Finder window and create a folder) or if you are comfortable working at the command line, you can make a directory there. In the newest version of RStudio (version 1.1), you have the option of opening up a command line prompt under the Terminal tab (on the left side, next to the Console tab).
+
+**End Exercise**
+
+**Exercise 2**
+
+Let's start a new project :
+
+1. Navigate to the **File** menu and select **New Project...** OR Select the **Create a project** button on the global toolbar (2nd from the left)
+1. Select **New Directory** option
+1. In the Project Type prompt, select **New Project**
+1. In the Directory Name prompt under Create New Project, enter "sample-project-structure"
+1. In the Create Project as a Subdirectory of prompt under Create New Project, navigate to the Projects folder you just created (or another directory of your choosing). You can type in the path or hit the **Browse** button to find the directory. Check the option for "Open in a new session" and create your project.
+
+**End Exercise**
+
+So, what exactly does creating a Project in RStudio do for you? In a nutshell, using these Projects allows you to drop what you're doing, close RStudio, and then open the Project to pick up where you left off. Your data, history, settings, open tabs, etc. will be saved for you automatically.
+
+Does using a RStudio Project allow someone else to pick up your code and just use it? Or let you come back to a Project 1 year later and have everything work magically? Not by itself, but with a few more tricks you will be able to more easily re-run or share your code.
+
+### Put raw data and metadata in a data directory and files generated during cleanup and analysis in a results directory
+
+Before we broke up with Excel, it was standard operating procedure to perform our calculations and data manipulations in the same place that our data lived. This is not necessarily incompatible with reproducibility, if we have very careful workflows and make creative use of macros. However, once you have modified your original input file, it may be non-trivial to review what you actually did to your original raw data (particularly if you did not save it as a separate file). Morever, Excel generally lends itself to non-repeatable manual data manipulation that can take extensive detective work to piece together.
+
+Using R alone will not necessarily save you from these patterns but they take a different form. Instead of clicking around, dragging, and entering formulas, you might find yourself throwing different functions at your data in a different order each time you open up R. While it takes some effort to overwrite your original data file in R, other non-ideal patterns of file management that are common in Excel-land can creep up on you if you're not careful.
+
+One solution to help avoid these issues in maintaining the separation of church and state (if I may use a poor analogy) is to explicitly organize your analysis so that raw data lives in one directory (the *data* directory) and the results of running your R code are placed in another directory (eg. *results* or *output*). You can take this concept a little further and include other directories within your project folder to better organize work such as *figures*, *documents* (for manuscripts), or *processed_data*/*munge* (if you want to create intermediate data sets). You have a lot of flexibility and there are multiple resources that provide some guidance [(Parzakonis 2017)](https://statsravingmad.com/measure/sample-r-project-structure/), [(Muller 2017)](http://blog.jom.link/implementation_basic_reproductible_workflow.html), [(Software Carpentry 2016)](https://swcarpentry.github.io/r-novice-gapminder/02-project-intro/). 
+
+**Exercise 3**
+
+Be sure to work within the RStudio window that contains your "sample-project-structure" project. Refer to the top right of the window and you should see the project name displayed there. Let's go ahead and create a minimal project structure by running the following code within the console:
+
+```{r, eval = FALSE}
+library(fs)
+dir_create("data") # raw data
+dir_create("output") # output from analysis
+dir_create("cache") # intermediate data (after processing raw data)
+dir_create("src") # code goes into this folder
+```
+
+This is a bare bones structure that should work for future projects you create. Refer to the content below if you decide you want to adopt a standard directory structure for your projects on top of using RStudio Projects.
+
+Keep this project open in a separate window for now. We will revisit it as we learn about version control.
+
+**End Exercise**
+
+*Further exploration/tools for creating projects:* 
+
+The directory creation code in the above exercise can be packaged into a function that creates the folder structure for you (either within or outside of a project). Software Carpentry has a nice refresher on writing functions: https://swcarpentry.github.io/r-novice-inflammation/02-func-R/.
+
+There is also a dedicated Project Template package that has a nice "minimal project layout" that can be a good starting point if you want R to do more of the work for you: [Project Template](http://projecttemplate.net/index.html). This package duplicates some functionality that the RStudio Project does for you, so you probably want to run it outside of an RStudio Project but it is a good tool to be aware of.
+
+### Name all files (and variables) to reflect their content or function
+
+This concept is pretty straightforward: assume someone else will be working with your code and analysis and won't intuitively understand cryptic names. Rather than output such as results.csv, a file name of morphine_precision_results.csv offers more insight. [Wilson et al.](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510) make the good point that using sequential numbers will come back to bite you as your project evolves: for example, "figure_2.txt" for a manuscript may eventually become "figure_3.txt". We'll get into it in the next section but the final guidance with regards to file names is to using a style convention for file naming to make it easier to read names an manipulate files in R. One common issue is dealing with whitespace in file names: this can be annoying when writing out the file names in scripts so underscores are preferrable. Another issue is the use of capital letters: all lowercase names is easier to write out. As an example, rather than "Opiate Analysis.csv", the preferred name might be "opiate_analysis.csv".
+
+## Adopt a style convention for coding
+
+Reading other people's code can be extremely difficult. Actually, reading your own code is often difficult, particularly if you haven't laid eyes on it long time and are trying to reconstruct what you did. One thing that can help is to adopt certain conventions around how your code looks, and style guides are handy resources to help with this. Google has published an [R Style Guide](https://google.github.io/styleguide/Rguide.xml) that has been a long-standing resource and nice to refer to, but since we are immersing ourselves in the tidyverse, we will recommend the [Tidyverse style guide](http://style.tidyverse.org/).
+
+Some highlights:
+- Use underscores to separate words in a name (see above comments for file names)
+- Put a space before and after operators (such as `==`, `+`, `<-`), but there are a few exceptions such as `^` or `:`
+- Use `<-` rather than `=` for assignment
+- Try to limit code to 80 characters per line & if a function call is too long, separate arguments to use one line each for function, arguements, and closing parenthesis.
+```{r, eval = FALSE}
+# Good
+do_something_very_complicated(
+  something = "that",
+  requires = many,
+  arguments = "some of which may be long"
+)
+
+# Bad
+do_something_very_complicated("that", requires, many, arguments,
+                              "some of which may be long"
+                              )
+```
+
+While we're talking about style conventions, let's take a little diversion to discuss a common element of code in the tidyverse that you may not be familiar with: the almighty pipe `%>%`. The pipe allows you to chain together functions sequentially so that you can be much more efficient with your code and make it readable. Here is an example (with imaginary functions) adapted from the tidyverse style guide:
+```{r, eval = FALSE}
+# one way to represent a hop, scoop, and a bop, without pipes
+foo_foo <- hop(foo_foo, through = forest)
+foo_foo <- scoop(foo_foo, up = field_mice)
+foo_foo <- bop(foo_foo, on = head)
+# another way to represent the same sequence with less code but in a less readable way
+foo_foo <- bop(scoop(hop(foo_foo, through = forest), up = field_mice), on = head)
+
+# a hop, scoop, and a bop with the almight pipes
+foo_foo %>%
+  hop(through = forest) %>%
+  scoop(up = field_mouse) %>%
+  bop(on = head)
+```
+Pipes are not compatible with all functions but should work with all of the tidyverse package functions (the magrittr package that defines the pipe is included in the tidyverse). In general, functions expect data as the primary argument and you can think of the pipe as feeding the data to the function. From the perspective of coding style, the most useful suggestion for using pipes is arguably to write the code so that each function is on its own line. The tidyverse style guide [section on pipes](http://style.tidyverse.org/pipes.html) is pretty helpful.
+
+You're not alone in your efforts to write readable code: there's an app for that! Actually, there are packages for that, and multiple packages at that. We will not discuss in too much depth here but it is good to be aware of them:
+- [styler](http://styler.r-lib.org/) is a package that allows you to interactively reformat a chunk of code, a file, or a directory
+- [lintr](https://github.com/jimhester/lintr) checks code in an automated fashion while you are writing it
+
+So, if you have some old scripts you want to make more readable, you can unleash styler on the file(s) and it will reformat it. Functionality for lintr has been built into more recent versions of RStudio.
+
+## Enforce reproducibility of the directories and packages
+
+### Scenario 1: Sharing your project with a colleague
+
+Let's think about a happy time a couple months from now. You've completed this R course, have learned some new tricks, and you have written an analysis of your mass spec data, bundled as a nice project in a directory named "mass_spec_analysis". You're very proud of the analysis you've written and your colleague wants to run the analysis on similar data. You send them your analysis project (the whole directory) and when they run it they immediately get the following error when trying to load the data file with the `read.csv("file.csv")` command:
+Error in file(file, "rt") : cannot open the connection
+In addition: Warning message:
+In file(file, "rt") :
+  cannot open file 'file.csv': No such file or directory
+  
+Hmmm, R can't find the file, even though you set the working directory for your folder using `setwd("/Users/username/path/to/mass_spec_analysis")`.
+
+What is the problem? Setting your working directory is actually the problem here, because it is almost guaranteed that the path to a directory on your computer does not match the path to the directory on another computer. That path may not even work on your own computer a couple years from now!
+
+Fear not, there is a package for that! The [here package](https://cran.r-project.org/web/packages/here/index.html) is a helpful way to "anchor" your project to a directory without setting your working directory. The here package uses a pretty straightforward syntax to help you point to the file you want. In the example above, where file.csv is a data file in the root directory (I know, not ideal practice per our discussion on project structure above), then you can reference the file using `here("file.csv")`, where `here()` indicates the current directory. So reading the file could be accomplished with `read.csv(here("file.csv"))` and it could be run by any who you share the project with.
+
+The here package couples well with an RStudio Project because there is an algorithm that determines which directory is the top-level directory by looking for specific files
+- creating an RStudio Project creates an .Rproj file that tells here which is the project top-level directory
+- if you don't create a Project in RStudio, you can create an empty file named .here in the top-level directory to tell here where to go
+- there are a variety of other file types the package looks for (including a .git file which is generated if you have a project on Github)
+
+I encourage you to read the following post by Jenny Bryan that includes her strong opinions about setting your working directory: [Project-oriented workflow](https://www.tidyverse.org/articles/2017/12/workflow-vs-script/).
+
+Moral of the story: avoid using `setwd()` and complicated paths to your file - use `here()` instead!
+
+### Scenario 2: Running your 2018 code in 2019
+
+Now imagine you've written a nice analysis for your mass spec data but let it sit on the shelf for 6 months or a year. In the meantime, you've updated R and your packages multiple times. You rerun your analysis on the same old data set and either (a) one or more lines of code longer works or (b) the output of your analysis is different than the first time you ran it. Very often these problems arise because one or more of the packages you use in your code have been updated since the first time you ran your analysis. Sometimes package updates change the input or output specific functions expect or produce or alter the behavior of packages in unexpected ways. These problems also arise when sharing code with colleagues because different users may have different versions of packages loaded.
+
+Don't worry, there are actually multiple packages for that! Probably the most lightweight solution to this problem is the [checkpoint package](https://cran.r-project.org/web/packages/checkpoint/index.html). The basic premise behind checkpoint is that it allows you use the package as it existed at a specific date. There is a snapshot for all packages in CRAN (the R package repository) each day, dating back to 2017-09-17. By using checkpoint you can be confident that the version of the package you reference in your code is the same version that anyone else running your code will be using.
+
+The behavior of checkpoint makes it complicated to test out in this section: the package is tied to a project and by default searches for every package called within your project (via `library()` or `require()`). However, if you refer to the setup code chunks for this course you will see how checkpoint works in the wild.
+
+The checkpoint package is very helpful in writing reproducible analyses, but there are some limitations/considerations with using it:
+- retrieving and installing packages adds to the amount of time it takes to run your analysis
+- package updates over time may fix bugs so changes in output may be more accurate
+- checkpoint is tied to projects, so alternate structures that don't use projects may not able to utilize the package
+
+There is another solution to this problem that has tighter integration with RStudio: the [packrat package](https://cran.r-project.org/web/packages/packrat/index.html). Packrat sets up a private package library and helps manage the version of each package you use in a project. It is very similar to checkpoint conceptually, but rather than locking packages to a date, you are capturing specific versions of each package. In some ways this is a better way to manage packages since the versions are more transparent, but there is more overhead in setting this up. There is a helpful walkthrough here: http://rstudio.github.io/packrat/walkthrough.html. In addition, there is integration with the RStudio IDE, which is detailed here: http://rstudio.github.io/packrat/rstudio.html.
+
+Either approach to package management will work - the important point here is to be proactive about how you manage your packages, especially if you know your code will be used over and over again in the future.
+
+## Use a version control system
+
+![One of many justifications for using version control. Source: phdcomics.com](assets/phd_comic_final_version.jpg)
+
+The concept of capturing changes to a document by resaving the file with different names is well-intentioned and lines up with previous concepts of reproducibilty. This can help capture changes you've made in the evolution of a project. The problem with this method is that it is very clunky and, realistically, you will not be able to capture every single change you've made. When writing code, you often do want to capture changes at a higher resolution than when writing a paper or other text document. 
+
+The basic functionality of a version control system tracks changes (in addition to who made changes in collaborative settings) and makes it easier to undo changes. But you can go further with version control and implement it as a tool in collaboration workflows because it enables multiple people to work on changes to the same set of files at once.
+
+### A brief intro to Git
+
+This section is a high level summary of many concepts explained in Chapter 1 of the [Pro Git](https://git-scm.com/book/en/v2) textbook. There are other great resources to learn about using Git and using Git with RStudio, including http://happygitwithr.com, https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN, and http://r-bio.github.io/intro-git-rstudio/.
+
+Git was originally developed as a tool to support the development of Linux (the open source operating system that powers most web servers and many mobile devices). There were a variety of requirements but to meet the needs of a large open source project, the version control system needed to support many contributors working in parallel in a sizable code base.
+
+Git works on the following principles:
+
+- Git works by taking snapshots of a set of files over time
+- Most operations are performed on your local machine
+- Every change is captured
+- Git generally adds data and does not remove it (which means it is hard to lose data)
+
+When working in Git, there are three states that files live in: modified, staged, and committed. A modified file is self explanatory - you have made some change to a file in your project. When the file is staged, you indicate that that modified file will be incorporated into your next snapshot. When the file (or files) is/are committed, you then indicate that the staged file(s) can now be stored. Committing is indicating to Git that you are ready to take the snapshot. This workflow is captured visually below.
+
+![Git basic workflow. Source: https://git-scm.com/book/en/v2/Getting-Started-Git-Basics](assets/git_basic_workflow.png)
+
+### Hands-on with Git
+
+First we need to learn how to interact with Git locally. We can do this easily within a RStudio project.
+
+*If you have not set up Git per the pre-course instructions (https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and signed up for an account on Github.com (https://github.com/join), you will need to do so before you can complete the next exercise.*
+
+**Exercise 4**
+
+If you have not previously set up Git and the interface within RStudio on your system, first follow these steps:
+
+1. First we need to set up our git configuration to include our email address and user name. Open either Terminal (Mac) or Git Bash (Windows) and run the following:
+  1. git config --global user.name "*your username*"
+  1. git config --global user.email *your email address*
+1. Before we can use the Git interface in RStudio, we need to enable version control in the application. Navigate to "Global Options" under the Tools menu with RStudio and select "Git/SVN" on the lefthand menu. Ensure that the check box for "Enable version control interface for RStudio projects" is checked.
+
+Next we will take our sample project and enable Git within the project to demonstrate the workflow.
+
+1. Navigate to your sample-project-structure RStudio window (refer to upper right hand corner to see project name)
+1. Note the tabs you see on the upper right quadrant. You should see tabs for Environment, History, and Connections (depending on version of RStudio and any personal window customizations)
+1. Navigate to the Tools menu in your menubar and select "Version Control", then "Project Setup..."
+1. In the Project Options window that pops up, navigate to the "Git/SVN" menu (if not already there).
+1. Select "Git" in the "Version control system" options.
+1. A prompt for "Confirm New Git Repository" should pop up. Select "Yes".
+1. A "Confirm Restart RStudio" prompt will pop up. Select "Yes".
+
+Capturing changes using the Git window:
+
+1. Create a new R file (one quick way: click shortcut button on top left of window above console and select "R Script").
+1. Add a few comment lines (recall that comments are denoted by #) with any content you'd like (e.g. title, author, date).
+1. Save the file (can use disk button) to the src folder and give it a name (e.g. sample).
+1. Now navigate to the Git window on the top right.
+1. There is a list of files and directories (that include files) within the project directory. Click the checkbox under "Staged" for the "src/" folder. The status column changed to include a green A icon. This indicates you are adding the file to the version control system.
+1. Hit the "Commit" button (menu options within Git window).
+1. A new "RStudio: Review Changes" window will pop up. Highlight the "src/sample.R" file (or whatever you named it) that you added. You will see your code highlighted in green to indicate additions to the code.
+1. Type "My first commit" (or anything else you'd like) in the Commit message window on the top right, and hit the "Commit" button under it. A Git commit window will pop up showing some details of the commit you made. Close that window and close the Review Changes window.
+1. Go back to your R script and delete at least one line and add another, then save.
+1. Navigate back to the Git window, and repeat the steps of checking the box to stage, hitting the Commit button (note the red and green highlights in the Review Changes), writing a commit message, and commiting.
+
+Congratulations! You have learned to stage and commit changes in your local Git repository.
+
+**End Exercise**
+
+### Moving to distributed workflows
+
+So far everything we have done has been on a local repository. A powerful aspect of Git is the ability to maintain a centralized repository outside of your local machine. This can help you synchronize the repo (short for repository) between multiple computers, but more importantly, this facilitates workflows in which multiple people contribute to a project. Imagine our local Git repository has a copy that lives on another system but is publically available for yourself and others to access. That is the function of GitHub, which hosts our course repo.
+
+GitHub is the largest host of Git repositories and hosts open source projects (like this course) for free. GitHub also hosts private repos for a fee, and there are other services such as GitLab and BitBucket that host Git repos but also provide other functionality. GitHub is very popular among academic software projects because most are open source (and therefore free to host) but there is one important factor to consider when using the free GitHub service: content is hosted on their servers so this may not be a good fit for sensitive data (such as health information). Many organizations who write code to analyze sensitive information do not risk committing this information and purchase Git services that allow them to host repositories on their own hardware. *Always be very careful about preventing sensitive information from being available publically when working with version control system (and in general).*
+
+One possible workflow when taking advantage of a distributed Git repository, which we refer to as a "remote" repository, is one which multiple people work from one repo and are continually bringing over copies to their local machines and then committing changes.
+
+![Centralized workflow with Git. Credit: https://git-scm.com/book/en/v2/Distributed-Git-Distributed-Workflows](assets/centralized_workflow.png)
+
+A common workflow in GitHub is one in which there is a single official project repo that contributors create a public clone of, make changes to their own repo, and request that the official repo incorporate changes into the main project ("pull request"). A step-by-step breakdown of the process illustrated below is as follows:
+
+1. The project maintainer pushes to their public repository.
+1. A contributor clones that repository and makes changes.
+1. The contributor pushes to their own public copy.
+1. The contributor sends the maintainer an email asking them to pull changes.
+1. The maintainer adds the contributor’s repository as a remote and merges locally.
+1. The maintainer pushes merged changes to the main repository.
+
+![Integration manager workflow with Git. Credit: https://git-scm.com/book/en/v2/Distributed-Git-Distributed-Workflows](assets/integration-manager.png)
+
+We have placed the contents of this course into a shared Git repository (central hub) for the class to download and work with. This will help cut down on the scripting you need to run through the exercises for this course and will also give you the chance to work with Git. In the following exercise you will use Git with the existing course repository to move through the typical workflow using RStudio.
+
+**Exercise 5**
+
+Forking the course repository:
+
+1. Navigate to the course repository at https://github.com/pcmathias/MSACL-intermediate-R-course.
+1. Select the "Fork" button at the top right of the repository page. If you are not already signed in, you will be asked to sign in.
+1. You should now have the course repository under your account at Github (github.com/*your-user-name*/MSACL-intermediate-R-course). 
+
+We will explain why we "forked" the repository in more detail after the exercise.
+
+Opening the repository as a project in RStudio:
+
+1. Under the File menu within the RStudio application, select "New Project".
+1. Select "Version Control" in the first Create Project prompt.
+1. Select "Git" in the next Create Project from Version Control prompt.
+1. Copy and paste the URL for the repository you just forked (github.com/*your-user-name*/MSACL-intermediate-R-course) into the prompt for Repository URL.
+1. Select a project name as well as a destination folder for your project (perhaps under a newly created Projects folder?).
+
+Creating a file and using the Git workflow:
+
+1. Let's create a new file within the repository by navigating to "New File" under the File menu and selecting "R Script".
+1. Add a title to the first line by inserting a comment (using #) with a title: "# My Commit".
+1. Add another comment line: "# Author: *your-user-name*".
+1. Add a single line of code, eg. `print("Hello world")`.
+1. Save the file in the your repository folder with the following convention:  username_commit.R.
+1. If not already open, open up the Git window in the top left of the RStudio window (click the Git tab). You should see your new file in that window with two boxes containing yellow question marks. Check the box for the file under Staged and you should see a green box with an "A" under the Status box. This has taken a new file (with a modified status) and staged it.
+1. Stage and commit the file per the steps outlined in the previous exercise. Add "My commit" to the Commit message window and hit the "Commit" button below.
+
+That is the general workflow you will use within RStudio. Modify (or add) a file, stage it by checking the box in the Git window, and then commit it. Be sure to include helpful comments when you commit, in case you need to go back to a previous version. All of these changes have happened locally on your machine.
+
+**End Exercise**
+
+When we first pulled the course repository, we completed the first few steps of this workflow. We took the central version of the course repo and made a local copy on our Github accounts ("forked" the repository). Then we started making local changes and committing them. Now we can work through updating the remote repository.
+
+**Exercise 6**
+
+*These steps are dependent on completing the previous exercise*
+
+1. Now that you have committed changes to your local repository, you can update your remote repository on GitHub by "pushing" the local changes to the remote repository. Press the "Push" button (with a green up arrow beside it) to push your changes to remote.
+1. You should be prompted for a username and password. Enter your GitHub username and password and you should seen an indication that the push has completed.
+1. Navigate to your MSACL-intermediate-R-course repository on your web browser (github.com/*your-user-name*/MSACL-intermediate-R-course). You should see the file you've added there.
+
+Now both of your local repo and your remote repo are aligned.
+
+**End Exercise**
+
+In software projects that have multiple contributors, you need a workflow that allows contributors to work on different pieces of code and contribute changes in a structured fashion, ideally so a single owner of the repository can review and incorporate changes. The common way this is done with open source projects on GitHub is the pull request workflow: a contributor forks a repository, makes some changes in their repo, and then sends a pull request to the original contributor
+
+**Optional Exercise** 
+
+If you would like to try the pull request workflow
+
+1. Navigate to your MSACL repository webpage (under your username in GitHub) and select the "New pull request" button near the top.
+1. Under "Compare changes", select the link to "compare across forks".
+1. Click the "base fork" button and select "pcmathias/MSACL-intermediate-R-course". Click the "base" button adjacent to the "base fork" button and select "class-contributions".
+1. Click the "head fork" button and select your repository, if not already selected.
+1. The "Create pull request" button should be available to select now. Click the button and add any comments to close out the pull request process.
+
+On our end, we will get a notification about a pull request and can choose to incorporate the code into the repository.
+
+**End Exercise**
+
+You can keep your repository synchronized with the original by following steps below.
+
+If you would like to synchronize your MSACL repo with the main course repo in the future
+
+1. Open Terminal within RStudio on the bottom left of the window (tab is adjacent to Console tab).
+1. The Terminal window should be set to your MSACL course repo directory. Run `ls` to confirm that you see the course contents. If not, use `cd` to navigate to the right directory.
+1. Enter `git remote add upstream https://github.com/pcmathias/MSACL-intermediate-R-course`.
+1. Enter `git remote -v` to list the remote repositories. You should see the main course repository listed as upstream. 
+
+Now your course repository is linked to the main course repo.
+
+In the future, if you want to retrieve changes to the original course repo:
+1. With your working directory set to the project directory, enter `git fetch upstream` (in Terminal console or Git Bash). This pulls any changes from the upstream repo to your local system.
+1. Enter `git checkout master` to make sure you are on your master branch (explained more below).
+1. Enter `git merge upstream/master` to merge the course repo changes with your local repository.
+
+These instructions were adapted from the following: https://help.github.com/articles/syncing-a-fork.
+
+The Git workflow for keeping changes updated is not as seamless as many modern document editors such as Office 365 or Google Docs, which continuously update changes for you without manual saving. One reason Git does not work that way is that your commits are expected to be strategic and coupled with changes that you may want to roll back. This is important to give you confidence that you do not need to create backup copies of your work, but the trade off is that you have to do extra work to make sure updates are captured. This is especially important when working with a remote repository. We made local changes and pushed those to the remote to update it. But imagine another scenario where you are working on multiple computers and made changes on computer A yesterday but are working on computer B today. If you pushed your changes from computer A to the remote yesterday, you can perform the opposite function on computer B today. You would use the "Pull" button to pull the contents of the remote repository onto your local computer B.
+
+### Addditional Git tips and tricks
+
+#### Using branches
+
+When multiple people are working on a repository or you are working on multiple types of changes in a repository, there are other potential workflows besides forking a repository, making changes, and sending a pull request. A branch in Git is essentially another line of development that allows you to work without disrupting the primary line of code development (most often the *master* branch). RStudio provides support to create new branches and change branches - both features are on the top right of the Git window.
+
+![Branching in Git. Credit: https://www.atlassian.com/git/tutorials/using-branches/git-merge](assets/branching.png)
+
+So when should you use branches? Arguably the cleanest way to use branches is to couple each branch to a major feature or change in your code. This is particularly helpful if you (and your team) want to work on multiple features at once. You can isolate each feature to branch, test it, and merge the branch (this can be done via similar workflows to the pull request) but also allows parallel development. To take this workflow one step further, GitHub and other Git-based systems allow you to open up "issues" (note the "Issues" tab on a GitHub repo page) that can include feature requests. You can open up a branch, name it for an issue, work on the feature, and then close out the issue when the feature is completed and tested.
+
+#### Setting up ssh
+
+Typing in your password every time you interact with remote repository (eg. in GitHub) can be annoying to do repeatedly. An alternative is to set up SSH. At a high level, this requires setting up a public-private SSH key pair, where the private key lives on your machine (and should not be shared!) and the public key lives in your GitHub profile. There are nice instructions for setting this up from either RStudio or the shell (eg. Terminal tab) at http://happygitwithr.com/ssh-keys.html. 
+
+SSH is a useful protocol to know about in general. There is a short tutorial at https://www.hostinger.com/tutorials/ssh-tutorial-how-does-ssh-work that explains many of the concepts. For a general reading resource on cryptography, [The Code Book](https://www.amazon.com/gp/product/B004IK8PLE/ref=kinw_myk_ro_title) by Simon Singh is highly recommended.
+
+#### What should and shouldn't go into version control
+
+The last thing to consider is a question: should you put everything in your project under version control? Maybe not. Git and similar version control systems typically do not handle raw data files well and the repository site you use may impose file size limits (Github has a 100 MB limit). *Also note that your repository site may be public so storing sensitive data (such as health information) within the repo may be problematic.* The excellent article by [Wilson et al.](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510) covers these issues in more details and provides nice guidance about what should not go into version control. Practically, the .gitignore can help exclude specific files - it is simply a list of files or groups of files to ignore. As an example, including "*.html" in the .gitignore will exclude html pages from your repository. (The reason for doing this will become more obvious in the next lesson.)
+
+#### Additional Git resources
+
+Finally, there are variety of resources available to learn Git.
+- The [Happy Git and GitHub for the useR](http://happygitwithr.com) online book walks through Git in a lot more detail, with a lot more explanation.
+- The [Pro Git](https://git-scm.com/book/en/v2) textbook has a lot of detail about a variety of Git topics outside of the context of R and RStudio. 
+- There is also a downloadable Git tutorial that may be helpful to reinforce many of the above concepts: https://github.com/jlord/git-it-electron.
+
+## Summary
+
+* Reproducible research is the principle that any research result can be reproduced by anybody
+* Practices in reproducible research also offer benefits for to the code author in producing clearer, easier to understand code and being able to easily repeat past work
+* Important practices in reproducible research include:
+  - Developing a standardized but easy-to-use project structure
+  - Adopting a style convention for coding
+  - Enforcing reproducibility when working with projects and packages
+  - Using a version control system to track work and collaborate with others
