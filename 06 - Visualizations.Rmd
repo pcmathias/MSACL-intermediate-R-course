@@ -77,25 +77,29 @@ Let's start with a simple histogram of the ion ratios present in the data set. F
 ```{r}
 january_pos_ir <- january_samples %>%
   filter(ion_ratio > 0)
-ggplot(january_pos_ir) + geom_histogram(mapping = aes(x = ion_ratio))
+ggplot(january_pos_ir) + 
+  geom_histogram(mapping = aes(x = ion_ratio))
 ```
 
 Note that the default behavior is the break up the distribution into 30 bins. We can supply an additional argument to the histogram geom to explicitly define the binwidth:
 
 ```{r}
-ggplot(january_pos_ir) + geom_histogram(mapping = aes(x = ion_ratio), binwidth = 0.01)
+ggplot(january_pos_ir) + 
+  geom_histogram(mapping = aes(x = ion_ratio), binwidth = 0.01)
 ```
 
 Now let's add another variable and look at a different view of the data: a plot of ion ratio by row number in the data set, using the sample data set that has been filtered to include only samples with ion ratio greater than 0. We will specify that mapping of sample id on the x-axis, ion ratio on the y-axis, and a point geom to render the data points as points on the graph.
 
 ```{r}
-ggplot(data = january_pos_ir) + geom_point(mapping = aes(x = idx, y = ion_ratio))
+ggplot(data = january_pos_ir) + 
+  geom_point(mapping = aes(x = idx, y = ion_ratio))
 ```
 
 If we want to add additional variables to the plot, we can add additional information to the mapping. In this case we may want to visualize different compounds.
 
 ```{r}
-ggplot(data = january_pos_ir) + geom_point(mapping = aes(x = idx, y = ion_ratio, col = compound_name))
+ggplot(data = january_pos_ir) + 
+  geom_point(mapping = aes(x = idx, y = ion_ratio, col = compound_name))
 ```
 
 This is interesting but doesn't provide as clear a look of the data. It would be better to visualize each compound on its own plot, which we can accomplish easily using a facet function. Notice that defining the data can be done as a variable (here it is `g`) and that definition can be used later for any number of geoms.
@@ -139,20 +143,25 @@ Another handy capability of ggplot is adding multiple layers to a plot. Let's re
 known_samples <- january_samples %>%
   filter(sample_type != "unknown")
 ggplot(data = known_samples) + 
-  geom_point(mapping = aes(x = expected_concentration, y = concentration, col = compound_name))
+  geom_point(mapping = aes(x = expected_concentration, y = concentration, 
+                           col = compound_name))
 ```
 
 There is a lot of overlap, so let's modify the poisition of the points to prevent overlap using the position argument to the point geom:
 
 ```{r}
 ggplot(data = known_samples) + 
-  geom_point(mapping = aes(x = expected_concentration, y = concentration, col = compound_name), position = position_dodge(width = 25))
+  geom_point(mapping = aes(x = expected_concentration, y = concentration, 
+                           col = compound_name), 
+             position = position_dodge(width = 25))
 ```
 
 Instead of observing the data points, we may be only interested in a line that is fit to the data points, which we can generate quickly using the smooth geom.
 
 ```{r}
-ggplot(data = known_samples) + geom_smooth(mapping = aes(x = expected_concentration, y = concentration, col = compound_name))
+ggplot(data = known_samples) + 
+  geom_smooth(mapping = aes(x = expected_concentration, y = concentration, 
+                            col = compound_name))
 ```
 
 Not a whole lot of excitement here: the observed concentrations are highly correlated with expected concentrations.
@@ -160,7 +169,9 @@ Not a whole lot of excitement here: the observed concentrations are highly corre
 We may want to see both the original data points and a line fit to them. Up until now, we have been including the mapping argument within the geom function. However, we may not want to duplicate the same code if the mapping is identical for multiple geoms. Instead we can place the mapping arguments in the `ggplot` function and add multiple layers without calling the mapping every time.
 
 ```{r}
-ggplot(data = known_samples, mapping = aes(x = expected_concentration, y = concentration, col = compound_name)) + 
+ggplot(data = known_samples, 
+       mapping = aes(x = expected_concentration, y = concentration, 
+                     col = compound_name)) + 
   geom_smooth() +
   geom_point(position = position_dodge(width = 25))
 ```
@@ -169,7 +180,8 @@ Ultimately plotting the raw data points may not be the best visualization. Plott
 
 ```{r}
 ggplot(data = known_samples) + 
-  geom_boxplot(mapping = aes(x = factor(expected_concentration), y = concentration, col = compound_name))
+  geom_boxplot(mapping = aes(x = factor(expected_concentration), y = concentration, 
+                             col = compound_name))
 ```
 
 **Exercise**  

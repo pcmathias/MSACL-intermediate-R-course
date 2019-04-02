@@ -50,6 +50,7 @@ The [dplyr package](http://dplyr.tidyverse.org/) provides functions to carve, ex
 Reducing a data set to a subset of columns and/or rows are common operations, particularly on the path to answering a specific set of questions about a data set. 
 
 If you need to go from a large number of columns (variables) to a smaller set, `select()` allows you to select specific columns by name. 
+
 ![Syntax for `select()`](assets/select.png)
 
 Let's take these for a spin using the data we started examining in the last lesson.

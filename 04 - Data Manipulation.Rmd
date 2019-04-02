@@ -50,6 +50,7 @@ The [dplyr package](http://dplyr.tidyverse.org/) provides functions to carve, ex
 Reducing a data set to a subset of columns and/or rows are common operations, particularly on the path to answering a specific set of questions about a data set. 
 
 If you need to go from a large number of columns (variables) to a smaller set, `select()` allows you to select specific columns by name. 
+
 ![Syntax for `select()`](assets/select.png)
 
 Let's take these for a spin using the data we started examining in the last lesson.
@@ -166,6 +167,14 @@ batch_jan_timestamps <- batch_jan %>%
 summary(batch_jan_timestamps)
 ```
 You can see from the above example that these functions provide a great deal of flexibility in associating a row with arbitrary time scales. This allows the ability to group items by time and calculate summary data, which we will discuss in the next section.
+
+There are also "scoped" versions of mutate that allow you to mutate multiple rows at once. `mutate_all` will apply a function to all columns, `mutate_at` can apply to select columns, and `mutate_if` can apply to columns meeting some condition. For example, if all of your character variables should be represented as factors, you can use `mutate_if` to convert them:
+
+```{r}
+batch_jan_factors<- batch_jan %>%
+  mutate_if(is.character, as.factor)
+summary(batch_jan_factors)
+```
 
 **Exercise 2**
 
