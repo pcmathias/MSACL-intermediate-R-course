@@ -35,28 +35,47 @@ Let's run through the base reading function with a csv.
 
 1. Use the base `read.csv()` function to read the "2017-01-06_s.csv" file in the data folder into a data frame.
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 base_load <- 
+```
+
+```{r}
+base_load <- read.csv("data/2017-01-06_s.csv")
 ```
 
 2. What is the internal structure of the object? (Recall the `str()` command to quickly view the structure.)
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 
+```
+
+```{r}
+str(base_load)
 ```
 
 3. Summarize the data. (Recall the `summary()` function to view column types and characteristics about the data.)
 
-```{r base_load, eval = FALSE}
+```{r base_load, echo = FALSE, eval = FALSE}
 
+```
+
+```{r}
+summary(base_load)
 ```
 
 4. Repeat the previous steps starting with #2, but include the argument `stringsAsFactors = FALSE` when you read in the data.
 
-```{r base_load_nofactors, eval = FALSE}
+```{r base_load_nofactors, echo = FALSE, eval = FALSE}
 base_load_nofactors <- 
 str()
 summary()
+```
+
+```{r}
+base_load_nofactors <- read.csv("data/2017-01-06_s.csv",
+                                stringsAsFactors = FALSE)
+str(base_load_nofactors)
+summary(base_load_nofactors)
 ```
 
 5. For this data set, which fields should be strings and which should be factors?
@@ -91,25 +110,37 @@ Readr also offers equivalent write functions such as `write_csv()` and `write_ts
 Now let's run through using the readr function for a csv:
 1. Use the `read_csv()` function to read the "2017-01-06_s.csv" file into a data frame.
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 readr_load <- 
+```
+
+```{r}
+readr_load <- read_csv("data/2017-01-06_s.csv")
 ```
 
 2. What is the internal structure of the object?
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 
+```
+
+```{r}
+str(readr_load)
 ```
 
 3. Summarize the data.
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 
+```
+
+```{r}
+summary(readr_load)
 ```
 
 4. Finally, let's follow some best practices and explicitly define columns with the `col_types` argument. We want to explicitly define compoundName and sampleType as factors. Note that the `col_factor()` expects a definition of the factor levels but you can get around this by supplying a `NULL`. Then run a summary to review the data.
 
-```{r col_types, eval = FALSE}
+```{r col_types, echo = FALSE, eval = FALSE}
 readr_load_factors <- read_csv( ,
   col_types = cols(
     
@@ -117,6 +148,16 @@ readr_load_factors <- read_csv( ,
     )
   )
 summary( )
+```
+
+```{r}
+readr_load_factors <- read_csv("data/2017-01-06_s.csv",
+                               col_types = cols(
+                                 compoundName = col_factor(NULL),
+                                 sampleType = col_factor(NULL)
+                                 )
+                               )
+summary(readr_load_factors)
 ```
 
 **End Exercise**
@@ -171,11 +212,18 @@ You might be able to guess what comes next: we'll read in an Excel file.
 1. Now read in only the first 5 columns using the `range` parameter
 1. Review the first 6 lines of the imported data
 
-```{r readxl, eval = FALSE}
+```{r readxl, echo = FALSE, eval = FALSE}
 readxl_load <- read_excel( )
 
 readxl_load_subset <- read_excel( , range = )
 
+```
+
+```{r}
+readxl_load <- read_excel("data/orders_data_set.xlsx")
+summary(readxl_load)
+readxl_load_subset <- read_excel("data/orders_data_set.xlsx", range = cell_cols("A:E"))
+head(readxl_load_subset)
 ```
 
 **End Exercise**

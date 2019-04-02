@@ -144,9 +144,25 @@ Recalling the helpful functions we used from the `broom` package, we can examine
 **Exercise 1:**
 
 Examine modGLM using the `glance()` and `tidy()` functions of the `broom` package. What is the AIC and BIC for this model? What are the coefficients for each term of the model? 
+```{r, echo = FALSE, eval = FALSE}
 
-```{r, eval = FALSE}
 
+```
+
+```{r}
+glance(modGLM)
+#AIC 67
+#BIC 79
+
+# The difference between the null deviance and the residual deviance shows how our model is doing against the null model (a model with only the intercept). The wider this gap, the better. 
+# logLik
+
+tidy(modGLM) %>%
+    arrange(p.value)
+# The logistic regression coefficients (estimate) give the change in the log odds of the outcome for a one unit increase in the predictor variable. You can take the exp and convert this to odds ratio.
+
+exp(coef(modGLM))
+# Now we can say that for a one unit increase in SCr, the odds of being in group CKD3b (vs in CKD2) increase by a factor of 1.27
 
 ```
 
@@ -181,10 +197,14 @@ mean(ckd_test$Stage_pred == ckd_test$Stage) #0.98
 **Exercise 2:**
 
 Select a different threshold and determine the accuracy of the model for that threshold setting.
+```{r, echo = FALSE, eval = FALSE}
 
-```{r, eval = FALSE}
 
+```
 
+```{r}
+ckd_test$Stage_pred<- ifelse(ckd_test$Stage_prob > 0.6, "CKD3b", "CKD2")
+mean(ckd_test$Stage_pred == ckd_test$Stage) #0.96
 ```
 
 **End exercise**
