@@ -1,0 +1,84 @@
+---
+title: 'Lesson: Working with relational databases'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Motivations for working with relational databases
+
+Managing your data within text or Excel files is often the default approach since instruments (whether mass spectrometers or any other lab instrument) generate the data in this format. Files may be spread out over multiple directories and if multiple files are required for analysis they are copied into one location to work with. You may either manually copy and paste the data together into one large file or import multiple files into your environment (possibly into one data frame) within your analysis code. This pattern presents a practical challenge under a few scenarios:
+- You are collecting longitudinal data and want to work with a large number of files over some time period (dozens or more).
+- The entire data set you are working with is large and exceeds the memory of the system you are analyzing data on.
+- The data set you are working with natively exists in a relational database and cutting out the process of extracting the data and importing into R can make your analysis more efficient or effective. One compelling use case is developing a dashboard that automatically refreshes when the database has new data.
+
+One approach to managing data in these scenarios is to store it in a relational database and connect to the data with a database connection using R. Many of the tidyverse packages such as dplyr have built-in compatibility with relational databases that is supported with a package called dbplyr. This allows R to translate the code that you write into the native language of the database. You can then take advantage of the functionality of a database without having to be an expert in the database language (although it definitely helps to know the basics of the language). 
+
+## The basics of Structured Query Language (SQL)
+
+The principles of relational databases were developed by Edward Codd at IBM in the early 1970s and were based on relational algebra. Using these principles, another group developed a programming language that evolved into Structured Query Language (originally called SEQUEL and pronounced either as "S-Q-L" or "sequel") to represent these principles. Core database principles have actually been adopted heavily by tidyverse package developers. You actually already know these concepts because we have introduced them in previous lessons but did not call them out as database concepts. These concepts include:
+- Data are represented as a group of tables, which is analagous to working with a group of data frames.
+- The principles of tidy data are adapted from common relational database practices:
+  - Observations are represented by rows (often called tuples in relational database speak)
+  - Variables are stored in columns (commonly referred to as fields)
+- Tables are linked together with variables that are shared - this principle is used to join data sets
+
+SQL was intended to be more accessible than many of the programming languages of that time, and the basic syntax for queries is relatively simple. The most basic query has two "clauses":
+- a SELECT clause chooses the columns to return in a query - this is identical to the `select()` functionality from the dplyr package
+- a FROM clause chooses the table for which the columns are returned - this is analogous to specifying the data frame you apply a function to
+
+As an example, let's consider our sample data as a table in a database. If we wanted to retrieve sample name, compound name, and ion ratio from a "sample" table, we would write the following SQL query:
+
+```{sql}
+SELECT  
+        sample_name, compound_name, ion_ratio
+FROM
+        sample
+```
+
+If we want to only obtain data for one specific coumpound, e.g. morphine, we add a WHERE clause with a logical condition, functioning identically to the `filter()` command.
+
+```{sql}
+SELECT  
+        sample_name, compound_name, ion_ratio
+FROM
+        sample
+WHERE
+        sample_name = 'morphine'   -- Note the single quotes
+```
+
+Note a few minor details in the above query that are different than R syntax:
+- equality is represented with one equal sign ("assingment" of an object is not done in a similar way in SQL so there is no risk from this one symbol being used for multiple things)
+- the string 'morphine' is enclosed in single quotes and SQL is strict about only using single quotes (unlike R)
+- comments are added with two dashes (-- unlike # for comments in R)
+
+One final basic concept in SQL is one you have already learned: the different types of joins in R are pulled exactly from SQL. Recognizing the SQL syntax is the final hurdle. Joins are performed within the FROM clause of the query. If we want to join the sample table with the batch table by the batch name and the compound name, we perform the following query:
+
+```{sql}
+SELECT  
+        sample.*, batch.*   -- * is shorthand for return all columns
+FROM
+        sample
+        INNER JOIN batch ON sample.batch_name = batch.batch_name
+          AND sample.compound_name = batch.compound_name
+```
+
+There are few more details to consider in the query above:
+- When joining multiple tables, columns may be derived from one or more of the source tables so SQL wants explicit specification of the the source of the column. The syntax for specifying the table for a column is "table.column".
+- Asterisks can be used to select all columns from a specific table. Rather than calling out the tables as above, you can also just use a single asterisk to query all columns from all tables joined in the FROM clause
+- The keys for the join must be specified using ON. Most major flavors of SQL do not attempt to automatically identify keys like the join functions in R.
+
+The above examples are a very basic introduction to SQL. We will not cover more detail in this course because many more complicated queries are arguably better represented in R. If you primarily draw from dplyr for your data manipulation functions, R will translate your code into SQL automatically so there is limited need to learn SQL immediately yet still be able to take advantage of database functionality. However, having a solid understanding of SQL is helpful because much of the tidyverse functions and conventions are derived from core logical operations that are bread and butter SQL activites.
+
+Keep in mind that there are actually a variety of implementations of SQL (based on different vendors, openly developed tools, etc.) that each have differences in syntax. While many SQL commands and clauses are identical between SQL flavors, even some basic commands can vary dramatically. One example: the analogy of `head()` (i.e. return only the top n rows) is TOP() within the SELECT clause in Microsoft SQL Server and a separate LIMIT clause after other clauses in PostgreSQL.
+
+Since SQL is the standard route to data retrieval throughout analytics and reporting communities, there are a variety of helpful resources for learning more about SQL. Here are some helpful resources to learn more:
+
+
+
+## Connecting to databases with R
+
+Connecting to databases requires a few packages. The DBI package allows R to communicate with various relational database management systems (RDBMS). This package provides a general mechanism to connect but in addition each specific RDBMS also requires a separate package to support the appropriate syntax. For example, the RSQLite package allows connection to SQLite.
