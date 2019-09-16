@@ -73,7 +73,12 @@ There are few more details to consider in the query above:
 
 The above examples are a very basic introduction to SQL. We will not cover more detail in this course because many more complicated queries are arguably better represented in R. If you primarily draw from dplyr for your data manipulation functions, R will translate your code into SQL automatically so there is limited need to learn SQL immediately yet still be able to take advantage of database functionality. However, having a solid understanding of SQL is helpful because much of the tidyverse functions and conventions are derived from core logical operations that are bread and butter SQL activites.
 
-Keep in mind that there are actually a variety of implementations of SQL (based on different vendors, openly developed tools, etc.) that each have differences in syntax. While many SQL commands and clauses are identical between SQL flavors, even some basic commands can vary dramatically. One example: the analogy of `head()` (i.e. return only the top n rows) is TOP() within the SELECT clause in Microsoft SQL Server and a separate LIMIT clause after other clauses in PostgreSQL.
+Keep in mind that there are actually a variety of implementations of SQL (based on different vendors, openly developed tools, etc.) that each have differences in syntax. Some examples include:
+- Microsoft SQL Server
+- PostgreSQL
+- MySQL
+- SQLite
+While many SQL commands and clauses are identical between SQL flavors, even some basic commands can vary dramatically. One example: the analogy of `head()` (i.e. return only the top n rows) is TOP() within the SELECT clause in Microsoft SQL Server and a separate LIMIT clause after other clauses in PostgreSQL.
 
 Since SQL is the standard route to data retrieval throughout analytics and reporting communities, there are a variety of helpful resources for learning more about SQL. Here are some helpful resources to learn more:
 
@@ -81,4 +86,20 @@ Since SQL is the standard route to data retrieval throughout analytics and repor
 
 ## Connecting to databases with R
 
-Connecting to databases requires a few packages. The DBI package allows R to communicate with various relational database management systems (RDBMS). This package provides a general mechanism to connect but in addition each specific RDBMS also requires a separate package to support the appropriate syntax. For example, the RSQLite package allows connection to SQLite.
+Connecting to a database is analogous to reading data into a file: specific functions are required to interact with the outside data source. The DBI package allows R to communicate with various relational database management systems (RDBMS). This package provides a general mechanism to connect but in addition each specific RDBMS also requires a separate package to support the appropriate syntax and translate commands into the specific RDBMS commands. For example, the RSQLite package allows connection to SQLite.
+
+The first step in connecting to a database is to use the `dbConnect()` function from the DBI package. This function accepts a number of arguments to configure the database connection, but the most important is the definition of the driver. For example, connecting to a SQLite database can be done by calling `RSQLite::SQLite()` as the first argument. The other arguments to provide the function include the location of the database (e.g. a file or a host server name), database name (often the host has multiple databases), username, password, and port (for databases configured to use a specific port).
+
+**Exercise**
+
+The project dataset for the course is included in a file called "project_data.sqlite", so we will connect to this this SQLite database. Use the `dbConnect()` function to connect to this database, and refer to the following site for some additional info on connecting: <https://cran.r-project.org/web/packages/RSQLite/vignettes/RSQLite.html>. The first argument is the driver, and for SQLite, the second argument indicates the location of the database (or a temporary one to create one on the fly). Load this connection into an object called projectdb.
+
+```{r, eval = FALSE}
+projectdb <- 
+```
+
+```{r}
+
+```
+
+**End Exercise**
