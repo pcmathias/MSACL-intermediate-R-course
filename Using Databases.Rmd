@@ -5,6 +5,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(DBI)
 library(tidyverse)
 ```
 
@@ -16,6 +17,28 @@ Managing your data within text or Excel files is often the default approach sinc
 - The data set you are working with natively exists in a relational database and cutting out the process of extracting the data and importing into R can make your analysis more efficient or effective. One compelling use case is developing a dashboard that automatically refreshes when the database has new data.
 
 One approach to managing data in these scenarios is to store it in a relational database and connect to the data with a database connection using R. Many of the tidyverse packages such as dplyr have built-in compatibility with relational databases that is supported with a package called dbplyr. This allows R to translate the code that you write into the native language of the database. You can then take advantage of the functionality of a database without having to be an expert in the database language (although it definitely helps to know the basics of the language). 
+
+
+## Connecting to databases with R
+
+Connecting to a database is analogous to reading data into a file: specific functions are required to interact with the outside data source. The DBI package allows R to communicate with various relational database management systems (RDBMS). This package provides a general mechanism to connect but in addition each specific RDBMS also requires a separate package to support the appropriate syntax and translate commands into the specific RDBMS commands. For example, the RSQLite package allows connection to SQLite.
+
+The first step in connecting to a database is to use the `dbConnect()` function from the DBI package. This function accepts a number of arguments to configure the database connection, but the most important is the definition of the driver. For example, connecting to a SQLite database can be done by calling `RSQLite::SQLite()` as the first argument. The other arguments to provide the function include the location of the database (e.g. a file or a host server name), database name (often the host has multiple databases), username, password, and port (for databases configured to use a specific port).
+
+**Exercise**
+
+The project dataset for the course is included in a file called "project_data.sqlite", so we will connect to this this SQLite database. Use the `dbConnect()` function to connect to this database, and refer to the following site for some additional info on connecting: <https://cran.r-project.org/web/packages/RSQLite/vignettes/RSQLite.html>. The first argument is the driver, and for SQLite, the second argument indicates the location of the database (or a temporary one to create one on the fly). Load this connection into an object called projectdb.
+
+```{r, eval = FALSE}
+projectdb <- 
+```
+
+```{r}
+projectdb <- dbConnect(RSQLite::SQLite(), "project_data.sqlite")
+```
+
+**End Exercise**
+
 
 ## The basics of Structured Query Language (SQL)
 
@@ -32,16 +55,18 @@ SQL was intended to be more accessible than many of the programming languages of
 
 As an example, let's consider our sample data as a table in a database. If we wanted to retrieve sample name, compound name, and ion ratio from a "sample" table, we would write the following SQL query:
 
-```{sql}
+```{sql, connection = projectdb}
 SELECT  
         sample_name, compound_name, ion_ratio
 FROM
         sample
+LIMIT
+        10;
 ```
 
 If we want to only obtain data for one specific coumpound, e.g. morphine, we add a WHERE clause with a logical condition, functioning identically to the `filter()` command.
 
-```{sql}
+```{sql, connection = projectdb}
 SELECT  
         sample_name, compound_name, ion_ratio
 FROM
@@ -57,13 +82,14 @@ Note a few minor details in the above query that are different than R syntax:
 
 One final basic concept in SQL is one you have already learned: the different types of joins in R are pulled exactly from SQL. Recognizing the SQL syntax is the final hurdle. Joins are performed within the FROM clause of the query. If we want to join the sample table with the batch table by the batch name and the compound name, we perform the following query:
 
-```{sql}
+```{sql, connection = projectdb}
 SELECT  
         sample.*, batch.*   -- * is shorthand for return all columns
 FROM
         sample
         INNER JOIN batch ON sample.batch_name = batch.batch_name
           AND sample.compound_name = batch.compound_name
+LIMIT  10;
 ```
 
 There are few more details to consider in the query above:
@@ -83,23 +109,3 @@ While many SQL commands and clauses are identical between SQL flavors, even some
 Since SQL is the standard route to data retrieval throughout analytics and reporting communities, there are a variety of helpful resources for learning more about SQL. Here are some helpful resources to learn more:
 
 
-
-## Connecting to databases with R
-
-Connecting to a database is analogous to reading data into a file: specific functions are required to interact with the outside data source. The DBI package allows R to communicate with various relational database management systems (RDBMS). This package provides a general mechanism to connect but in addition each specific RDBMS also requires a separate package to support the appropriate syntax and translate commands into the specific RDBMS commands. For example, the RSQLite package allows connection to SQLite.
-
-The first step in connecting to a database is to use the `dbConnect()` function from the DBI package. This function accepts a number of arguments to configure the database connection, but the most important is the definition of the driver. For example, connecting to a SQLite database can be done by calling `RSQLite::SQLite()` as the first argument. The other arguments to provide the function include the location of the database (e.g. a file or a host server name), database name (often the host has multiple databases), username, password, and port (for databases configured to use a specific port).
-
-**Exercise**
-
-The project dataset for the course is included in a file called "project_data.sqlite", so we will connect to this this SQLite database. Use the `dbConnect()` function to connect to this database, and refer to the following site for some additional info on connecting: <https://cran.r-project.org/web/packages/RSQLite/vignettes/RSQLite.html>. The first argument is the driver, and for SQLite, the second argument indicates the location of the database (or a temporary one to create one on the fly). Load this connection into an object called projectdb.
-
-```{r, eval = FALSE}
-projectdb <- 
-```
-
-```{r}
-
-```
-
-**End Exercise**
