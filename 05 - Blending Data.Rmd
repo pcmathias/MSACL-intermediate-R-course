@@ -7,6 +7,7 @@ output:
 ```{r setup_5, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(tidylog, warn.conflicts = FALSE)
 library(readxl)
 library(janitor)
 ```
