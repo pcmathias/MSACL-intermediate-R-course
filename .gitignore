@@ -4,3 +4,6 @@
 .Ruserdata
 data/
 *.DS_Store
+*.html
+*.md
+*.pdf
