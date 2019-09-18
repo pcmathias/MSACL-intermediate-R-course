@@ -197,7 +197,7 @@ select_allR <- right_join(select_peaksWide, select_samples) #notice reverse in r
 
 We started out with the intention to combine data from three tables so we could report qualifier and quantifier peak areas of QC samples from select batches, noting which instrument was used. We now know how to create a dataset we need for this analysis.  
 
-** Exercise 3**  
+**Exercise 3**  
 (1) Join `january_peaks`, `january_batches`, and `january_samples`. *Hint: first create a key in each table. Join to retain rows in samples table.*  
 
 ```{r, echo = FALSE, eval = FALSE}
