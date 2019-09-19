@@ -207,4 +207,18 @@ Keep in mind that there are actually a variety of implementations of SQL (based 
 - SQLite
 While many SQL commands and clauses are identical between SQL flavors, even some basic commands can vary dramatically. One example: the analogy of `head()` (i.e. return only the top n rows) is TOP() within the SELECT clause in Microsoft SQL Server and a separate LIMIT clause after other clauses in PostgreSQL.
 
+## Security Considerations
+
+If you are working with sensitive data such as protected health information, security is a major consideration in interacting with databases. This is most relevant when interacting with sensitive data on a remote server, for which you have to supply credentials to R to establish a connection. **A general best practice is to avoid storing credentials (username, password) in plaintext in your code.** This practice presents a particular risk if you are committing code to a repository that can be accessed remotely, but can also be an issue if your files are accessible to other users on the same system.
+
+How do we set up our connection to avoid having to type out database usernames and passwords? There are a handful of ways to handle this, and will cover two explicitly. 
+
+### The keyring package
+
+
+### The config package
+
+
+## Additional Resources
+
 Since SQL is the standard route to data retrieval throughout analytics and reporting communities, there are a variety of helpful resources for learning more about SQL. Here are some helpful resources to learn more:
