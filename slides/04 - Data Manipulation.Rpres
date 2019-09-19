@@ -268,16 +268,6 @@ Gathering data with `gather()` and `pivot_longer()`
 
 ![Gather operation](assets/data_gather.png)
 
-Example: `gather()`
-========================================================
-class: small-code
-```{r}
-samples_jan_tidy_gather <- samples_jan_messy %>%
-  gather("morphine", "hydromorphone", "oxymorphone", "codeine", "hydrocodone", "oxycodone",
-         key = "compound_name", value = "concentration")
-head(samples_jan_tidy_gather)
-```
-*Note: key and value arguments*
 
 Example: `pivot_longer()`
 ========================================================
@@ -298,15 +288,6 @@ Making data untidy
   - Specify where new columns names come from
   - Specify where new column values come from
 
-Example: `spread()`
-========================================================
-class: small-code
-```{r}
-samples_jan_remessy_spread <- samples_jan_tidy_gather %>%
-  spread(key = "compound_name", value = "concentration")
-head(samples_jan_remessy_spread)
-```
-*Note: key and value arguments*
 
 Example: `pivot_wider()`
 ========================================================
