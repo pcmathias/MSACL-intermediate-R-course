@@ -268,6 +268,7 @@ Using the config package can be a good option for automating connections to the 
 For the last exercise, we will reconnect to the publicly available database we viewed initially, but we will use the config package to connect.
 
 1. Install the config package with `install.packages("config")`.
+
 2. Create a config.yml file in the same directory as this R Markdown document and include the following info:
 - host
 - dbname
@@ -275,26 +276,37 @@ For the last exercise, we will reconnect to the publicly available database we v
 - username
 - password
 Note that exact names of the configuration fields are dependent on the driver (the example above is for a different type of connection than PostgreSQL).
+
 3. Connect to the database and retrieve the first 20 entries of the rna table, similarly to what we retrieved in the original example.
 
 ```{r, eval = FALSE}
 
 
 rna <- 
-head(rna, 10)
+head()
 ```
 
 ```{r}
 dw <- config::get("sampledb")
 con <- DBI::dbConnect(RPostgres::Postgres(),
-                      dbname = dw$datbase,
-                      host = dw$server,
+                      dbname = dw$dbname,
+                      host = dw$host,
                       port = dw$port,
-                      user = dw$uid,
-                      password = dw$pwd
+                      user = dw$user,
+                      password = dw$password
                       )
 rna <- tbl(con, "rna")
-head(rna, 10)
+head(rna, 20)
+```
+
+4. Disconnect from the database.
+
+```{r, eval = FALSE}
+
+```
+
+```{r}
+dbDisconnect(con)
 ```
 
 **End Exercise**
