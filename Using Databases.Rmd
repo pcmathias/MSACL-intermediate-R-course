@@ -54,7 +54,7 @@ dbDisconnect(exampledb)
 
 Let's practice connecting with a much simpler database. The project data for this course has been converted into a SQLite database, which has the advantage of storing the whole database in a single file. With this database, many of the connection and authentication details are not required - you just need to point the connection function to the file location.
 
-**Exercise**
+**Exercise 1**
 
 The project dataset for the course is included in a file called "project_data.sqlite", so we will connect to this this SQLite database. 
 
@@ -158,7 +158,7 @@ There are few more details to consider in the query above:
 
 SQL is not the focus of this course, but let's do a quick exercise to practice writing a query. 
 
-**Exercise**
+**Exercise 2**
 We will connect to the same projectdb database. 
 
 1. Retrieve sample and batch data (like the example above) for oxycodone (compound_name) and unknown samples (sample_type). Collect only the first 20 results.
@@ -263,7 +263,7 @@ con <- DBI::dbConnect(odbc::odbc(),
 
 Using the config package can be a good option for automating connections to the dashboards. One security consideration with a configuration file is that other users on your server/system may be able to see your config.yml file unless you explicitly make it available only to yourself. It is a good idea to restrict the file to only allow yourself access to it. On Linux and Mac OS X, that can be done with `chmod 600 "filename"`. 
 
-**Exercise**
+**Exercise 3**
 
 For the last exercise, we will reconnect to the publicly available database we viewed initially, but we will use the config package to connect.
 
