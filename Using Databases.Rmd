@@ -209,16 +209,105 @@ While many SQL commands and clauses are identical between SQL flavors, even some
 
 ## Security Considerations
 
-If you are working with sensitive data such as protected health information, security is a major consideration in interacting with databases. This is most relevant when interacting with sensitive data on a remote server, for which you have to supply credentials to R to establish a connection. **A general best practice is to avoid storing credentials (username, password) in plaintext in your code.** This practice presents a particular risk if you are committing code to a repository that can be accessed remotely, but can also be an issue if your files are accessible to other users on the same system.
+If you are working with sensitive data such as protected health information, security is a major consideration in interacting with databases. This is most relevant when interacting with sensitive data on a remote server, for which you have to supply credentials to R to establish a connection. **A general best practice is to avoid storing credentials (username, password) in plain text in your code.** This practice presents a particular risk if you are committing code to a repository that can be accessed remotely, but can also be an issue if your files are accessible to other users on the same system.
 
 How do we set up our connection to avoid having to type out database usernames and passwords? There are a handful of ways to handle this, and will cover two explicitly. 
 
 ### The keyring package
 
+Windows, Mac OS X, and Linux all have internal mechanisms to store credentials which we can take advantage of to store database credentials. The [keyring](https://github.com/r-lib/keyring) package allows you to use your operating system password to access your database credentials, rather than having to remember multiple different usernames and passwords (this is a trickier problem if you work with multiple databases). You supply your database password once using the `key_set()` function, and then `key_list()` and `key_get()` functions retrieve your username and password, respectively. As long as your are signed into your operating system, you will be able to retrieve the credentials with those commands.
+
+A sample connection call:
+
+```{r, eval = FALSE}
+con <- dbConnect(odbc::odbc(), 
+  Driver   = "SQLServer",
+  Server   = "my-database",
+  Port     = 1433,
+  Database = "default",
+  UID      = keyring::key_list("my-database")[1,2], # format to retrieve username
+  PWD      = keyring::key_get("my-database")) # retrieves password
+```
+
+This keying-based configuration is effective in situations where you are confident you will be signed in.
 
 ### The config package
 
+An alternative to storing credentials in the OS is to set up a configuration file that contains the database connection details that is not shared in a repository or with other users of the system. The [config](https://github.com/rstudio/config) package allows you to create a config.yml file that contains a simple key:value pair structure with the necessary connection details. 
+
+An example file:
+```
+default:
+  datawarehouse:
+    driver: 'Postgres' 
+    server: 'mydb-test.company.com'
+    uid: 'local-account'
+    pwd: 'my-password'  
+    port: 5432
+    database: 'regional-sales'
+```
+
+This data can be accessed using the `get()` function from the config package plus supplying generic connection details that reference the file.
+```{r, eval = FALSE}
+dw <- config::get("datawarehouse")
+
+con <- DBI::dbConnect(odbc::odbc(),
+   Driver = dw$driver,
+   Server = dw$server,
+   UID    = dw$uid,
+   PWD    = dw$pwd,
+   Port   = dw$port,
+   Database = dw$database
+)
+```
+
+Using the config package can be a good option for automating connections to the dashboards. One security consideration with a configuration file is that other users on your server/system may be able to see your config.yml file unless you explicitly make it available only to yourself. It is a good idea to restrict the file to only allow yourself access to it. On Linux and Mac OS X, that can be done with `chmod 600 "filename"`. 
+
+**Exercise**
+
+For the last exercise, we will reconnect to the publicly available database we viewed initially, but we will use the config package to connect.
+
+1. Install the config package with `install.packages("config")`.
+2. Create a config.yml file in the same directory as this R Markdown document and include the following info:
+- host
+- dbname
+- port
+- username
+- password
+Note that exact names of the configuration fields are dependent on the driver (the example above is for a different type of connection than PostgreSQL).
+3. Connect to the database and retrieve the first 20 entries of the rna table, similarly to what we retrieved in the original example.
+
+```{r, eval = FALSE}
+
+
+rna <- 
+head(rna, 10)
+```
+
+```{r}
+dw <- config::get("sampledb")
+con <- DBI::dbConnect(RPostgres::Postgres(),
+                      dbname = dw$datbase,
+                      host = dw$server,
+                      port = dw$port,
+                      user = dw$uid,
+                      password = dw$pwd
+                      )
+rna <- tbl(con, "rna")
+head(rna, 10)
+```
+
+**End Exercise**
 
 ## Additional Resources
 
-Since SQL is the standard route to data retrieval throughout analytics and reporting communities, there are a variety of helpful resources for learning more about SQL. Here are some helpful resources to learn more:
+The content in this lesson captures an abbreviated version of RStudio's [guide to connecting to databases](https://db.rstudio.com/getting-started/). Please refer that resource to learn more about databases and R.
+
+SQL is a very powerful tool in some settings because it is the primary route to retrieve data. So knowing some basics can unlock new data sources. There are a large number of resources online for learning SQL that can be pulled up by simplying searching for something along the lines of "learn SQL". One helpful resource that cuts across both theory and syntax is Stanford's openly-available, self-paced [database course](https://lagunita.stanford.edu/courses/DB/2014/SelfPaced/about).
+
+## Summary
+
+- Databases can provide better support than working with files when data sets are large or longitudinal data is collected over time.
+- `dbConnect()` enables connections to databases but specific drivers are required for specific types of databases.
+- Functions from dplyr can be translated to SQL to allow access to data without writing SQL queries.
+- Security considerations are important for database connections, especially if sensitive information is stored - the keyring and config packages can support best practices.
