@@ -324,4 +324,4 @@ SQL is a very powerful tool in some settings because it is the primary route to 
 - Databases can provide better support than working with files when data sets are large or longitudinal data is collected over time.
 - `dbConnect()` enables connections to databases but specific drivers are required for specific types of databases.
 - Functions from dplyr can be translated to SQL to allow access to data without writing SQL queries.
-- Security considerations are important for database connections, especially if sensitive information is stored - the keyring and config packages can support best practices.
+- Security considerations are important for database connections, especially if sensitive information is stored - The keyring and config packages can support best practices for maintaining credentials.
