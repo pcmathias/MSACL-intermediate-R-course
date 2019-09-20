@@ -89,11 +89,13 @@ sample %>%
   
 ```
 
-```{r}
-sample %>%
-  filter(sample_type == 'standard') %>%
-  collect() %>%   # without collecting the data locally, summary will provide a summary of connection object, not of data
+```{r, echo = FALSE, eval = FALSE}
+sample_summary <- sample %>%
+  dplyr::filter(sample_type == 'standard') %>%
+    # without collecting the data locally, summary will provide a summary of connection object, not of data
+  collect() %>% 
   summary()
+sample_summary
 ```
 
 **End Exercise**
@@ -131,7 +133,7 @@ SELECT
 FROM
         sample
 WHERE
-        sample_name = 'morphine'   -- Note the single quotes
+        compound_name = 'morphine'   -- Note the single quotes
 ```
 
 Note a few minor details in the above query that are different than R syntax:
@@ -173,7 +175,7 @@ WHERE
 
 ```
 
-```{sql, connection = projectdb}
+```{sql, connection = projectdb, eval = FALSE}
 SELECT  
         sample.*, batch.*   -- * is shorthand for return all columns
 FROM
