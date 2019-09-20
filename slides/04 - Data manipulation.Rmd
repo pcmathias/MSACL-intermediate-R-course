@@ -1,6 +1,5 @@
 ---
 title: "Data manipulation in the tidyverse"
-author: "Patrick Mathias"
 output: powerpoint_presentation
 ---
 
@@ -364,38 +363,48 @@ samples_jan_messy <- read_csv(here::here("data/messy/2017-01-06-sample-messy.csv
 head(samples_jan_messy)
 ```
 
-## Gathering data with gather()
-- key argument to name the variable you are gathering
-- value argument to name the new column with the values you extract from the old column
+## Gathering data with `pivot_longer()`
 
-![Gather operation](../assets/data_gather.png)
+- `pivot_longer()` is new (and now recommended) approach
+- use similar syntax, definition of arguments
+  - specify the variable(s) you are gathering
+  - specify the column names for the new columns that will contain the names and values you extract from the old column(s)
 
-## Example: gather()
+
+![Pivot longer](../assets/data_gather.png)
+
+## Example: `pivot_longer()`
 
 ```{r}
-samples_jan_tidy <- samples_jan_messy %>%
-  gather("morphine", "hydromorphone", "oxymorphone", "codeine", "hydrocodone", "oxycodone",
-         key = "compound_name", value = "concentration")
-head(samples_jan_tidy)
+samples_jan_tidy_longer <-samples_jan_messy %>% 
+  pivot_longer(cols = c(-batch_name, -sample_name, -sample_type), names_to = "compound_name", values_to = "concentration")
+head(samples_jan_tidy_longer)
 ```
+*Note: names_to and values_to arguments + cols argument*
 
 ## Making data untidy
 
-- Inverse operation of `gather()` is `spread()`
-- Specify the key, which is the variable than needs to be used to generate multiple new columns
-- Specify the value, which takes the variable that will need to populate those new columns
+- Inverse operation of `pivot_longer()` is `pivot_wider()`
+- Similar syntax:
+  - Specify where new columns names come from
+  - Specify where new column values come from
 
-## Example: spread()
+## Example: `pivot_wider()`
 
 ```{r}
-samples_jan_remessy <- samples_jan_tidy %>%
-  spread(key = "compound_name", value = "concentration")
-head(samples_jan_remessy)
+samples_jan_remessy_wider <- samples_jan_tidy_longer %>%
+  pivot_wider(names_from = "compound_name", values_from = "concentration")
+head(samples_jan_remessy_wider)
 ```
+*Note: names_from and values_from arguments*
 
 ## Exercise 4
 
-Tidy a messy data set
+The "2017-01-06-batch-messy.csv" file in the messy subdirectory of the data dir is related to the "2017-01-06.xlsx" batch file you have worked with before. Unfortunately, it is not set up to have a single observation per row. There are two problems that need to be solved:
+
+1. Each parameter in a batch is represented with a distinct column per compound, but all compounds appear on the same row. Each compound represents a distinct observation, so these should appear on their own rows.
+1. There are 3 parameters per obsevation (compound) - calibration slope, intercept, and R^2. However these appear on different lines. All 3 paramters need to appear on the same row.
+
 
 ## Summary
 
