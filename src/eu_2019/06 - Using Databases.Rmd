@@ -60,7 +60,7 @@ The project dataset for the course is included in a file called "project_data.sq
 
 1. Use the `dbConnect()` function to connect to this database, and refer to the following site for some additional info on connecting: <https://cran.r-project.org/web/packages/RSQLite/vignettes/RSQLite.html>. The first argument is the driver, and for SQLite, the second argument indicates the location of the database (or a temporary one to create one on the fly). Load this connection into an object called projectdb.
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, echo = FALSE}
 projectdb <- 
 ```
 
@@ -70,26 +70,26 @@ projectdb <- dbConnect(RSQLite::SQLite(), "project_data.sqlite")
 
 2. The data in this database mirrors the structure of the files we've seen already. There are tables for batches, samples, and peaks. Connect to the "sample" table and view the first 10 records.
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 sample <- 
 
 ```
 
-```{r, eval = FALSE}
+```{r}
 sample <- tbl(projectdb, "sample")
 head(sample, 10)
 ```
 
 3. Using the dplyr tools we have learned thus far, perform a `summary()` on only the standards from the sample table (sample_type == 'standard') and note the minimum, median, and maximum concentrations. Hint: you may need to bring the data into your local environment for `summary()` to perform as expected.
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 sample %>%
   
   
   
 ```
 
-```{r, echo = FALSE, eval = FALSE}
+```{r}
 sample_summary <- sample %>%
   dplyr::filter(sample_type == 'standard') %>%
     # without collecting the data locally, summary will provide a summary of connection object, not of data
@@ -175,7 +175,7 @@ WHERE
 
 ```
 
-```{sql, connection = projectdb, eval = FALSE}
+```{sql, connection = projectdb}
 SELECT  
         sample.*, batch.*   -- * is shorthand for return all columns
 FROM
@@ -183,8 +183,8 @@ FROM
         INNER JOIN batch ON sample.batch_name = batch.batch_name
           AND sample.compound_name = batch.compound_name
 WHERE
-        compound_name = 'oxycodone' 
-        AND sample_type = 'unknown'
+        sample.compound_name = 'oxycodone' 
+        AND sample.sample_type = 'unknown'
 LIMIT  10;
 ```
 
@@ -281,7 +281,7 @@ Note that exact names of the configuration fields are dependent on the driver (t
 
 3. Connect to the database and retrieve the first 20 entries of the rna table, similarly to what we retrieved in the original example.
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 
 
 rna <- 
@@ -303,7 +303,7 @@ head(rna, 20)
 
 4. Disconnect from the database.
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 
 ```
 
