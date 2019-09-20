@@ -6,14 +6,14 @@ author:
 - Randall Julian
 - Adam Zabell
 output:
-  pdf_document:
-    toc: yes
-    toc_depth: '2'
   html_document:
     number_sections: yes
     toc: yes
     toc_depth: 2
     toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
 ---
 
 # Adopting principles of reproducible research
@@ -41,9 +41,9 @@ output:
 ```{r lesson_5, child = '05 - Blending Data.Rmd'}
 ```
 
-# Stronger visualizations with ggplot2
+# Using databases
 
-```{r lesson_6, child = '06 - Visualizations.Rmd'}
+```{r lesson_6, child = '06 - Using Databases.Rmd'}
 ```
 
 # Exploring lab order data
