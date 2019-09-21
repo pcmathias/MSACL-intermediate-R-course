@@ -185,7 +185,7 @@ FROM
 WHERE
         sample.compound_name = 'oxycodone' 
         AND sample.sample_type = 'unknown'
-LIMIT  10;
+LIMIT  20;
 ```
 
 2. Disconnect from the project database (hint: this is R code, not SQL).
