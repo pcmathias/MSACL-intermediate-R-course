@@ -5,6 +5,14 @@ output: powerpoint_presentation
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+library(DBI)
+library(dplyr)
+```
+
+## Install Postgres driver
+
+```{r, echo = TRUE, eval = FALSE}
+install.packages("RPostgres")
 ```
 
 ## Motivations for working with relational databases
@@ -40,7 +48,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Example DB connection
 
-```{r}
+```{r, echo = TRUE}
 exampledb <- dbConnect(RPostgres::Postgres(),
                        host = 'hh-pgsql-public.ebi.ac.uk',   # server address
                        port = 5432,   # PostgreSQL TCP port is 5432 by default
@@ -51,7 +59,7 @@ exampledb <- dbConnect(RPostgres::Postgres(),
 
 ## Querying a table in the DB
 
-```{r}
+```{r, echo = TRUE}
 rna <- tbl(exampledb, "rna")
 head(rna, 10)
 ```
@@ -61,7 +69,7 @@ head(rna, 10)
 
 ## Disconnect from DB when finished
 
-```{r}
+```{r, echo = TRUE}
 dbDisconnect(exampledb)
 ```
 
@@ -92,6 +100,10 @@ The project dataset for the course is included in a file called "project_data.sq
 - WHERE clause specifies inclusion/exclusion criteria for rows
 
 ## Basic query
+
+```{r, echo = FALSE}
+projectdb <- dbConnect(RSQLite::SQLite(), "../project_data.sqlite")
+```
 
 ```{sql, connection = projectdb}
 SELECT  
@@ -146,7 +158,7 @@ LIMIT  10;
 
 ## Example keyring configuration
 
-```{r, eval = FALSE}
+```{r, echo = TRUE, eval = FALSE}
 con <- dbConnect(odbc::odbc(), 
   Driver   = "SQLServer",
   Server   = "my-database",
@@ -178,7 +190,7 @@ default:
 
 ## Retrieve info from config file
 
-```{r, eval = FALSE}
+```{r, echo = TRUE, eval = FALSE}
 dw <- config::get("datawarehouse")
 
 con <- DBI::dbConnect(odbc::odbc(),
