@@ -98,6 +98,10 @@ SQL was intended to be more accessible than many of the programming languages of
 
 RStudio has nice multi-language support that allows us to run SQL within a Markdown file, provided we supply the connection to run the query on. As an example, let's consider our project data database we connected to in the last exercise. If we wanted to retrieve sample name, compound name, and ion ratio from a "sample" table, we would write the following SQL query:
 
+```{r, echo = FALSE}
+projectdb <- dbConnect(RSQLite::SQLite(), "project_data.sqlite")
+```
+
 ```{sql, connection = projectdb}
 SELECT  
         sample_name, compound_name, ion_ratio
@@ -127,7 +131,8 @@ One final basic concept in SQL is one you have already learned: the different ty
 
 ```{sql, connection = projectdb}
 SELECT  
-        sample.*, batch.*   -- * is shorthand for return all columns
+        sample.batch_name, sample.sample_name, sample.compound_name, sample.concentration,
+        batch.instrument_name, batch.reviewer_name, batch.calibration_slope
 FROM
         sample
         INNER JOIN batch ON sample.batch_name = batch.batch_name

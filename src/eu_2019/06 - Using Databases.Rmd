@@ -145,7 +145,8 @@ One final basic concept in SQL is one you have already learned: the different ty
 
 ```{sql, connection = projectdb}
 SELECT  
-        sample.*, batch.*   -- * is shorthand for return all columns
+        sample.batch_name, sample.sample_name, sample.compound_name, sample.concentration,
+        batch.instrument_name, batch.reviewer_name, batch.calibration_slope
 FROM
         sample
         INNER JOIN batch ON sample.batch_name = batch.batch_name
