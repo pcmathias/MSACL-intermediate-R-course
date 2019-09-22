@@ -105,6 +105,16 @@ The project dataset for the course is included in a file called "project_data.sq
 projectdb <- dbConnect(RSQLite::SQLite(), "../project_data.sqlite")
 ```
 
+```{sql, connection = projectdb, echo = TRUE, eval = FALSE}
+SELECT  
+        sample_name, compound_name, ion_ratio
+FROM
+        sample
+LIMIT
+        10;
+```
+## Basic query
+
 ```{sql, connection = projectdb}
 SELECT  
         sample_name, compound_name, ion_ratio
@@ -116,6 +126,17 @@ LIMIT
 
 ## Specify a subset of rows
 
+```{sql, connection = projectdb, eval = FALSE, echo = TRUE}
+SELECT  
+        sample_name, compound_name, ion_ratio
+FROM
+        sample
+WHERE
+        compound_name = 'morphine'   -- Note the single quotes
+```
+
+## Specify a subset of rows
+
 ```{sql, connection = projectdb}
 SELECT  
         sample_name, compound_name, ion_ratio
@@ -123,6 +144,19 @@ FROM
         sample
 WHERE
         compound_name = 'morphine'   -- Note the single quotes
+```
+
+## Join tables
+
+```{sql, connection = projectdb, eval = FALSE, echo = TRUE}
+SELECT  
+        sample.batch_name, sample.sample_name, sample.compound_name, sample.concentration,
+        batch.instrument_name, batch.reviewer_name, batch.calibration_slope
+FROM
+        sample
+        INNER JOIN batch ON sample.batch_name = batch.batch_name
+          AND sample.compound_name = batch.compound_name
+LIMIT  10;
 ```
 
 ## Join tables
