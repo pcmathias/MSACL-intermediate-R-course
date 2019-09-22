@@ -273,6 +273,10 @@ Open a pull request and have your edits come back into the base repository
 - [Happy Git and GitHub for the useR](http://happygitwithr.com) online book - Git in RStudio
 - [Pro Git](https://git-scm.com/book/en/v2) - general Git info
 
+## Bringing it all together: an example of Git + Packrat
+
+Bo Burla, Data Science 201 alumnus from MSACL EU 2018, created the following reproducible analysis: https://github.com/pcmathias/Manuscript_Sieber-Ruckstuhl_Burla_2019
+
 ## Lesson 1 wrap-up
 
 * Reproducible research is the principle that any research result can be reproduced by anybody
