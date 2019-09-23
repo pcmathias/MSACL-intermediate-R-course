@@ -138,6 +138,13 @@ Select a variable (other than SCr) and perform a single variable regression for 
 
 ```
 
+```{r}
+my.slr.fit <- lm(iGFRc ~ SDMA, ckd)
+
+tidy(my.slr.fit) #equation: iGFRc = -24.7*SDMA + 73.5
+glance(my.slr.fit) #R2: 0.48
+```
+
 **End exercise**
 
 ### Making predictions from our model
@@ -238,6 +245,19 @@ Predict the iGFRc values for the test set using the mod.full and plot the actual
 
 ```{r, echo = FALSE, eval = FALSE}
 
+
+```
+
+```{r}
+#predict values for test set and add as new column, iGFR_pred
+ckd_test <- ckd_test %>%
+              mutate(iGFR_pred = round(predict(mod.full, ckd_test),0))
+
+
+#plot actual vs predicted for test set
+ggplot(ckd_test, aes(x = iGFR_pred, y = iGFRc)) + 
+  geom_point() +
+  geom_abline(color = "blue")
 
 ```
 
@@ -352,9 +372,26 @@ ckd_test <- ckd[test, ] %>%
 
 ```
 
+```{r}
+mod2 <- lm(iGFRc ~ Trp + Kynurenine + BUN + CYC_DB 
+               + Phe + ADMA, data = ckd_train)
+glance(mod2)
+tidy(mod2) %>%
+    arrange(p.value)
+
+#add the predicted values to the train set
+ckd_train <- ckd_train %>%
+              mutate(iGFR_pred = round(augment(mod2)$.fitted,0))
+```
+
 (3) Write out the equation for this model. Does it make sense, based on your prior knowledge?
 ```{r, echo = FALSE, eval = FALSE}
 
+```
+
+
+```{r}
+# iGFRc = 0.44*Trp - 2.95*Kynurenine - 0.43*BUN - 5.94*CYC_DB - 12.2*ADMA - 0.13*Phe
 ```
 
 (4) Find the R2, RMSE, and MAPE values for the model fit on the training set.
@@ -362,14 +399,42 @@ ckd_test <- ckd[test, ] %>%
 
 ```
 
+
+```{r}
+glance(mod2)$r.squared #0.870
+rmse(ckd_train$iGFRc, mod2$fitted.values) #7.08
+mape(ckd_train$iGFRc, mod2$fitted.values) #0.14 or 14%
+```
+
 (5) Check for collinearity.
 ```{r, echo = FALSE, eval = FALSE}
 
 ```
 
+
+```{r}
+vif(mod2) #yay!!
+```
+
 (6) Examine the residuals and actual vs predicted.
 ```{r, echo = FALSE, eval = FALSE}
 
+```
+
+
+```{r}
+# Make a residual plot (prediction on x axis). 
+ckd_train <- ckd_train %>%
+        mutate(residuals = iGFRc - iGFR_pred)
+
+ggplot(ckd_train, aes(x = iGFR_pred, y = residuals)) + 
+  geom_point() +
+  geom_hline(yintercept = 0, color = "blue")
+
+#plot actual vs predicted
+ggplot(ckd_train, aes(x = iGFR_pred, y = iGFRc)) + 
+  geom_point() +
+  geom_abline(color = "blue")
 ```
 
 **End Exercise** 
@@ -407,7 +472,6 @@ ggplot(ckd_test, aes(sample = residuals)) +
 rmse(ckd_test$iGFRc, ckd_test$iGFR_pred) #7.92
 mape(ckd_test$iGFRc, ckd_test$iGFR_pred) #0.16 or 16%
 ```
-
 We solved our collinearity problem and didn't really lose anything on performance. This also made our model less complex. The RMSE and MAPE values for the train and test sets are similar and the residual plots look pretty good. From our prior knowledge, the variables and signs of the coefficients in the model seem reasonable. These results suggest we could expect similar performance from our model when it is applied to new data that is of a similar range as our train and test sets. 
 
 ## Acknowledgement
@@ -420,3 +484,5 @@ The data used in this lesson was simulated from a data set generated in collabor
 - There are 4 primary assumptions in multivariate linear regression that must be evaluated for a given model. 
 - Best practice is to randomly split data into train and test sets, used to fit and evaluate the model.
 - Collinearity can be a problem with multivariate linear models.
+
+
