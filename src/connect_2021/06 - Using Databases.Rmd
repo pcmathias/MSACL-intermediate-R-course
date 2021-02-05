@@ -1,0 +1,328 @@
+---
+title: 'Lesson 6: Working with relational databases'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(DBI)
+library(tidyverse)
+#install.packages("RPostgres") # install this package for example connection
+```
+
+## Motivations for working with relational databases
+
+Managing your data within text or Excel files is often the default approach since instruments (whether mass spectrometers or any other lab instrument) generate the data in this format. Files may be spread out over multiple directories and if multiple files are required for analysis they are copied into one location to work with. You may either manually copy and paste the data together into one large file or import multiple files into your environment (possibly into one data frame) within your analysis code. This pattern presents a practical challenge under a few scenarios:
+- You are collecting longitudinal data and want to work with a large number of files over some time period (dozens or more).
+- The entire data set you are working with is large and exceeds the memory of the system you are analyzing data on.
+- The data set you are working with natively exists in a relational database and cutting out the process of extracting the data and importing into R can make your analysis more efficient or effective. One compelling use case is developing a dashboard that automatically refreshes when the database has new data.
+
+One approach to managing data in these scenarios is to store it in a relational database and connect to the data with a database connection using R. Many of the tidyverse packages such as dplyr have built-in compatibility with relational databases that is supported with a package called dbplyr. This allows R to translate the code that you write into the native language of the database. You can then take advantage of the functionality of a database without having to be an expert in the database language (although it definitely helps to know the basics of the language). 
+
+
+## Connecting to databases with R
+
+Connecting to a database is analogous to reading data into a file: specific functions are required to interact with the outside data source. The DBI package allows R to communicate with various relational database management systems (RDBMS). This package provides a general mechanism to connect but in addition each specific RDBMS also requires a separate package to support the appropriate syntax and translate commands into the specific RDBMS commands. For example, the RSQLite package allows connection to SQLite.
+
+The first step in connecting to a database is to use the `dbConnect()` function from the DBI package. This function accepts a number of arguments to configure the database connection, but the most important is the definition of the driver. For example, connecting to a SQLite database can be done by calling `RSQLite::SQLite()` as the first argument (RSQLite is the name of the package for the driver and `SQLite()` is the function called to set up the connection). The other arguments to provide the function include the location of the database (e.g. a file or a host server name), database name (often the host has multiple databases), username, password, and port (for databases configured to use a specific port).
+
+As an example, let's connect to a publicly available PostgreSQL database and provide all the details required to establish the connection. Below we connect to a database hosted by RNAcentral, which requires authentication (user and password) to access the database in addition to specifying the server and database name that you are connecting to. `dbConnect()` uses all of these arguments to establish a connection.
+
+```{r}
+exampledb <- dbConnect(RPostgres::Postgres(),
+                       host = 'hh-pgsql-public.ebi.ac.uk',   # server address
+                       port = 5432,   # PostgreSQL TCP port is 5432 by default
+                       dbname = 'pfmegrnargs',   # specific database to access (may be multiple dbs)
+                       user = 'reader',
+                       password = 'NWDMCE5xdipIjRrp')
+```
+
+If that executes successfully, you should see an object in your environment called exampledb that is a PqConnection type. R now has the connection info in your environment and you can use that connection to access specific tables. The database we've connected to stores RNA sequences in a table called "rna". We can use the dplyr function `tbl()` to create a table from the PostgreSQL data source. The function takes a data source as the first argment, and in the case of a database, will take a table name to generate a table. We can then use a familiar function to perform an operation on the table.
+
+```{r}
+rna <- tbl(exampledb, "rna")
+head(rna, 10)
+```
+
+Note that the rna object in the environment is not actually a tibble/data frame - it's a list. R actually does not immediately pull the data in when you use the `tbl()` function - it generates and stores a query to perform on the database. When you need to retrieve data, for example using the `head()` function or when you'd like to generate a plot, it will perform the query at that time. If you want to pull all the data in prior to when you actually need to perform local operations on it, you can use the `collect()` function.
+
+Finally, when you no longer need to work with the database, you'll probably want to close the connection using the `dbDisconnect()` function.
+
+```{r}
+dbDisconnect(exampledb)
+```
+
+Let's practice connecting with a much simpler database. The project data for this course has been converted into a SQLite database, which has the advantage of storing the whole database in a single file. With this database, many of the connection and authentication details are not required - you just need to point the connection function to the file location.
+
+**Exercise 1**
+
+The project dataset for the course is included in a file called "project_data.sqlite", so we will connect to this this SQLite database. 
+
+1. Use the `dbConnect()` function to connect to this database, and refer to the following site for some additional info on connecting: <https://cran.r-project.org/web/packages/RSQLite/vignettes/RSQLite.html>. The first argument is the driver, and for SQLite, the second argument indicates the location of the database (or a temporary one to create one on the fly). Load this connection into an object called projectdb.
+
+```{r, eval = FALSE, echo = FALSE}
+projectdb <- 
+```
+
+```{r}
+projectdb <- dbConnect(RSQLite::SQLite(), "project_data.sqlite")
+```
+
+2. The data in this database mirrors the structure of the files we've seen already. There are tables for batches, samples, and peaks. Connect to the "sample" table and view the first 10 records.
+
+```{r, echo = FALSE, eval = FALSE}
+sample <- 
+
+```
+
+```{r}
+sample <- tbl(projectdb, "sample")
+head(sample, 10)
+```
+
+3. Using the dplyr tools we have learned thus far, perform a `summary()` on only the standards from the sample table (sample_type == 'standard') and note the minimum, median, and maximum concentrations. Hint: you may need to bring the data into your local environment for `summary()` to perform as expected.
+
+```{r, echo = FALSE, eval = FALSE}
+sample %>%
+  
+  
+  
+```
+
+```{r}
+sample_summary <- sample %>%
+  dplyr::filter(sample_type == 'standard') %>%
+    # without collecting the data locally, summary will provide a summary of connection object, not of data
+  collect() %>% 
+  summary()
+sample_summary
+```
+
+**End Exercise**
+
+
+## The basics of Structured Query Language (SQL)
+
+The principles of relational databases were developed by Edward Codd at IBM in the early 1970s and were based on relational algebra. Using these principles, another group developed a programming language that evolved into Structured Query Language (originally called SEQUEL and pronounced either as "S-Q-L" or "sequel") to represent these principles. Core database principles have actually been adopted heavily by tidyverse package developers. You actually already know these concepts because we have introduced them in previous lessons but did not call them out as database concepts. These concepts include:
+- Data are represented as a group of tables, which is analagous to working with a group of data frames.
+- The principles of tidy data are adapted from common relational database practices:
+  - Observations are represented by rows (often called tuples in relational database speak)
+  - Variables are stored in columns (commonly referred to as fields)
+- Tables are linked together with variables that are shared - this principle is used to join data sets
+
+SQL was intended to be more accessible than many of the programming languages of that time, and the basic syntax for queries is relatively simple. The most basic query has two "clauses":
+- a SELECT clause chooses the columns to return in a query - this is identical to the `select()` functionality from the dplyr package
+- a FROM clause chooses the table for which the columns are returned - this is analogous to specifying the data frame you apply a function to
+
+RStudio has nice multi-language support that allows us to run SQL within a Markdown file, provided we supply the connection to run the query on. As an example, let's consider our project data database we connected to in the last exercise. If we wanted to retrieve sample name, compound name, and ion ratio from a "sample" table, we would write the following SQL query:
+
+```{sql, connection = projectdb}
+SELECT  
+        sample_name, compound_name, ion_ratio
+FROM
+        sample
+LIMIT
+        10;
+```
+
+If we want to only obtain data for one specific coumpound, e.g. morphine, we add a WHERE clause with a logical condition, functioning identically to the `filter()` command.
+
+```{sql, connection = projectdb}
+SELECT  
+        sample_name, compound_name, ion_ratio
+FROM
+        sample
+WHERE
+        compound_name = 'morphine'   -- Note the single quotes
+```
+
+Note a few minor details in the above query that are different than R syntax:
+- equality is represented with one equal sign ("assingment" of an object is not done in a similar way in SQL so there is no risk from this one symbol being used for multiple things)
+- the string 'morphine' is enclosed in single quotes and SQL is strict about only using single quotes (unlike R)
+- comments are added with two dashes (-- unlike # for comments in R)
+
+One final basic concept in SQL is one you have already learned: the different types of joins in R are pulled exactly from SQL. Recognizing the SQL syntax is the final hurdle. Joins are performed within the FROM clause of the query. If we want to join the sample table with the batch table by the batch name and the compound name, we perform the following query:
+
+```{sql, connection = projectdb}
+SELECT  
+        sample.batch_name, sample.sample_name, sample.compound_name, sample.concentration,
+        batch.instrument_name, batch.reviewer_name, batch.calibration_slope
+FROM
+        sample
+        INNER JOIN batch ON sample.batch_name = batch.batch_name
+          AND sample.compound_name = batch.compound_name
+LIMIT  10;
+```
+
+There are few more details to consider in the query above:
+- When joining multiple tables, columns may be derived from one or more of the source tables so SQL wants explicit specification of the the source of the column. The syntax for specifying the table for a column is "table.column".
+- Asterisks can be used to select all columns from a specific table. Rather than calling out the tables as above, you can also just use a single asterisk to query all columns from all tables joined in the FROM clause
+- The keys for the join must be specified using ON. Most major flavors of SQL do not attempt to automatically identify keys like the join functions in R.
+
+SQL is not the focus of this course, but let's do a quick exercise to practice writing a query. 
+
+**Exercise 2**
+We will connect to the same projectdb database. 
+
+1. Retrieve sample and batch data (like the example above) for oxycodone (compound_name) and unknown samples (sample_type). Collect only the first 20 results.
+
+```{sql, connection = projectdb, eval = FALSE}
+SELECT
+
+FROM
+
+WHERE
+
+
+```
+
+```{sql, connection = projectdb}
+SELECT  
+        sample.*, batch.*   -- * is shorthand for return all columns
+FROM
+        sample
+        INNER JOIN batch ON sample.batch_name = batch.batch_name
+          AND sample.compound_name = batch.compound_name
+WHERE
+        sample.compound_name = 'oxycodone' 
+        AND sample.sample_type = 'unknown'
+LIMIT  20;
+```
+
+2. Disconnect from the project database (hint: this is R code, not SQL).
+
+```{r, eval = FALSE}
+
+```
+
+```{r}
+dbDisconnect(projectdb)
+```
+
+**End Exercise**
+
+The above examples and exercise are a very basic introduction to SQL. We will not cover more detail in this course because many more complicated queries are arguably better represented in R. If you primarily draw from dplyr for your data manipulation functions, R will translate your code into SQL automatically so there is limited need to learn SQL immediately yet still be able to take advantage of database functionality. However, having a solid understanding of SQL is helpful because much of the tidyverse functions and conventions are derived from core logical operations that are bread and butter SQL activites.
+
+Keep in mind that there are actually a variety of implementations of SQL (based on different vendors, openly developed tools, etc.) that each have differences in syntax. Some examples include:
+- Microsoft SQL Server
+- PostgreSQL
+- MySQL
+- SQLite
+While many SQL commands and clauses are identical between SQL flavors, even some basic commands can vary dramatically. One example: the analogy of `head()` (i.e. return only the top n rows) is TOP() within the SELECT clause in Microsoft SQL Server and a separate LIMIT clause after other clauses in PostgreSQL.
+
+## Security Considerations
+
+If you are working with sensitive data such as protected health information, security is a major consideration in interacting with databases. This is most relevant when interacting with sensitive data on a remote server, for which you have to supply credentials to R to establish a connection. **A general best practice is to avoid storing credentials (username, password) in plain text in your code.** This practice presents a particular risk if you are committing code to a repository that can be accessed remotely, but can also be an issue if your files are accessible to other users on the same system.
+
+How do we set up our connection to avoid having to type out database usernames and passwords? There are a handful of ways to handle this, and will cover two explicitly. 
+
+### The keyring package
+
+Windows, Mac OS X, and Linux all have internal mechanisms to store credentials which we can take advantage of to store database credentials. The [keyring](https://github.com/r-lib/keyring) package allows you to use your operating system password to access your database credentials, rather than having to remember multiple different usernames and passwords (this is a trickier problem if you work with multiple databases). You supply your database password once using the `key_set()` function, and then `key_list()` and `key_get()` functions retrieve your username and password, respectively. As long as your are signed into your operating system, you will be able to retrieve the credentials with those commands.
+
+A sample connection call:
+
+```{r, eval = FALSE}
+con <- dbConnect(odbc::odbc(), 
+  Driver   = "SQLServer",
+  Server   = "my-database",
+  Port     = 1433,
+  Database = "default",
+  UID      = keyring::key_list("my-database")[1,2], # format to retrieve username
+  PWD      = keyring::key_get("my-database")) # retrieves password
+```
+
+This keying-based configuration is effective in situations where you are confident you will be signed in.
+
+### The config package
+
+An alternative to storing credentials in the OS is to set up a configuration file that contains the database connection details that is not shared in a repository or with other users of the system. The [config](https://github.com/rstudio/config) package allows you to create a config.yml file that contains a simple key:value pair structure with the necessary connection details. 
+
+An example file:
+```
+default:
+  datawarehouse:
+    driver: 'Postgres' 
+    server: 'mydb-test.company.com'
+    uid: 'local-account'
+    pwd: 'my-password'  
+    port: 5432
+    database: 'regional-sales'
+```
+
+This data can be accessed using the `get()` function from the config package plus supplying generic connection details that reference the file.
+```{r, eval = FALSE}
+dw <- config::get("datawarehouse")
+
+con <- DBI::dbConnect(odbc::odbc(),
+   Driver = dw$driver,
+   Server = dw$server,
+   UID    = dw$uid,
+   PWD    = dw$pwd,
+   Port   = dw$port,
+   Database = dw$database
+)
+```
+
+Using the config package can be a good option for automating connections to the dashboards. One security consideration with a configuration file is that other users on your server/system may be able to see your config.yml file unless you explicitly make it available only to yourself. It is a good idea to restrict the file to only allow yourself access to it. On Linux and Mac OS X, that can be done with `chmod 600 "filename"`. 
+
+**Exercise 3**
+
+For the last exercise, we will reconnect to the publicly available database we viewed initially, but we will use the config package to connect.
+
+1. Install the config package with `install.packages("config")`.
+
+2. Create a config.yml file in the same directory as this R Markdown document and include the following info:
+- host
+- dbname
+- port
+- username
+- password
+Note that exact names of the configuration fields are dependent on the driver (the example above is for a different type of connection than PostgreSQL).
+
+3. Connect to the database and retrieve the first 20 entries of the rna table, similarly to what we retrieved in the original example.
+
+```{r, echo = FALSE, eval = FALSE}
+
+
+rna <- 
+head()
+```
+
+```{r}
+dw <- config::get("sampledb")
+con <- DBI::dbConnect(RPostgres::Postgres(),
+                      dbname = dw$dbname,
+                      host = dw$host,
+                      port = dw$port,
+                      user = dw$user,
+                      password = dw$password
+                      )
+rna <- tbl(con, "rna")
+head(rna, 20)
+```
+
+4. Disconnect from the database.
+
+```{r, echo = FALSE, eval = FALSE}
+
+```
+
+```{r}
+dbDisconnect(con)
+```
+
+**End Exercise**
+
+## Additional Resources
+
+The content in this lesson captures an abbreviated version of RStudio's [guide to connecting to databases](https://db.rstudio.com/getting-started/). Please refer that resource to learn more about databases and R.
+
+SQL is a very powerful tool in some settings because it is the primary route to retrieve data. So knowing some basics can unlock new data sources. There are a large number of resources online for learning SQL that can be pulled up by simplying searching for something along the lines of "learn SQL". One helpful resource that cuts across both theory and syntax is Stanford's openly-available, self-paced [database course](https://lagunita.stanford.edu/courses/DB/2014/SelfPaced/about).
+
+## Summary
+
+- Databases can provide better support than working with files when data sets are large or longitudinal data is collected over time.
+- `dbConnect()` enables connections to databases but specific drivers are required for specific types of databases.
+- Functions from dplyr can be translated to SQL to allow access to data without writing SQL queries.
+- Security considerations are important for database connections, especially if sensitive information is stored - The keyring and config packages can support best practices for maintaining credentials.
