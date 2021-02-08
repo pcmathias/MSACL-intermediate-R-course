@@ -128,7 +128,7 @@ The add file options also allow you to create a presentation in R Markdown. This
 
 **Exercise 4**
 
-The course repository that your forked and opened as an RStudio project has multiple R Markdown files that contain the course content. If not already open, open up the lesson 2 file: "03 - R Markdown.Rmd".
+The course repository that your forked and opened as an RStudio project has multiple R Markdown files that contain the course content. If not already open, open up the lesson 3 file: "03 - R Markdown.Rmd".
 
 In addition to the lesson text documents, there are a few folders that each of these documents refer to. 
 
@@ -161,6 +161,6 @@ Yihui Xie, who developed R Markdown and the knitr package, has written a book de
 
 ## Summary
 
-* Integrating code and documentation in one place produces clearer, more reproducible code
-* RStudio provides useful built-in functionality for "knitting" documents into a variety of output formats
-* R Markdown documents can be integrated within a recommended project structure to create a reproducible analysis
+- Integrating code and documentation in one place produces clearer, more reproducible code
+- RStudio provides useful built-in functionality for "knitting" documents into a variety of output formats
+- R Markdown documents can be integrated within a recommended project structure to create a reproducible analysis
