@@ -1,5 +1,5 @@
 ---
-title: 'Lesson 3: Reading files - beyond the basics'
+title: 'Lesson 4: Reading files - beyond the basics'
 output:
   html_document: default
 ---
@@ -12,75 +12,6 @@ library(fs)
 ```
 
 This is a much shorter and less philosophical lesson than the previous lessons but hopefully is very useful when considering how to pull data into R.
-
-## Base functions for reading and writing files
-
-### Reading files
-
-R has solid built-in functions for importing data from files with the `read.table()` family of functions. `read.table()` is the generic form that expects a filename (in quotes) at a minimum and, importantly, an indication of the separator character used - it defaults to "" which indicates white space (one or more spaces, tabs, newlines, or carriage returns). The default header parameter for `read.table()` is FALSE, meaning that the function will **not** use the first row to determine column names. Because non-Excel tabular files are generally comma-delimited or tab-delimited with a first row header, `read.csv()` and `read.delim()` are the go-to base file reading functions that include a `header = TRUE` parameter and use comma and tab delimting, respectively, by default.
-
-There are a variety of other [useful parameters](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html) to consider, including explicitly supplying the column names via the `col.names` parameter (if not defined in header, for example). One related group of parameters to be conscious of with these functions are `stringsAsFactors` and `colClasses`. When R is reading a file, it will convert each column to a specific data type based on the content within that column. The default behavior of R is to convert columns with non-numeric data into a factor, which are a representation of categorical variables. For example, you may want to separate out data by sex (M/F) or between three instruments A, B, and C, and it makes perfect sense to represent these as a factor, so that you can easily stratify the groups during analyses in R, particularly for modeling questions. So, by default, with these base functions `stringsAsFactors = TRUE`, which means that any columns with characters may not have the expected behavior when you analyze the data. In general this may not be a big deal but can cause problems in a couple scenarios:
-1. You are expecting a column to be a string to parse the data (using the stringr package for example). Not a huge deal - you can convert to a character
-2. There are typos or other data irregularities that cause R to interpret the column as a character and then automatically convert to a factor. If you are not careful and attempt to convert this column back to a numeric type (using `as.numeric()` for example), you can end up coverting the column to a completely different set of numbers! That is because factors are represented as integers within R, and using a function like `as.numeric()` will convert the value to its backend factor integer representation. So `c(20, 4, 32, 5)` could become `c(1, 2, 3, 4)` and you may not realize it.
-
-Problem #2 will come back to haunt you if you are not careful. The brute force defense mechanism is to escape the default behavior: `read.csv("file_name.csv", stringsAsFactors = FALSE)`. This will prevent R from converting any columns with characters into factors. However, you may want some of your columns to be represented as factors. You can modify behavior on a column by column basis. `read.csv("file_name.csv", colClasses = c("character", "factor", "integer")` will set a 3 column csv file to character, factor, and integer data types in that column order.
-
-To be safe, the best practice is arguably to explicitly define column types when you read in a file. It is a little extra work up front but can save you some pain later on.
-
-For the curious, additional information about the history of of stringsAsFactors can be found [here](https://simplystatistics.org/2015/07/24/stringsasfactors-an-unauthorized-biography/).
-
-**Exercise 1**
-
-Let's run through the base reading function with a csv.
-
-1. Use the base `read.csv()` function to read the "2017-01-06_s.csv" file in the data folder into a data frame.
-
-```{r, echo = FALSE, eval = FALSE}
-base_load <- 
-```
-
-```{r}
-base_load <- read.csv("data/2017-01-06_s.csv")
-```
-
-2. What is the internal structure of the object? (Recall the `str()` command to quickly view the structure.)
-
-```{r, echo = FALSE, eval = FALSE}
-
-```
-
-```{r}
-str(base_load)
-```
-
-3. Summarize the data. (Recall the `summary()` function to view column types and characteristics about the data.)
-
-```{r base_load, echo = FALSE, eval = FALSE}
-
-```
-
-```{r}
-summary(base_load)
-```
-
-4. Repeat the previous steps starting with #2, but include the argument `stringsAsFactors = FALSE` when you read in the data.
-
-```{r base_load_nofactors, echo = FALSE, eval = FALSE}
-base_load_nofactors <- 
-str()
-summary()
-```
-
-```{r}
-base_load_nofactors <- read.csv("data/2017-01-06_s.csv",
-                                stringsAsFactors = FALSE)
-str(base_load_nofactors)
-summary(base_load_nofactors)
-```
-
-5. For this data set, which fields should be strings and which should be factors?
-
-**End Exercise**
 
 ## Speeding things up with the *readr* package
 
@@ -174,30 +105,6 @@ system.time(base_load <- read.csv("data/2017-01-06_p.csv"))
 system.time(readr_load <- read_csv("data/2017-01-06_p.csv"))
 ```
 
-### Writing files
-
-The functions for reading files in base R have equivalents for [writing files](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/write.table.html) as well: `write.table()` and `write.csv()`. The first argument in these functions is the data frame or matrix to be written and the second argument is the file name (in quotes).
-```{r, eval = FALSE}
-write.table(x, file = "", append = FALSE, quote = TRUE, sep = " ",
-            eol = "\n", na = "NA", dec = ".", row.names = TRUE,
-            col.names = TRUE, qmethod = c("escape", "double"),
-            fileEncoding = "")
-```
-
-There are a few other important parameters:
-
-- `sep` indicates the field separator ("\t" for tab)
-- `row.names` is set to TRUE by default - in general this makes for an ugly output file becuase the first column shows the row number (I almost always set this to FALSE when I use the base function)
-- `na` indicates the string to use for missing data and is set to R's standard of "NA" by default
-- `append` can be set to TRUE if you would like to append your data frame/matrix to an existing file
-
-As you might predict, readr has it's own equivalents for writing files that work similarly with less arguments: `write_delim()`, `write_csv()`, and `write_tsv()` (tab-separated values text file) are examples. `write_excel_csv()` is a handy function that writes Excel-friendly csv files. 
-
-Advantages of the readr functions include:
-
-- similar to readr functions for reading files, writing is generally twice as fast
-- by default, row names (actually row numbers) are not printed in the first column
-
 ## Dealing with Excel files (gracefully)
 
 You may have broken up with Excel, but unfortunately many of your colleagues have not. You may be using a little Excel on the side. (Don't worry, we don't judge!) So Excel files will continue to be a part of your life. The [readxl package](http://readxl.tidyverse.org/) makes it easy to read in data from these files and also offers additional useful functionality. As with the other file reading functions, the syntax is pretty straightforward: `read_excel("file_name.xlsx")`. Excel files have an added layer of complexity in that one file may have multiple worksheets, so the `sheet = "worksheet_name"` argument can be added to specify the desired worksheet. Different portions of the spreadsheet can be read using the `range` arugment. For example a subset of rows and columns can be selected via cell coordinates: `read_excel("file_name.xlsx", range = "B1:D6")` or `read_excel("file_name.xlsx, range = cell_cols("A:F")`.
@@ -227,6 +134,45 @@ head(readxl_load_subset)
 ```
 
 **End Exercise**
+
+## Why not use base functions for reading in files?
+
+R has solid built-in functions for importing data from files with the `read.table()` family of functions. `read.table()` is the generic form that expects a filename (in quotes) at a minimum and, importantly, an indication of the separator character used - it defaults to "" which indicates white space (one or more spaces, tabs, newlines, or carriage returns). The default header parameter for `read.table()` is FALSE, meaning that the function will **not** use the first row to determine column names. Because non-Excel tabular files are generally comma-delimited or tab-delimited with a first row header, `read.csv()` and `read.delim()` are the go-to base file reading functions that include a `header = TRUE` parameter and use comma and tab delimting, respectively, by default.
+
+There are a variety of other [useful parameters](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html) to consider, including explicitly supplying the column names via the `col.names` parameter (if not defined in header, for example). One related group of parameters to be conscious of with these functions are `stringsAsFactors` and `colClasses`. When R is reading a file, it will convert each column to a specific data type based on the content within that column. The default behavior of R is to convert columns with non-numeric data into a factor, which are a representation of categorical variables. For example, you may want to separate out data by sex (M/F) or between three instruments A, B, and C, and it makes perfect sense to represent these as a factor, so that you can easily stratify the groups during analyses in R, particularly for modeling questions. So, by default, with these base functions `stringsAsFactors = TRUE`, which means that any columns with characters may not have the expected behavior when you analyze the data. In general this may not be a big deal but can cause problems in a couple scenarios:
+1. You are expecting a column to be a string to parse the data (using the stringr package for example). Not a huge deal - you can convert to a character
+2. There are typos or other data irregularities that cause R to interpret the column as a character and then automatically convert to a factor. If you are not careful and attempt to convert this column back to a numeric type (using `as.numeric()` for example), you can end up coverting the column to a completely different set of numbers! That is because factors are represented as integers within R, and using a function like `as.numeric()` will convert the value to its backend factor integer representation. So `c(20, 4, 32, 5)` could become `c(1, 2, 3, 4)` and you may not realize it.
+
+Problem #2 will come back to haunt you if you are not careful. The brute force defense mechanism is to escape the default behavior: `read.csv("file_name.csv", stringsAsFactors = FALSE)`. This will prevent R from converting any columns with characters into factors. However, you may want some of your columns to be represented as factors. You can modify behavior on a column by column basis. `read.csv("file_name.csv", colClasses = c("character", "factor", "integer")` will set a 3 column csv file to character, factor, and integer data types in that column order.
+
+To be safe, the best practice is arguably to explicitly define column types when you read in a file. It is a little extra work up front but can save you some pain later on.
+
+For the curious, additional information about the history of of stringsAsFactors can be found [here](https://simplystatistics.org/2015/07/24/stringsasfactors-an-unauthorized-biography/).
+
+
+### Writing files
+
+The functions for reading files in base R have equivalents for [writing files](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/write.table.html) as well: `write.table()` and `write.csv()`. The first argument in these functions is the data frame or matrix to be written and the second argument is the file name (in quotes).
+```{r, eval = FALSE}
+write.table(x, file = "", append = FALSE, quote = TRUE, sep = " ",
+            eol = "\n", na = "NA", dec = ".", row.names = TRUE,
+            col.names = TRUE, qmethod = c("escape", "double"),
+            fileEncoding = "")
+```
+
+There are a few other important parameters:
+
+- `sep` indicates the field separator ("\t" for tab)
+- `row.names` is set to TRUE by default - in general this makes for an ugly output file becuase the first column shows the row number (I almost always set this to FALSE when I use the base function)
+- `na` indicates the string to use for missing data and is set to R's standard of "NA" by default
+- `append` can be set to TRUE if you would like to append your data frame/matrix to an existing file
+
+As you might predict, readr has it's own equivalents for writing files that work similarly with less arguments: `write_delim()`, `write_csv()`, and `write_tsv()` (tab-separated values text file) are examples. `write_excel_csv()` is a handy function that writes Excel-friendly csv files. 
+
+Advantages of the readr functions include:
+
+- similar to readr functions for reading files, writing is generally twice as fast
+- by default, row names (actually row numbers) are not printed in the first column
 
 ## Importing dirty data
 
