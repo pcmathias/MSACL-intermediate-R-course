@@ -1,5 +1,5 @@
 ---
-title: 'Lesson 4: Data manipulation in the tidyverse'
+title: 'Lesson 5: Taking data manipulation to the next level'
 output:
   html_document: default
 
@@ -16,7 +16,7 @@ library(lubridate)
 
 ## A brief diversion to discuss the tidyverse
 
-According to the official tidyverse [website](https://www.tidyverse.org/), "the tidyverse is an *opinionated* collection of R packages designed for data science." We've gotten a flavor of tidyverse functionality by using the readr packages and will wade deeper into the tidyverse in the next lessons. Because the tidyverse was not a component of the introductory MSACL data science course in previous years, we are going to cover basic functionality of many tidyverse packages throughout the rest of the course. Many of the data manipulation concepts will probably be familiar but the tidyverse offers a consistent interface for functions. Data is consistently the first argument for functions, and that enables compatibility with pipes. The tidyverse includes its own version of a data frame, the [tibble](http://tibble.tidyverse.org/articles/tibble.html), with the primary advantages being nicer printing of output and more predictable behavior with subsetting.
+According to the official tidyverse [website](https://www.tidyverse.org/), "the tidyverse is an *opinionated* collection of R packages designed for data science." The bottom line is that the tidyverse offers a consistent interface for functions. Data is consistently the first argument for functions, and that enables compatibility with pipes. The tidyverse includes its own version of a data frame, the [tibble](http://tibble.tidyverse.org/articles/tibble.html), with the primary advantages being nicer printing of output and more predictable behavior with subsetting.
 
 One of the key concepts of the tidyverse philosophy is maintaing "tidy" data. [Tidy data](http://r4ds.had.co.nz/tidy-data.html) is a data structure and a way of thinking about data that not only facilitates using tidyverse packages but more importantly it also provides a convention for organizing data that is amenable to data manipulation. The three criteria for tidy data are:
 1. Each variable must have its own column.
@@ -45,7 +45,7 @@ You can load the core tidyverse packages by loading tidyverse: `library(tidyvers
 
 The [dplyr package](http://dplyr.tidyverse.org/) provides functions to carve, expand, and collapse a data frame (or tibble). To complement dplyr, we have also loaded the [tidylog package](https://github.com/elbersb/tidylog), which provides additional output to clarify exactly what the dplyr package did when you run certain commands.
 
-### Carving your data set
+### Select columns
 
 Reducing a data set to a subset of columns and/or rows are common operations, particularly on the path to answering a specific set of questions about a data set. 
 
@@ -79,6 +79,8 @@ samples_jan_subset <- samples_jan %>%
   select(batch_name:compound_name, concentration)
 head(samples_jan_subset)
 ```
+
+### Filter rows
 
 Now let's carve the data set in the other direction. If you need only a subset of rows from your data set, `filter()` allows you to pick rows (cases) based on values, ie. you can subset your data based on logic.
 
@@ -125,7 +127,7 @@ summary(samples_jan_oxy_ir)
 
 **End Exercise**
 
-### Expanding your data set
+### Add new columns with `mutate()`
 
 Another common data manipulation task is adding or replacing columns that are derived from data in other columns. The `mutate()` function provides a quick and clean way to add additional variables that can include calculations, evaluating some logic, string manipulation, etc. You provide the function with the following argument(s): name of the new column = value. For example, if we continue with our January sample data set that includes concentrations and expected concentrations for standards, we can calculate the ratio of concentration to expected:
 ```{r}
@@ -150,7 +152,7 @@ samples_jan %>%
   head(20)
 ```
 
-Another common operation manipulation is wrangling dates. The [lubridate package](http://lubridate.tidyverse.org/) offers a helpful toolset to quickly parse dates and times. The bread and butter parsing functions are named intuitively based on the order of year, month, date, and time elements. For example, `mdy("1/20/2018")` will convert the string into a date that R can use. There are other useful functions like `month()` and `wday()` that pull out a single element of the date to use for grouping operations, for example. Let's work with a different January data set that has batch data and parse the collection dates in a variety of ways:
+Another common operation is generating new columns to wrangle dates. The [lubridate package](http://lubridate.tidyverse.org/) offers a helpful toolset to quickly parse dates and times. The bread and butter parsing functions are named intuitively based on the order of year, month, date, and time elements. For example, `mdy("1/20/2018")` will convert the string into a date that R can use. There are other useful functions like `month()` and `wday()` that pull out a single element of the date to use for grouping operations, for example. Let's work with a different January data set that has batch data and parse the collection dates in a variety of ways:
 ```{r}
 batch_jan <- read_csv("data/2017-01-06_b.csv") %>%
   clean_names()
@@ -198,7 +200,7 @@ max(reviews_jan_grouped$review_duration)
 
 **End Exercise**
 
-### Collapse (summarize) your data set
+### Grouped summaries with `group_by()` and `summarize()`
 
 Carving and expanding your data are helpful but they are relatively simple. Often you will need to do more sophisticated analyses such as calculating statistical measures for multiple subsets of data. Grouping data by a variable using the `group_by()` function is critical tool provided by dplyr and naturally couples with its summary function `summarize()`. By grouping data you can apply a function within individual groups and calculate things like mean or standard deviation. As an example, we may want to look at our January sample data set and look at some statistics for the ion ratios by compound for the unknown sample type with non-zero concentation.
 ```{r}
@@ -269,6 +271,10 @@ sample_means_jan
 ```
 
 **End Exercise**
+
+## Scaling column-wise operations with `across()`
+
+
 
 ## Shaping and tidying data with tidyr
 
