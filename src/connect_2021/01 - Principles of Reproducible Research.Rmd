@@ -56,6 +56,38 @@ next lesson.
 
 ## Adopt a style convention for coding
 
+### Pipes
+
+A common element convention supported by the tidyverse that you may not be familiar with or may not use consistently is the almighty pipe `%>%`. The pipe allows you to chain together functions sequentially so that you can be much more efficient with your code and make it readable. This is a nice intuitive [example](https://twitter.com/andrewheiss/status/1359583543509348356) from Andrew Heiss, an educator at Georgia State University:
+
+```{r, eval = FALSE}
+my_morning <- I %>%
+  wake_up(time = "8:00") %>%
+  get_out_of_bed(side = "correct") %>%
+  get_dressed(pants = TRUE, shirt = TRUE) %>%
+  leave_house(car = TRUE, bike = FALSE)
+```
+
+Contrast that with the same operations but using sequential steps without the pipes:
+```{r, eval = FALSE}
+my_morning <- wake_up(I, time = "8:00")
+my_morning <- get_out_of_bed(my_morning, side = "correct")
+my_morning <- get_dressed(my_morning, pants = TRUE, shirt = TRUE) %>%
+my_morning <- leave_house(my_morning, car = TRUE, bike = FALSE)
+```
+This is readable but contains quite a bit of duplicative code.
+
+Pipes are not compatible with all functions but should work with all of
+the tidyverse package functions (the magrittr package that defines the
+pipe is included in the tidyverse). In general, functions expect data as
+the primary argument and you can think of the pipe as feeding the data
+to the function. From the perspective of coding style, the most useful
+suggestion for using pipes is arguably to write the code so that each
+function is on its own line. The tidyverse style guide [section on
+pipes](http://style.tidyverse.org/pipes.html) is pretty helpful, which leads us to a general tool for making code readable: style guides.
+
+### Style guides
+
 Reading other people's code can be extremely difficult. Actually,
 reading your own code is often difficult, particularly if you haven't
 laid eyes on it long time and are trying to reconstruct what you did.
@@ -94,41 +126,9 @@ do_something_very_complicated("that", requires, many, arguments,
                               )
 ```
 
-While we're talking about style conventions, let's take a little
-diversion to discuss a common element of code in the tidyverse that you
-may not be familiar with: the almighty pipe `%>%`. The pipe allows you
-to chain together functions sequentially so that you can be much more
-efficient with your code and make it readable. Here is an example (with
-imaginary functions) adapted from the tidyverse style guide:
+### Packages supporting code style
 
-```{r, eval = FALSE}
-# one way to represent a hop, scoop, and a bop, without pipes
-foo_foo <- hop(foo_foo, through = forest)
-foo_foo <- scoop(foo_foo, up = field_mice)
-foo_foo <- bop(foo_foo, on = head)
-# another way to represent the same sequence with less code but in a less readable way
-foo_foo <- bop(scoop(hop(foo_foo, through = forest), up = field_mice), on = head)
-
-# a hop, scoop, and a bop with the almight pipes
-foo_foo %>%
-  hop(through = forest) %>%
-  scoop(up = field_mouse) %>%
-  bop(on = head)
-```
-
-Pipes are not compatible with all functions but should work with all of
-the tidyverse package functions (the magrittr package that defines the
-pipe is included in the tidyverse). In general, functions expect data as
-the primary argument and you can think of the pipe as feeding the data
-to the function. From the perspective of coding style, the most useful
-suggestion for using pipes is arguably to write the code so that each
-function is on its own line. The tidyverse style guide [section on
-pipes](http://style.tidyverse.org/pipes.html) is pretty helpful.
-
-You're not alone in your efforts to write readable code: there's an app
-for that! Actually, there are packages for that, and multiple packages
-at that. We will not cover them in depth here but it is good to be
-aware of them: 
+You're not alone in your efforts to write readable code: there are multiple packages for that. We will not cover them in depth here but it is good to be aware of them: 
 
 - [styler](http://styler.r-lib.org/) is a package that
 allows you to interactively reformat a chunk of code, a file, or a
