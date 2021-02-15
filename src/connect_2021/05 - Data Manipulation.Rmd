@@ -14,7 +14,7 @@ library(readxl)
 library(lubridate)
 ```
 
-## A brief diversion to discuss the tidyverse
+## A brief review of tidy data principles & the tidyverse
 
 According to the official tidyverse [website](https://www.tidyverse.org/), "the tidyverse is an *opinionated* collection of R packages designed for data science." The bottom line is that the tidyverse offers a consistent interface for functions. Data is consistently the first argument for functions, and that enables compatibility with pipes. The tidyverse includes its own version of a data frame, the [tibble](http://tibble.tidyverse.org/articles/tibble.html), with the primary advantages being nicer printing of output and more predictable behavior with subsetting.
 
@@ -66,6 +66,13 @@ samples_jan <- read_csv("data/2017-01-06_s.csv",
 str(samples_jan)
 ```
 
+The simplest use of `select()` is to call out specific column names for the new data set:
+```{r}
+samples_jan_2columns <- samples_jan %>%
+  select(sample_name, concentration)
+head(samples_jan_2columns)
+```
+
 Let's say we don't need the last two logical columns and want to get rid of them. We can use `select()` and provide a range of adjacent variables:
 ```{r}
 samples_jan_subset <- samples_jan %>%
@@ -73,7 +80,14 @@ samples_jan_subset <- samples_jan %>%
 head(samples_jan_subset)
 ```
 
-Or we only care about the first 3 variables plus the concentration:
+We can accomplish the same selection using `-` to indicate which columns to drop:
+```{r}
+samples_jan_subset <- samples_jan %>%
+  select(-used_for_curve, -sample_passed)
+head(samples_jan_subset)
+```
+
+Or if we only care about the first 3 variables plus the concentration we can combine a range of adjacent columns plus calling other columns explicitly:
 ```{r}
 samples_jan_subset <- samples_jan %>%
   select(batch_name:compound_name, concentration)
@@ -90,6 +104,13 @@ If we only care about the morphine data, we can use `filter()` to pick those row
 ```{r}
 samples_jan %>%
   filter(compound_name == "morphine") %>% # note the two equal signs (one equal for assignment)
+  head()
+```
+
+We may be interested in more than one compound, in which case the `%in%` operator can allow us to `filter()` based on a list:
+```{r}
+samples_jan %>%
+  filter(compound_name %in% c("morphine", "hydromorphone")) %>% # note the use of the c() function to create a list
   head()
 ```
 
@@ -169,16 +190,31 @@ summary(batch_jan_timestamps)
 ```
 You can see from the above example that these functions provide a great deal of flexibility in associating a row with arbitrary time scales. This allows the ability to group items by time and calculate summary data, which we will discuss in the next section.
 
+Another common manipulation of interest to the laboratory is calculating the difference between 2 timestamps to analyze turnaround times (TATs). Lubridate has a duration data type and associated operator `%--%` for calculating differences between timestamps. Both variables we perform the calculation on should already be recognized by R as a datetime data type (e.g. POSIXct) and the calculation will return a special interval data type. The syntax is `start_time %--% end_time`. Here we calculate the turnaround time from collection to completing review of a batch:
+```{r}
+batch_jan_tat <- batch_jan %>%
+  mutate(tat_duration = batch_collected_timestamp %--% review_complete_timestamp)
+```
+
+The duration data type will display both timestamps and store the difference between the times in seconds, but this isn't very helpful if we want to visualize the data in common units of measure such as minutes, hours, days, weeks, or months. Lubridate provides a helpful set of duration objects that can help convert calculated durations into a usable numeric value. Functions such as `dminutes()`, `dhours()`, and `ddays()` take an argument for the number of that unit to perform a calculation for and return a duration object that contains the number of seconds corresponding to the unit of interest. For example, `dhours(1)` will return a duration object with a value of 3600 (seconds). When you divide a duration by another duration the result will be a numeric data element. Here we can expand our TAT duration calculation for each row of the data frame into TATs in minutes, hours, and days: 
+```{r}
+batch_jan_tat <- batch_jan %>%
+  mutate(tat_duration = batch_collected_timestamp %--% review_complete_timestamp,
+         tat_minutes = tat_duration / dminutes(1),
+         tat_hours = tat_duration / dhours(1),
+         tat_dayss = tat_duration / ddays(1))
+```
+
 **Exercise 2**
 
-How long an average does it take to review each batch? Using the January batch data, convert the review start timestamp and review complete timestamp fields into variables with a datetime type, then generate a new field the calculates the duration of the review in minutes. There are multiple approaches to this, but the `difftime()` function may be the most transparent - read the help on this function. The data will need to be collapsed by batch (which I do for you using the `distinct()` function) and display the min, max, median, and mean review times.
+How long an average does it take to review each batch? Using the January batch data, convert the review start timestamp and review complete timestamp fields into variables with a datetime type, then generate a new field the calculates the duration of the review in minutes. The data will need to be collapsed by batch (which I do for you using the `distinct()` function) and display the min, max, median, and mean review times.
 
 ```{r mutate_exercise, echo = FALSE, eval = FALSE}
 batch_jan_reviews <- batch_jan %>%
-  mutate(review_duration = as.numeric(difftime( , , units = "minutes")))
-# note: the output of difftime is a time interval, convert to numeric to avoid confusion downstream
+  mutate(review_duration = ,
+         review_duration_minutes = review_duration / )
 reviews_jan_grouped <- batch_jan_reviews %>%
-  distinct(batch_name, review_duration) 
+  distinct(batch_name, review_duration_minutes) 
 min()
 median()
 mean()
@@ -187,15 +223,14 @@ max()
 
 ```{r}
 batch_jan_reviews <- batch_jan %>%
-  mutate(review_duration = as.numeric(difftime(review_complete_timestamp, review_start_timestamp,
-                                               units = "mins")))
-# note: the output of difftime is a time interval, convert to numeric to avoid confusion downstream
+  mutate(review_duration = review_start_timestamp %--% review_complete_timestamp,
+         review_duration_minutes = review_duration / dminutes(1))
 reviews_jan_grouped <- batch_jan_reviews %>%
-  distinct(batch_name, review_duration) 
-min(reviews_jan_grouped$review_duration)
-median(reviews_jan_grouped$review_duration)
-mean(reviews_jan_grouped$review_duration)
-max(reviews_jan_grouped$review_duration)
+  distinct(batch_name, review_duration_minutes) 
+min(reviews_jan_grouped$review_duration_minutes)
+median(reviews_jan_grouped$review_duration_minutes)
+mean(reviews_jan_grouped$review_duration_minutes)
+max(reviews_jan_grouped$review_duration_minutes)
 ```
 
 **End Exercise**
@@ -204,36 +239,37 @@ max(reviews_jan_grouped$review_duration)
 
 Carving and expanding your data are helpful but they are relatively simple. Often you will need to do more sophisticated analyses such as calculating statistical measures for multiple subsets of data. Grouping data by a variable using the `group_by()` function is critical tool provided by dplyr and naturally couples with its summary function `summarize()`. By grouping data you can apply a function within individual groups and calculate things like mean or standard deviation. As an example, we may want to look at our January sample data set and look at some statistics for the ion ratios by compound for the unknown sample type with non-zero concentation.
 ```{r}
-samples_jan %>%
+samples_jan_ir_stats <- samples_jan %>%
   filter(sample_type == "unknown", concentration > 0) %>%
   group_by(compound_name) %>%
   summarize(median_ir = median(ion_ratio),
             mean_ir = mean(ion_ratio),
             std_dev_ir = sd(ion_ratio))
+samples_jan_ir_stats
 ```
 
 We may want to look at this on the batch level, which only requires adding another variable to the `group_by()` function.
 ```{r}
-samples_jan %>%
+samples_jan_batch_ir_stats <- samples_jan %>%
   filter(sample_type == "unknown", concentration > 0) %>%
   group_by(batch_name, compound_name) %>%
   summarize(median_ir = median(ion_ratio),
             mean_ir = mean(ion_ratio),
-            std_dev_ir = sd(ion_ratio)) %>%
-  head()
+            std_dev_ir = sd(ion_ratio))
+head(samples_jan_batch_ir_stats)
 ```
 
 Let's revisit our batch dataset with timestamps that we have parsed by time period (eg. month or week) and look at correlation coefficient statistics by instrument, compound, and week:
 ```{r}
-batch_jan_timestamps %>%
+batch_jan_cor_stats <- batch_jan_timestamps %>%
   group_by(instrument_name, compound_name, collect_week) %>%
   summarize(median_cor = median(calibration_r2),
             mean_cor = mean(calibration_r2),
             min_cor = min(calibration_r2),
             max_cor = max(calibration_r2))
+head(batch_jan_cor_stats)
 ```
 
-A relatively new package that provides nice grouping functionality based on times is called [tibbletime](https://github.com/business-science/tibbletime). This package provides similar functionality to the mutating and summarizing we did with times above but has a cleaner syntax for some operations and more functionality.
 
 **Exercise 3**
 
@@ -272,9 +308,80 @@ sample_means_jan
 
 **End Exercise**
 
+Whenever you use the `group_by()` function, the data frame preserves the groups, so it is important to recognize that subsequent operations you perform on the data will work on those groups. Performing a `summarize()` "peels off" one variable from the group. Let's revisit the the sample_states_jan data from the last exercise. We grouped by batch_name and compound_name and performed one `summarize()` to generate statistics for the concentrations by batch and compound. Reviewing the sample_stats_jan data frame shows that the output is still grouped by batch_name (see Groups output above the output table):
+```{r}
+head(sample_stats_jan)
+```
+
+If we run another summarize without updating the groups, statisitics will automatically be calculated by batch:
+```{r}
+sample_stats_batch <- sample_stats_jan %>%
+  summarize(batch_median_conc = median(median_conc))
+sample_stats_batch
+```
+
+We may be more interested in medians of within-batch median by compound rather than batch. In that case the grouping of sample_stats_jan does not align with the summarization we'd like to do. We can call `group_by()` to re-establish a different grouping for the data set and use `summarize()` as expected:
+```{r}
+sample_stats_compound <- sample_stats_jan %>%
+  group_by(compound_name) %>%
+  summarize(compound_median_conc = median(median_conc))
+sample_stats_compound
+```
+
+You may want to do a further data manipulation and transformation after an initial `group_by()` and `summarize()`. The safest practice to unsure you don't unintentionally perform grouped operations without realizing it is to use `ungroup()` to remove the groups:
+```{r}
+sample_stats_jan_ungrouped <- sample_stats_jan %>%
+  ungroup()
+summary(sample_stats_jan_ungrouped)
+```
+
 ## Scaling column-wise operations with `across()`
 
+One common activity when transforming data is performing the same operation across multiple columns in your data frame. As an example let's revisit our January samples data set and calculate mean values for ion_ratio, response, and concentration for each distinct group of sample_type and compound_name:
+```{r}
+samples_jan_means <- samples_jan %>%
+  group_by(sample_type, compound_name) %>%
+  summarize(ion_ratio = mean(ion_ratio), 
+            response = mean(response),
+            concentration = mean(concentration))
+```
 
+This may require multiple copies and pastes and would be quite frustrating if you had to perform the same operation on 20 columns rather than just 3. The `across()` function provides a mechanism to repeat the same operation across multiple columns:
+```{r}
+samples_jan_means <- samples_jan %>%
+  group_by(sample_type, compound_name) %>%
+  summarize(across(ion_ratio:concentration, mean))
+```
+
+The first argument to `across()` is the column(s) to operate on, and this can be provided as a list or using syntax you would use for the `select()` function. In the example above, 4 consecutive columns are selected with the `:`. The second argument to the `across()` function is a function or list of functions to apply to each column. This argument will accept formulas similar to those you may use with the purrr package, such as `~ .x /2` to divide by 2: the `~` tells R to evaluate the expression following it as a function and `.x` indicates a list or vector to operate on.
+
+An additional helper function `where()` can select columns based on specific criteria rather than calling out columns specifically. In this case we specify calculating the mean on any column meeting the criteria of being a numeric data type:
+```{r}
+samples_jan_means <- samples_jan %>%
+  group_by(sample_type, compound_name) %>%
+  summarize(across(where(is.numeric), mean))
+samples_jan_means
+```
+
+In this data set, there are no missing data, but it's helpful to know that the `na.rm = TRUE` argument that is often added to base summary statistics functions like `mean()` can be added to the `across()` function as well:
+```{r}
+samples_jan_means <- samples_jan %>%
+  group_by(sample_type, compound_name) %>%
+  summarize(across(where(is.numeric), mean, na.rm = TRUE))
+samples_jan_means
+```
+
+Finally, `across()` allows you to perform multiple functions on multiple columns by providing a list of functions. Let's calculate the `min()` and `max()` across the numeric columns in the January samples data set:
+```{r}
+min_max <- list(
+  min = ~min(.x, na.rm = TRUE), 
+  max = ~max(.x, na.rm = TRUE)
+)
+samples_jan_minmax <- samples_jan %>%
+  group_by(sample_type, compound_name) %>%
+  summarize(across(where(is.numeric), min_max))
+samples_jan_minmax
+```
 
 ## Shaping and tidying data with tidyr
 
@@ -346,9 +453,9 @@ head(batch_jan_tidy, 10)
 
 ## Summary
 
-- The `dplyr` package offers a number of useful functions for manipulating data sets
+- The dplyr package offers a number of useful functions for manipulating data sets
   - `select()` subsets columns by name and `filter()` subset rows by condition
   - `mutate()` adds additional columns, typically with calculations or logic based on other columns
   - `group_by()` and `summarize()` allow grouping by one or more variables and performing calculations within the group
 - Manipulating dates and times with the `lubridate` package can make grouping by time periods easier
-- The `tidyr` package provides functions to tidy and untidy data
+- `pivot_longer()` and `pivot_wider()` allow you to pivot your data frame to and from a tidy data structure
