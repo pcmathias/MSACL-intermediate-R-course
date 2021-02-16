@@ -270,7 +270,6 @@ batch_jan_cor_stats <- batch_jan_timestamps %>%
 head(batch_jan_cor_stats)
 ```
 
-
 **Exercise 3**
 
 From the January sample dataset, for samples with unknown sample type, what is the minimum, median, mean, and maximum concentration for each compound by batch? What is the mean of the within-batch means by compound?
@@ -383,6 +382,31 @@ samples_jan_minmax <- samples_jan %>%
 samples_jan_minmax
 ```
 
+Another powerful use case for `across()` is using it in combination with `mutate()` to transform multiple columns at once. The syntax for using the function is the same as before: the first argument includes the columns to operate on and the second includes the function that will operate on those columns. In addition to the function to transform existing columns with, the `mutate()` function also expects the name(s) of any new columns to be included. As an example we may want to view rounded versions of numeric columns in our samples data set but retain the original columns. In this case we provide a single function within a list and add "rounded" to append to the existing column names for which the condition applies:
+```{r}
+samples_jan_rounded <- samples_jan %>%
+  mutate(across(where(is.numeric), list(rounded = ~ round(.x, 2))))
+samples_jan_rounded
+```
+
+The result is that every numeric column has a mutated counterpart with rounded values.
+
+**Exercise 4**
+
+A common operation in some contexts is to group data together by date. For example, you may be interested in test volumes over time and want to count by various dates represented in your data set. To do this efficiently you may want to create new columns with dates corresponding to every timestamp in your data set. Recall that the `floor_date()` function acts as a type of rounding function and returns a timestamp that's rounded down to a specified time unit (e.g. unit = "day" as the second argument rounds to the date). For the batch_jan data, add an additional column for every timestamp variable using the `is.POSIXct()` (to identify timestamp columns) and `floor_date()` functions.
+
+```{r across_exercise, echo = FALSE, eval = FALSE}
+batch_jan_dates <- batch_jan %>%
+  mutate(   )
+```
+
+```{r}
+batch_jan_dates <- batch_jan %>%
+  mutate(across(where(is.POSIXct), list(date = ~ floor_date(.x, unit = "day"))))
+```
+
+**End Exercise**
+
 ## Shaping and tidying data with tidyr
 
 Data in the real world are not always tidy. Consider a variant of the January sample data we've reviewed previously in the "2017-01-06-messy.csv" file.
@@ -398,7 +422,6 @@ This certainly isn't impossible to work with, but there are some challenges with
 Previous versions (i.e., prior to 1.0.0) of `tidyr` used the `gather()` function to gather data into tidy, longer formats. A newer approach is to use `pivot_longer()` to make datasets longer by increasing the number of rows and decreasing the number of columns. (The `gather()` function isn't going away, but it is recommended to use `pivot_longer()` instead.) 
 
 ![Gather operation](assets/data_gather.png)
-
 
 ```{r}
 samples_jan_tidy_longer <-samples_jan_messy %>% 
@@ -423,7 +446,7 @@ head(samples_jan_remessy_wider)
 
 There are other useful tidyr functions such as `separate()` and `unite()` to split one column into multiple columns or combine multiple columns into one column, respectively. These are pretty straightforward to pick up. We will demonstrate use of `unite()` in the next lesson.  
 
-**Exercise 4**
+**Exercise 5**
 
 The "2017-01-06-batch-messy.csv" file in the messy subdirectory of the data dir is related to the "2017-01-06.xlsx" batch file you have worked with before. Unfortunately, it is not set up to have a single observation per row. There are two problems that need to be solved:
 
@@ -450,6 +473,8 @@ batch_jan_tidy <- batch_jan_longer %>%
   pivot_wider(names_from = "parameter", values_from = "value")
 head(batch_jan_tidy, 10)
 ```
+
+**End Exercise**
 
 ## Summary
 

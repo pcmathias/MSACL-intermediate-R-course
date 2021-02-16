@@ -1,9 +1,9 @@
 ---
-title: 'Lesson 7: Exploring lab order data'
+title: 'Lesson 8: Exploring lab order data'
 output: html_document
 ---
 
-```{r setup_7, include=FALSE}
+```{r setup_8, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readxl)
@@ -119,7 +119,7 @@ ggplot(data = orders) +
   geom_histogram(mapping = aes(x = order_time), binwidth = 60*60*24*7)
 ```
 
-2. Plot or tabulate the breakdown of test orders in the data set (using description or procedure code). Focus on the top 25 tests.
+2. Plot or tabulate the breakdown of test orders in the data set (using description or procedure code). Use the `slice_head()` function to restrict the output to the top 25 most commonly ordered tests. (Review the help documentation for `slice()` and related functions.)
 
 ```{r, echo = FALSE, eval = FALSE}
 
@@ -129,7 +129,7 @@ ggplot(data = orders) +
 orders %>%
   tabyl(description) %>%
   arrange(desc(n)) %>%
-  top_n(25)
+  slice_head(n = 25)
 ```
 
 3. Plot and/or tabulate cancellations over time for the data set.
@@ -149,7 +149,7 @@ orders %>%
   adorn_ns() # add back in counts (N's)
 ```
 
-4. Explore whether there are specific tests that are cancelled more frequently than others. Focus on the top 25 tests.
+4. Explore whether there are specific tests that are cancelled more frequently than others. Restrict the output to the top 25 tests.
 
 ```{r, echo = FALSE, eval = FALSE}
 
@@ -160,11 +160,12 @@ orders %>%
   #filter(description %in% orders_top25$description) %>%
   tabyl(description, order_status_c_descr) %>%
   arrange(desc(Completed)) %>%
-  top_n(25, Completed) %>%
+  #top_n(25, Completed) %>%
   adorn_totals("row") %>% # tabulate operations below across rows
   adorn_percentages("row") %>% # express counts as percentages
   adorn_pct_formatting() %>% # clean up percentages for nicer printing
-  adorn_ns() # add back in counts (N's)
+  adorn_ns()  %>%# add back in counts (N's)
+  slice_head(n = 25)
 ```
 
 **End Exercise**

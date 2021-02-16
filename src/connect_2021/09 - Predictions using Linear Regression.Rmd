@@ -1,10 +1,10 @@
 ---
-title: 'Lesson 8: Predictions using linear regression'
+title: 'Lesson 9: Predictions using linear regression'
 output:
   html_document: default
 ---
 
-```{r setup_8, include=FALSE}
+```{r setup_9, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(corrplot)

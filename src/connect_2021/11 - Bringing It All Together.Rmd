@@ -1,10 +1,10 @@
 ---
-title: 'Lesson 10: Bringing it all together from import to graph to result'
+title: 'Lesson 11: Bringing it all together from import to graph to result'
 output:
   html_document: default
 ---
 
-```{r setup_10, include=FALSE}
+```{r setup_11, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(lubridate)

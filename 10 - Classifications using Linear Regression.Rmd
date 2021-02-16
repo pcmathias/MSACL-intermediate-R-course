@@ -1,10 +1,10 @@
 ---
-title: 'Lesson 9: Classifications using linear regression'
+title: 'Lesson 10: Classifications using linear regression'
 output:
   html_document: default
 ---
 
-```{r setup_9, include=FALSE}
+```{r setup_10, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(corrplot)
