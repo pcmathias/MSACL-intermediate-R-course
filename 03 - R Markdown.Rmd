@@ -1,5 +1,5 @@
 ---
-title: 'Lesson 2: Getting cozy with R Markdown'
+title: 'Lesson 3: Getting cozy with R Markdown'
 output:
   html_document:
     df_print: paged
@@ -33,9 +33,8 @@ There are 3 components of a typical R Markdown document:
 The header includes metadata about the document that can help populate useful information such as title and author. This information is included in a YAML (originally *Yet Another Markup Language*, now *YAML Ain't Markup Language*) format that is pretty easy to read. For example, the header for this document is:
 ```{r, eval = FALSE}
 ---
-title: 'Lesson 2: Getting cozy with R Markdown'
-author: "Patrick Mathias"
-output: html_document
+title: 'Lesson 3: Getting cozy with R Markdown'
+output: html_notebook
 ---
 ```
 
@@ -44,82 +43,98 @@ The output field dictates the output once the document is knit, and users can ad
 ### Text
 
 Text is written in whitespace sections using [R Markdown syntax](http://rmarkdown.rstudio.com/authoring_basics.html), which is a variant of a simple formatting language called markdown that makes it easy to format text using a plain text syntax. For example, asterisks can be used to *italicize* (`*italicize*`) or **bold** (`**bold**`) text and hyphens can be used to create bullet points:
-- point 1
-- point 2
-- point 3
 ```{r, eval = FALSE}
 - point 1
 - point 2
 - point 3
 ```
 
+- point 1
+- point 2
+- point 3
+
+The text sections of your notebook can be organized into sections like a document you would create in software like Microsoft Word. There are multiple levels of headers available and syntax is simple: `# Header 1` on it's own line will create a section of the document:
+
+# Header 1
+
+Under that header multiple subsections can be built with a similar syntax - just add more `#` signs to create the next level header: `## Header 2`. For the header to work, it should be on its own line.
+
+## Header 2
+
+Let's practice making modifications to the document in the header and the text.
+
+**Exercise 1**
+
+Let's use the built-in functionality in RStudio to create an R Notebook and make some modifications.
+
+1. Add a file by selecting the add file button on the top left of your screen
+1. Select R Notebook as the file type
+1. Find the header. Change the title of the notebook to "My First R Notebook"
+1. Add your name as the author by adding another line to the header: `author: "Your Name"`
+1. Add a second level heading (##) at the end of the notebook called “My Calculation”
+
+**End Exercise**
 
 ### Code chunks
 
 Interspersed within your text you can integrate "chunks" of R code, and each code chunk can be named. You can supply certain parameters to instruct R what to do with each code chunk. The formatting used to separate a code chunk from text uses a rarely utilized character called the backtick ` that typically can be found on the very top left of your keyboard. The formatting for a code chunk includes 3 backticks to open or close a chunk and curly brackets with the opening backticks to supply information about the chunk. Here is the general formatting, including the backticks and the curly braces that indicate the code should be evaluated in R:  
   
   
-    ```{r}
+    ```{r, eval = FALSE}
     mean(c(10,20,30))
     ```
   
-And this is how the code chunk looks by default:
+And this is how the code chunk looks within a document by default:
 ```{r, eval = FALSE}
 mean(c(10,20,30))
 ```
 
-There are shortcuts for adding chunks rather than typing out backticks: the `Insert` button near the top right of your script window or the `Ctrl+Alt+i`/`Command+Option+i`(Windows/Mac) shortcut.
+There are shortcuts for adding chunks rather than typing out backticks: the Insert Code Chunk button near the top right of your script window (green button  with a plus C) or the `Ctrl+Alt+i`/`Command+Option+i`(Windows/Mac) shortcut. As with inserting a chunk, there are multiple options for running a chunk: the `Run` button near the top right of your script window or the `Ctrl+Shift+Enter`/`Command+Shift+Enter` (Windows/Mac) shortcut. Within a code chunk, if you just want to run an individual line of code, the `Ctrl+Enter`/`Command+Enter` (Windows/Mac) shortcut while run only the line your cursor is currently on.
 
-In addition code can be integrated within text by using a single backtick to open and close the integrated code, and listing "r" at the beginning of the code (to indicate the language to be evaluated): `r mean(c(10,20,30))`.
+In addition code can be integrated within text by using a single backtick to open and close the integrated code, and listing "r" at the beginning of the code (to indicate the language to be evaluated). Including "r mean(c(10,20,30))" surrounded by backticks will produce the following output: `r mean(c(10,20,30))`.
+
+**Exercise 2**
+
+Let's practice working with code chunks with an R Notebook.
+
+1. Within the notebook you created in Exercise 1, find the grey code chunk. Press the green play button on the top right of the chunk. What happened? Alternately, if you cursor is within a code chunk, you can hit `Ctrl+Shift+Enter`/`Command+Shift+Enter` and the code inside the chunk will execute.
+1. Insert a code chunk under the cars code chunk by using the `Ctrl+Alt+i`/`Command+Option+i`(Windows/Mac) shortcut. Another option for adding a code chunk is to use the Add Code Chunk button on the top right of the Editor window (green button with a plus sign and a C).
+1. Using the new code chunk you created, display the first lines of the cars data frame with the `head(cars)` command and execute the code chunk
+
+**End Exercise**
+
+A helpful tip: use your first code chunk as a setup chunk to set output options and load packages you will use in the rest of the document. The `knitr::opts_chunk$set(echo = TRUE)` command in the setup chunk tells R to display (or echo) the source code you write in your output document. A detailed list of various options can be found under the R Markdown cheatsheet here: https://www.rstudio.com/resources/cheatsheets/.
 
 ## Flexibility in reporting: types of knitr output
 
 Under the hood, the knitting functionality in RStudio takes advantage of a universal document coverter called [Pandoc](http://pandoc.org/) that has considerable flexibility in producing different types of output. The 3 most common output formats are .html, .pdf, and Microsoft Word .docx, but there is additional flexibility in the document formatting. For example, rather than creating a pdf or html file in a typical text report format, you can create slides for a presentation.
 
-There is additional functionality in RStudio that allows you to create an R Notebook, which is a useful variant of an R Markdown document. Traditionally you might put together an R Markdown document, with all its glorious text + code, and then knit the entire document to produce some output. The R Notebook is a special execution mode that allows you to run individual code chunks separately and interactively. This allows you to rapidly interact with your code and see the output without having to run all the code in the entire document. As with inserting a chunk, there are multiple options for running a chunk: the `Run` button near the top right of your script window or the `Ctrl+Shift+Enter`/`Command+Shift+Enter` (Windows/Mac) shortcut. Within a code chunk, if you just want to run an individual line of code, the `Ctrl+Enter`/`Command+Enter` (Windows/Mac) shortcut while run only the line your cursor is currently on.
-
-**Exercise 1**
-
-Let's use the built-in functionality in RStudio to create an R Markdown document.
-
-1. Add a file by selecting the add file button on the top left of your screen
-1. Select R Markdown... as the file type
-1. Title the document "Sample R Markdown Document" and select OK
-1. Put the cursor in the "cars" code chunk (should be the 2nd chunk) and hit `Ctrl+Shift+Enter`/`Command+Shift+Enter`. What happened?
-1. Insert a code chunk under the cars code chunk by using the `Ctrl+Alt+i`/`Command+Option+i`(Windows/Mac) shortcut
-1. Create output for the first lines of the cars data frame using the `head(cars)` command and execute the code chunk
-
-**End Exercise**
-
-RStudio sets up the document to be run as an R Notebook so you can interactively run chunks separately and immediately view the output.
-
-RStudio also already provides you with an outline of a useful document, including interspersed code chunks. The header is completed based on the data that was entered into the document creation wizard. The first code chunk below the header is a useful practice to adopt: use your first code chunk as a setup chunk to set output options and load packages you will use in the rest of the document. The `knitr::opts_chunk$set(echo = TRUE)` command in the setup chunk tells R to display (or echo) the source code you write in your output document. A detailed list of various options can be found under the R Markdown cheatsheet here: https://www.rstudio.com/resources/cheatsheets/.
-
 Now let's knit this file and create some output.
 
-**Exercise 2**
+**Exercise 3**
 
 1. Click the **Knit** button
 1. You are being prompted to save the .Rmd file. Choose the "src" folder of your project and name the file sample_markdown_document
 1. RStudio should produce output in .html format and display
 1. Click the Open in Browser window and the same output should open in your default internet browser
 1. If you find the folder you saved the .Rmd file there should also be a .html file you can open as well
-1. Now, instead of hitting the **Knit** button, select the down arrow adjacent to it and click Knit to PDF
-1. Repeat the previous step but knit to a Word document
+1. Now, instead of hitting the **Knit** button, select the down arrow adjacent to it and click Knit to Word
 
 **End Exercise**
 
+Documents can be knitted to a pdf format as well, but this requires the installation of a package called [tinytex](https://yihui.org/tinytex/) if you don't already have LaTeX (a document preparation language).
+
 The add file options also allow you to create a presentation in R Markdown. This can be a handy alternative to Powerpoint, especially if you want to share code and/or many figures within a presentation. You can find more information about these presentations and the syntax used to set up slides at the RStudio site on [Authoring R Presentations](https://support.rstudio.com/hc/en-us/articles/200486468-Authoring-R-Presentations).
 
-**Exercise 3**
+**Exercise 4**
 
-The course repository that your forked and opened as an RStudio project has multiple R Markdown files that contain the course content. If not already open, open up the lesson 2 file: "02 - R Markdown.Rmd".
+The course repository that your forked and opened as an RStudio project has multiple R Markdown files that contain the course content. If not already open, open up the lesson 3 file: "03 - R Markdown.Rmd".
 
 In addition to the lesson text documents, there are a few folders that each of these documents refer to. 
 
 The "assets" folder contains images and other files that can be pulled into your R Markdown document. Let's practice embedding an image into your document. The syntax for incorporating an image is `![text for image caption](folder_name/image_file.ext)`. Practice embedding the "git_basic_workflow.png" diagram from the assets folder in the space below:
 
-Now knit the lesson 2 document to whatever format you'd like and open it.
+Now knit the lesson 3 document to whatever format you'd like and open it.
 
 <!---
 Note: updated repo to include all course data
@@ -146,6 +161,6 @@ Yihui Xie, who developed R Markdown and the knitr package, has written a book de
 
 ## Summary
 
-* Integrating code and documentation in one place produces clearer, more reproducible code
-* RStudio provides useful built-in functionality for "knitting" documents into a variety of output formats
-* R Markdown documents can be integrated within a recommended project structure to create a reproducible analysis
+- Integrating code and documentation in one place produces clearer, more reproducible code
+- RStudio provides useful built-in functionality for "knitting" documents into a variety of output formats
+- R Markdown documents can be integrated within a recommended project structure to create a reproducible analysis

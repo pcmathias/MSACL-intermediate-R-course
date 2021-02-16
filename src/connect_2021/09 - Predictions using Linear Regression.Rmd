@@ -1,0 +1,488 @@
+---
+title: 'Lesson 9: Predictions using linear regression'
+output:
+  html_document: default
+---
+
+```{r setup_9, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(corrplot)
+library(RColorBrewer)
+library(broom)
+library(Metrics)
+library(car)
+
+```
+
+## Overview of data
+
+Though we commonly think about linear regression in the context of calibrations or method comparisons, it is also a widely applied tool for predictive modeling. In this lesson we will use data from a targeted metabolomics experiment in children with chronic kidney disease to build a linear model that predicts their glomerular filtration rate (GFR). This data is provided in two files. One has values for the outcome (GFR) for each subject ID and the other includes values for several predictors (e.g., creatinine, BUN, various endogenous metabolites) measured for each subject ID.   
+
+We will need to use our previously learned skills to read in the data and join the two sets by subject.  
+
+```{r}
+#load in CKD_data.csv and CKD_GFR.csv
+data <- read_csv("data/CKD_data.csv")
+glimpse(data)
+
+GFR <- read_csv("data/CKD_GFR.csv")
+glimpse(GFR)
+
+#join by ID, convert ID to factor
+ckd <- left_join(GFR, data, by = "id") %>%
+        mutate(id = factor(id))
+glimpse(ckd)
+
+#how many subjects do we have? how many variables?
+```
+
+## Quick EDA
+
+Let's look at the summary statistics:
+
+```{r}
+summary(ckd)
+```
+
+Let's take a quick look at the distributions of our variables using violin plots. We can do this with a few lines of code, if we gather our data into a long format and then use the `facet_wrap` function to create small tiled plots for each variable.  
+
+```{r}
+meltData <- gather(ckd[2:14], variable, value)
+
+ggplot(meltData, aes(factor(variable), value)) +
+  geom_violin() + facet_wrap(~variable, scale="free")
+```
+
+We want to predict iGFRc from the other variables. Let's get an idea of how the predictors correlate with iGFRc and each other. The `cor` function calculates the pairwise correlations for us and the `corrplot` function helps us to visualize these correlations.  
+
+```{r}
+cors <- ckd %>% 
+        select(-id) %>%
+        cor(use = 'pairwise.complete.obs')
+
+corrplot(cors) #default, but can we improve the information display? customize using available arguments -- see help for what's possible
+
+corrplot(cors, type="lower", method="circle", addCoef.col="black", 
+         number.cex=0.45, tl.cex = 0.55, tl.col = "black",
+         col=brewer.pal(n=8, name="RdBu"), diag=FALSE)
+
+#corrplot.mixed(cors) #instead of above, can also try a different function from package
+```
+
+The correlations range from low to high and in both directions. It looks like we have several candidate predictors for iGFRc - some of which should be familiar and obvious to you. We also see that several predictors are highly correlated with each other. This is something we will come back to later and need to consider as we select predictors for our model. 
+
+
+## Simple linear regression
+
+Let's perform a simple linear regression to predict iGFRc. This is a model with a single predictor. In `R` we can use the `lm` function to fit linear models. We specify our formula and data in the function call. The `R` formula format is response ~ predictor(s). A formula has an implied intercept term, thus y ~ x is fit as y ~ x + int. The intercept term can be removed, if desired. When fitting a linear model y ~ x - 1 specifies a line through the origin. A model with no intercept can be also specified as y ~ x + 0 or y ~ 0 + x. You can assign a formula to a variable and use the variable name instead of the formula notation in model fitting. This may be useful if you want to compare different types of models for the same formula. In a later section we will learn how to specify formulas with more than one variable.  
+
+We will first fit the model and then examine the model output. `lm` returns an object of class "lm". This has special attributes we can explore to learn about our model and its fit of our data.  
+
+```{r}
+#fit the linear model
+# lm(formula = ___, data = ___)
+slr.fit <- lm(iGFRc ~ SCr, ckd)
+
+#print the model
+slr.fit
+
+#what is the equation of our model? Does this make sense to you?
+```
+
+### Examining our model  
+
+Next, we want to know more about our model - is it a good fit? What are the predicted and residual values? There are several ways to examine the output from a model fit. We'll use two common ways here. Recall the `summary` function we've used before to summarize the statistics of our data set. We can use this same function on our model fit object, but we'll get a very different output.  
+
+
+```{r}
+#view a summary of the model
+summary(slr.fit)
+
+#extract information
+coef(slr.fit)
+
+```
+
+A model fit summary is fine for scrolling through and enables you to extract some components individually, but is not well designed for extracting the information in a straightforward or tidy way. We often do want to use this information later or collate it in some way, maybe even as a data frame. The `broom` package was designed for this very problem. We will learn more about three of its functions.  
+
+The `tidy` function takes the coefficient information and organizes it into a dataframe where each row holds data for one term of the model.  
+
+```{r}
+tidy(slr.fit)
+# aha!
+```
+
+You may also want to see the actual values with the fitted values and their residuals, or bring them into a format you can analyze further. This is done using the `augment` function - because it augments the original data with the information from the model.
+
+```{r}
+head(augment(slr.fit))
+
+#if you want to add the fit-related columns to the entire data frame, specify the data frame
+head(augment(slr.fit, ckd))
+```
+
+Finally, you can use the `glance` function to get a single row of the performance and error metrics. This format becomes very useful when comparing different fits on the same data.  
+
+```{r}
+glance(slr.fit)
+```
+
+
+**Exercise 1:**
+
+Select a variable (other than SCr) and perform a single variable regression for iGFRc using the ckd dataset. Determine the model equation and R2 value. How did your model fit compare to our SCr example?  
+
+```{r, echo = FALSE, eval = FALSE}
+
+
+```
+
+```{r}
+my.slr.fit <- lm(iGFRc ~ SDMA, ckd)
+
+tidy(my.slr.fit) #equation: iGFRc = -24.7*SDMA + 73.5
+glance(my.slr.fit) #R2: 0.48
+```
+
+**End exercise**
+
+### Making predictions from our model
+
+Now that we've created a model, we want to use it to make predictions. This is done using the `predict` function. We will add our predicted values to the ckd data set as a new column, iGFR_pred.  
+
+```{r}
+ckd <- ckd %>%
+        mutate(iGFR_pred = round(predict(slr.fit, ckd),0))
+```
+
+The values we get from the predict call are identical to the fitted.values from the model fit call since we used the same data for both functions. 
+
+```{r}
+comp <- cbind(round(slr.fit$fitted.values,0), ckd$iGFR_pred)
+head(comp)
+```
+
+
+We can plot the actual vs predicted values to gain a sense of how well the model is predicting iGFRc.  
+
+```{r}
+# Make a plot to compare predictions to actual (prediction on x axis). 
+ggplot(ckd, aes(x = iGFR_pred, y = iGFRc)) + 
+  geom_point() +
+  geom_abline(color = "blue")
+
+```
+I hope we can improve on this model! So far, the R2 is around 0.5 and the plot of actual versus predicted values does not look linear. An obvious next step is to add complexity to the model and use other available variables to try to better predict iGFRc.
+
+
+## Multivariate linear regression
+
+With multivariate linear regression, we will use more than one dependent variable to predict our independent variable. We can do this using the same `lm` function we used above, but we change the formula to include the additonal variables. This can be as extreme as y ~ . to regress the response by ALL available predictors. Though we may evaluate this type of model, we have to be particularly careful of multicolinearity from highly correlated dependent variables, as this will introduce problems into the prediction.  
+
+### Split the data
+
+Now is a good time to introduce the concept of train and test data sets. This is a fundamental practice in predictive modeling. We will randomly split our data into two groups: a training set and a test set. We will fit our model to one set (train) and use the other (test) for making predictions. The test set is sometimes called the internal validation set. We can then assess a model's expected performance by comparing the error in the train and test sets. A commonly used approach splits the data 75:25 as train:test.  
+
+```{r}
+#reload data to remove SLR predictions
+data <- read_csv("data/CKD_data.csv")
+GFR <- read_csv("data/CKD_GFR.csv")
+#join by ID, convert ID to factor
+ckd <- left_join(GFR, data, by = "id") %>%
+        mutate(id = factor(id))
+
+# sample(x, size, replace = FALSE, prob = NULL)
+set.seed(622) #so we all get same random numbers
+train <- sample(nrow(ckd), nrow(ckd) * 0.75)
+test <- -train
+
+ckd_train <- ckd[train, ] %>%
+              select(-id)
+ckd_test <- ckd[test, ] %>%
+              select(-id)
+
+# alternatively, two dplyr versions that only work on tibbles: 
+# sample_n(tbl, size, replace = FALSE, weight = NULL, .env = NULL)
+# sample_frac(tbl, size = 1, replace = FALSE, weight = NULL,
+#   .env = NULL)
+```
+
+We will use values in the train and test variables we created as indices to assign rows to one group or the other.
+
+Let's build a model for iGFRc based on all variables (except id). We will fit it to the training data. 
+```{r }
+#fit the model
+mod.full <- lm(iGFRc ~ ., data = ckd_train)
+
+#check out the model info
+glance(mod.full)
+
+tidy(mod.full) %>%
+    arrange(p.value)
+
+#add the predicted values to the train set
+ckd_train <- ckd_train %>%
+              mutate(iGFR_pred = round(augment(mod.full)$.fitted,0))
+```
+
+Plot the actual vs predicted for the training set fit for mod.full.
+```{r}
+ggplot(ckd_train, aes(x = iGFR_pred, y = iGFRc)) + 
+  geom_point() +
+  geom_abline(color = "blue")
+
+```
+
+Looks pretty reasonable and much improved over the simple linear regression model. 
+
+
+Let's predict the iGFRc values for our test set to see how the model does when predicting new data.
+
+**Exercise 2:**
+
+Predict the iGFRc values for the test set using the mod.full and plot the actual vs predicted values.
+
+```{r, echo = FALSE, eval = FALSE}
+
+
+```
+
+```{r}
+#predict values for test set and add as new column, iGFR_pred
+ckd_test <- ckd_test %>%
+              mutate(iGFR_pred = round(predict(mod.full, ckd_test),0))
+
+
+#plot actual vs predicted for test set
+ggplot(ckd_test, aes(x = iGFR_pred, y = iGFRc)) + 
+  geom_point() +
+  geom_abline(color = "blue")
+
+```
+
+**End exercise**
+
+### Evaluating model performance
+
+We can examine how well the model is predicting iGFRc in a few ways: (1) plot the actual vs predicted values, (2) plot the residuals vs predicted values, and (3) plot a qq plot or histogram of the residuals. The residuals are the difference between the actual and predicted values. We will also calculate the root mean squared error (RMSE), as this metric is often used to express the error for a model so its performance can be compared to that from other models.  
+Linear regression relies on several assumptions (though it can be pretty robust even if some assumptions are violated to some degree). 
+
+These assumptions include:
+- The relationship between the response and predictors is linear and additive
+- The errors are independent (i.e., not serially correlated)
+- The errors have constant variance (i.e., have homoscedasticity)
+- The errors are normally distributed
+
+We can examine the residuals to make sure our assumptions are valid for a particular model. We are looking for low residuals that have similar variance over the range of predicted values and are normally distributed. We also look for a linear trend in the actual vs observed values. 
+
+```{r, echo = FALSE}
+ckd_test <- ckd_test %>%
+              mutate(iGFR_pred = round(predict(mod.full, ckd_test),0))
+```
+
+```{r}
+# Make a residual plot (prediction on x axis). 
+ckd_test <- ckd_test %>%
+        mutate(residuals = iGFRc - iGFR_pred)
+
+ggplot(ckd_test, aes(x = iGFR_pred, y = residuals)) + 
+  geom_point() +
+  geom_hline(yintercept = 0, color = "blue")
+
+# Make a QQ plot of the residuals
+ggplot(ckd_test, aes(sample = residuals)) + 
+  stat_qq() + stat_qq_line(linetype = 2, color = "blue")
+
+# alternatively can visually assess normality via histogram of residuals
+# ggplot(ckd_test, aes(residuals)) +
+#   geom_histogram()
+```
+
+We can use the `rmse` function from the `Metrics` package to calculate the RMSE for the training and test set predictions. If our model is not overfit, we expect the values for the two sets to be similar. As you might expect, a lower RMSE indicates a better fitting model. Another commonly calculated error metric, Mean Absolute Percent Error (MAPE), can be calculated using the `mape` function from the `Metrics` package.  
+
+```{r}
+# rmse(actual, predicted)
+rmse(ckd_train$iGFRc, mod.full$fitted.values) #7.04
+rmse(ckd_test$iGFRc, ckd_test$iGFR_pred) #8.10
+
+# mape(actual, predicted)
+mape(ckd_train$iGFRc, mod.full$fitted.values) #0.13 or 13%
+mape(ckd_test$iGFRc, ckd_test$iGFR_pred) #0.16 or 16%
+```
+
+### Examining collinearity
+
+As mentioned before, we need to be careful when several predictors have strong correlation. The variance inflation factor (VIF) can be calculated for each model to determine how much the variance of a regression coefficient is inflated due to multicollinearity in the model.
+
+The smallest possible value of VIF is one (absence of multicollinearity). As a rule of thumb, a VIF value that exceeds 5 or 10 indicates a problematic amount of collinearity.
+
+
+```{r}
+vif(mod.full)
+```
+As we expected! There are several VIF above 5 or 10 in our model. Though it seems to fit well, the coefficients may be unstable due to the multicollinearity, making the model's performance on new data unpredictable.
+
+When multicollinearity is present, a first consideration is to remove highly correlated variables, since the presence of multicollinearity implies that the information that this variable provides about the response is redundant in the presence of the other variables. Removal of one or more variables may have an unexpected effect on other variables. 
+
+### Feature engineering
+
+Feature engineering is the process of creating and selecting the best predictors for a model. This is an area where the 'art' of modeling is practiced and can have a great impact on results. The scope of this topic is beyond our time in this course, but we will do a brief exercise in variable selection to attempt to resolve our collinearity problem. 
+
+Let's go back and review the information from our full model fit to get an idea of what variables we may want to keep and not. 
+
+```{r}
+#sort the variables by the p value of their coefficients
+tidy(mod.full) %>%
+    arrange(p.value)
+
+#if we select the 'most' significant variables with pvalues ~ 0.05:
+# Trp, Kynurenine, BUN, CYC_DB, Phe, ADMA
+
+```
+To specify a formula for multiple variables, we use the y ~ a + b + c format, where a, b, and c are the independent variables we want to include in the model.
+
+
+**Exercise 3:** 
+
+(1) Run the code chunk below to reset the data variables. 
+
+```{r}
+#reload data to remove full model predictions
+data <- read_csv("data/CKD_data.csv")
+GFR <- read_csv("data/CKD_GFR.csv")
+#join by ID, convert ID to factor
+ckd <- left_join(GFR, data, by = "id") %>%
+        mutate(id = factor(id))
+
+# sample(x, size, replace = FALSE, prob = NULL)
+set.seed(622) #so we all get same random numbers
+train <- sample(nrow(ckd), nrow(ckd) * 0.75)
+test <- -train
+
+ckd_train <- ckd[train, ] %>%
+              select(-id)
+ckd_test <- ckd[test, ] %>%
+              select(-id)
+```
+
+
+(2) Fit a new model, mod2, that uses Trp, Kynurenine, BUN, CYC_DB, Phe, ADMA to predict iGFRc in the training set. Add the predicted values to the training set as a new variable, iGFR_pred.
+```{r, echo = FALSE, eval = FALSE}
+
+```
+
+```{r}
+mod2 <- lm(iGFRc ~ Trp + Kynurenine + BUN + CYC_DB 
+               + Phe + ADMA, data = ckd_train)
+glance(mod2)
+tidy(mod2) %>%
+    arrange(p.value)
+
+#add the predicted values to the train set
+ckd_train <- ckd_train %>%
+              mutate(iGFR_pred = round(augment(mod2)$.fitted,0))
+```
+
+(3) Write out the equation for this model. Does it make sense, based on your prior knowledge?
+```{r, echo = FALSE, eval = FALSE}
+
+```
+
+
+```{r}
+# iGFRc = 0.44*Trp - 2.95*Kynurenine - 0.43*BUN - 5.94*CYC_DB - 12.2*ADMA - 0.13*Phe
+```
+
+(4) Find the R2, RMSE, and MAPE values for the model fit on the training set.
+```{r, echo = FALSE, eval = FALSE}
+
+```
+
+
+```{r}
+glance(mod2)$r.squared #0.870
+rmse(ckd_train$iGFRc, mod2$fitted.values) #7.08
+mape(ckd_train$iGFRc, mod2$fitted.values) #0.14 or 14%
+```
+
+(5) Check for collinearity.
+```{r, echo = FALSE, eval = FALSE}
+
+```
+
+
+```{r}
+vif(mod2) #yay!!
+```
+
+(6) Examine the residuals and actual vs predicted.
+```{r, echo = FALSE, eval = FALSE}
+
+```
+
+
+```{r}
+# Make a residual plot (prediction on x axis). 
+ckd_train <- ckd_train %>%
+        mutate(residuals = iGFRc - iGFR_pred)
+
+ggplot(ckd_train, aes(x = iGFR_pred, y = residuals)) + 
+  geom_point() +
+  geom_hline(yintercept = 0, color = "blue")
+
+#plot actual vs predicted
+ggplot(ckd_train, aes(x = iGFR_pred, y = iGFRc)) + 
+  geom_point() +
+  geom_abline(color = "blue")
+```
+
+**End Exercise** 
+
+As the last step, we'll confirm the performance on our test set.
+```{r, echo = FALSE}
+mod2 <- lm(iGFRc ~ Trp + Kynurenine + BUN + CYC_DB 
+               + Phe + ADMA, data = ckd_train)
+```
+
+```{r}
+#predict values for test set and add as new column, iGFR_pred
+ckd_test <- ckd_test %>%
+              mutate(iGFR_pred = round(predict(mod2, ckd_test),0))
+
+
+#plot actual vs predicted for test set
+ggplot(ckd_test, aes(x = iGFR_pred, y = iGFRc)) + 
+  geom_point() +
+  geom_abline(color = "blue")
+
+# Make a residual plot (prediction on x axis). 
+ckd_test <- ckd_test %>%
+        mutate(residuals = iGFRc - iGFR_pred)
+
+ggplot(ckd_test, aes(x = iGFR_pred, y = residuals)) + 
+  geom_point() +
+  geom_hline(yintercept = 0, color = "blue")
+
+# QQ plot of the residuals
+ggplot(ckd_test, aes(sample = residuals)) + 
+  stat_qq() + stat_qq_line(linetype = 2, color = "blue")
+
+#calculate test set error
+rmse(ckd_test$iGFRc, ckd_test$iGFR_pred) #7.92
+mape(ckd_test$iGFRc, ckd_test$iGFR_pred) #0.16 or 16%
+```
+We solved our collinearity problem and didn't really lose anything on performance. This also made our model less complex. The RMSE and MAPE values for the train and test sets are similar and the residual plots look pretty good. From our prior knowledge, the variables and signs of the coefficients in the model seem reasonable. These results suggest we could expect similar performance from our model when it is applied to new data that is of a similar range as our train and test sets. 
+
+## Acknowledgement
+
+The data used in this lesson was simulated from a data set generated in collaboration with Dr. Ellen Brooks. Prior to simulation, the metabolomics data was processed and cleaned by Dr. David Lin. The lesson design was influenced by the DataCamp course: Supervised Learning in R: Regression.
+
+## Summary
+
+- Linear regression is a widely applied tool in predictive modeling and machine learning. 
+- There are 4 primary assumptions in multivariate linear regression that must be evaluated for a given model. 
+- Best practice is to randomly split data into train and test sets, used to fit and evaluate the model.
+- Collinearity can be a problem with multivariate linear models.
+
+

@@ -1,5 +1,5 @@
 ---
-title: 'Lesson 6: Working with relational databases'
+title: 'Lesson 7: Working with relational databases'
 output: html_document
 ---
 

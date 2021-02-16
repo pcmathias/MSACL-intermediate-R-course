@@ -1,0 +1,245 @@
+---
+title: 'Lesson 11: Bringing it all together from import to graph to result'
+output:
+  html_document: default
+---
+
+```{r setup_11, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+library(janitor)
+library(fs)
+```
+
+## From Import to Graph
+
+Let's pull all oru data together and explore the big data set. What follows are the steps to replicate the discovery of one particular problem in the mock data: excessively good R^2^ data.
+
+```{r, message=FALSE}
+all_batches <- dir_ls("data", glob = "*_b.csv") %>%
+  #list.files("data/", pattern = "_b.csv$") %>%
+  #file.path("data", .) %>%
+  map_dfr(read_csv) %>%
+  clean_names() %>%
+  as_tibble()
+```
+
+```{r}
+ggplot(all_batches, aes(x = calibration_r2, color = compound_name, fill = compound_name)) +
+  geom_histogram(bins = 30)
+ggplot(all_batches, aes(x = batch_collected_timestamp, y = calibration_r2, color = compound_name)) +
+  geom_line()
+```
+
+There's something interesting going on with the R^2^ values in the month of May, where a large number of them report a value of 1.0 -- a perfect fit. Let's focus on that month, and spread out the data so we can clarify whether it's all compounds or just oxymorphone (the magenta color on top).
+
+```{r}
+may_plot <- all_batches %>%
+  filter(batch_collected_timestamp > ymd("2017-04-15"), batch_collected_timestamp < ymd("2017-06-15")) %>%
+  ggplot(aes(x = batch_collected_timestamp, y = calibration_r2, color = compound_name))
+may_plot +
+  geom_line() +
+  facet_wrap(~ compound_name)
+may_plot +
+  geom_point() +
+  facet_grid(reviewer_name ~ instrument_name) +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+Whatever is going on, it looks like reviewer 'Dave' is the only person it is happening to. 
+
+## From Graph to Result
+
+Based on the batch-level data, we can see that 'Dave' -- and apparently only Dave -- has perfect R^2^ values on every batch of data he reviewed throughout the month of May. Digging deeper will require merging information from the batch level with information at the sample (and possibly peak) level. 
+
+```{r, message=FALSE}
+all_samples <- dir_ls("data", glob = "*_s.csv") %>%
+  map_dfr(read_csv) %>%
+  clean_names()
+daves_data <- all_samples %>%
+  left_join(select(all_batches, -calibration_slope, -calibration_intercept)) %>%
+  filter(
+    batch_collected_timestamp > ymd("2017-04-20"),
+    batch_collected_timestamp < ymd("2017-06-10"),
+    sample_type == "standard",
+    reviewer_name == "Dave"
+  )
+```
+
+The following plots of `daves_data` provide compelling evidence for what happened: Dave unselected the middle five calibrators in order to draw a straight line and maximize the R^2^ term.
+
+```{r, warning=FALSE}
+daves_data %>%
+  ggplot(aes(x = batch_collected_timestamp, y = used_for_curve, color = compound_name)) +
+  geom_point() +
+  facet_grid(compound_name ~ expected_concentration) +
+  geom_vline(xintercept = as.numeric(as_datetime(c("2017-05-01", "2017-06-01"))),
+    linetype = 1,
+    colour = "black") +
+  theme(axis.text.x = element_text(angle = 90))
+daves_data <- daves_data %>% 
+  mutate(pct_diff = (concentration - expected_concentration) / expected_concentration,
+         within_20 = abs(pct_diff) <= 0.2)
+daves_data %>%
+  filter(compound_name == "codeine") %>%
+  ggplot(aes(x = batch_collected_timestamp, y = pct_diff, color = within_20)) +
+  geom_point() +
+  facet_wrap(~ expected_concentration) +
+  ggtitle("Codeine Only") +
+  geom_vline(xintercept = as.numeric(as_datetime(c("2017-05-01", "2017-06-01"))), 
+    linetype = 1, 
+    colour = "black")
+```
+
+The second plot shows that calibrators were dropped regardless of whether they would be within 20% of the expected concentration, suggesting that they were dropped for some other reason. The data does not say why 'Dave' did this, but there are a couple of good guesses here which revolve around training.
+
+We intentionally included several other issues within the database, which will require aggregation and plotting to discover.
+
+**Exercise: Revealing problems based on ion ratios**
+
+Ion ratios can be particularly sensitive to instrument conditions, and variability is a significant problem in mass spec based assays which use qualifying ions. With the tools that have been demonstrated in this course, we can look for outlier spikes and stability trends, and separate them out across instruments, or compounds, or sample types. Within the 1 year of data provided, identify any potential issues with the data that might suggest problems with workflows, training, or other issues that could impact quality of the results.
+
+This is a very open ended exercise, so consider the following areas to explore:
+
+- Consider all of the qualitative data elements that could influence the observed ion ratios: visualize data as a function of combinations of these variables
+- Time-based trending can make abrupt changes very obvious
+- Data from all three file types (batches, samples, and peaks) are important in isolating isssues
+- When there are a lot of data point to visualize, consider aggregation and/or visualizations that represent statistical summaries or fitting
+
+```{r, echo = FALSE, eval = FALSE}
+
+# put your code here
+
+```
+
+```{r}
+all_samples %>%
+  left_join(all_batches) %>%
+  ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = compound_name)) +
+  geom_smooth() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  facet_grid(compound_name ~ instrument_name) # doc is grossly out of step, 
+# look in more detail
+```
+
+```{r}
+# calculate weekly average peak area by compound and instrument
+# exclude internal standard compounds
+mean_by_week <- all_peaks %>%
+  left_join(all_batches) %>%
+  filter(!str_detect(compound_name, "-")) %>%
+  filter(peak_area > 0) %>%
+  mutate(week = week(batch_collected_timestamp)) %>%
+  group_by(compound_name, instrument_name, week, chromatogram_name) %>%
+  summarise(mean = mean(peak_area), sd = sd(peak_area), n = n())
+
+ggplot(mean_by_week, aes(x = week, y = mean, color = chromatogram_name)) +
+  geom_line() +
+  geom_point() +
+  geom_smooth() +
+  facet_grid(compound_name ~ instrument_name, scales = "free_y") # quant is constant, qual drops
+```
+
+```{r}
+all_samples %>%
+  left_join(all_batches) %>%
+  filter(instrument_name != "doc") %>%
+  ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = compound_name)) +
+  geom_smooth() +
+  facet_grid(compound_name ~ instrument_name) +
+  theme(axis.text.x = element_text(angle = 90)) # grumpy+oxycodone looks least like the others
+```
+
+```{r}
+all_samples %>%
+  left_join(all_batches) %>%
+  filter(compound_name == "oxycodone" & instrument_name != "doc") %>%
+  ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = instrument_name)) +
+  ggtitle("oxycodone") +
+  geom_smooth() # grumpy+oxycodone clearly outlying
+```
+
+```{r}
+all_samples %>%
+  left_join(all_batches) %>%
+  filter(compound_name == "oxycodone" & instrument_name != "doc" & ion_ratio > 0) %>%
+  ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = instrument_name)) +
+  ggtitle("oxycodone") +
+  #geom_point() +
+  geom_smooth() # ion_ratio!=0 makes it even more clear
+```
+
+
+```{r}
+all_peaks <- dir_ls("data", glob = "*_p.csv") %>%
+  #list.files("data/", pattern = "_p.csv$") %>%
+  #file.path("data", .) %>%
+  map_dfr(read_csv, col_types = cols()) %>%
+  clean_names()
+
+mean_by_week <- all_peaks %>%
+  left_join(all_batches) %>%
+  filter(compound_name == "oxycodone" & instrument_name == "grumpy" & peak_area > 0) %>%
+  mutate(week = week(batch_collected_timestamp)) %>%
+  group_by(week, chromatogram_name) %>%
+  summarise(mean = mean(peak_area), sd = sd(peak_area), n = n())
+
+ggplot(mean_by_week, aes(x = week, y = mean, color = chromatogram_name)) +
+  geom_line() +
+  geom_point() +
+  geom_smooth() +
+  ggtitle("oxycodone + grumpy") +
+  facet_grid(chromatogram_name ~ ., scales = "free_y") # quant is constant, qual drops
+```
+
+
+```{r}
+mean_by_week %>%
+  mutate(sd = NULL, n = NULL) %>%
+  spread(chromatogram_name, mean) %>%
+  mutate(ion_ratio = quant / qual) %>%
+  ggplot(aes(x = week, y = ion_ratio)) +
+  geom_line() +
+  geom_smooth() +
+  ggtitle("ion_ratio by week for oxycodone on grumpy") # basically recreate step 4
+```
+```
+
+```{r}
+mean_by_week_reviewer <- all_peaks %>%
+left_join(all_batches) %>% 
+filter(!str_detect(compound_name, "-")) %>% 
+filter(peak_area > 0) %>%
+mutate(week = week(batch_collected_timestamp)) %>%
+group_by(compound_name, reviewer_name, week, chromatogram_name) %>%
+summarise(mean = mean(peak_area), sd = sd(peak_area), n = n())
+
+ggplot(mean_by_week_reviewer, aes(x = week, y = mean, color = chromatogram_name)) +
+   geom_line() +
+   geom_point() +
+   geom_smooth() +
+   facet_grid(compound_name ~ reviewer_name, scales = "free_y")
+# quants run by Walter show a dip
+```
+
+```{r}
+mean_by_week_Walter <- all_peaks %>%
+left_join(all_batches) %>% 
+filter(reviewer_name == "Walter") %>%
+filter(!str_detect(compound_name, "-")) %>% 
+filter(peak_area > 0) %>%
+mutate(week = week(batch_collected_timestamp)) %>%
+group_by(compound_name, instrument_name, week, chromatogram_name) %>%
+summarise(mean = mean(peak_area), sd = sd(peak_area), n = n())
+
+ggplot(mean_by_week_Walter, aes(x = week, y = mean, color = chromatogram_name)) +
+   geom_line() +
+   geom_point() +
+   geom_smooth() +
+   facet_grid(compound_name ~ instrument_name, scales = "free_y")
+# downward trend in quant peak areas over time across instruments
+```
+
+**End of Exercise**
+
