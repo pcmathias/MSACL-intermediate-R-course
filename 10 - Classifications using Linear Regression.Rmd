@@ -53,7 +53,8 @@ summary(ckd)
 We can create boxplots for each variable, filled by Stage, to see if there are differences in distributions across the classes. This may provide clues about which variables may be good predictors for CKD Stage.
 
 ```{r}
-grpData <- gather(ckd, variable, value, 3:14)
+grpData <- pivot_longer(data = ckd, names_to = "variable", 
+                        values_to = "value", cols = 3:14)
 
 ggplot(grpData, aes(factor(variable), value, fill = Stage)) +
   geom_boxplot() + facet_wrap(~variable, scale="free")

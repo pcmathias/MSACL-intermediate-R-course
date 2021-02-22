@@ -48,9 +48,11 @@ summary(ckd)
 Let's take a quick look at the distributions of our variables using violin plots. We can do this with a few lines of code, if we gather our data into a long format and then use the `facet_wrap` function to create small tiled plots for each variable.  
 
 ```{r}
-meltData <- gather(ckd[2:14], variable, value)
+long_data <- ckd %>% pivot_longer(cols = 2:14, 
+                                  names_to = "variable", 
+                                  values_to = "value")
 
-ggplot(meltData, aes(factor(variable), value)) +
+ggplot(long_data, aes(factor(variable), value)) +
   geom_violin() + facet_wrap(~variable, scale="free")
 ```
 
