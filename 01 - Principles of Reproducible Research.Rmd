@@ -72,7 +72,7 @@ Contrast that with the same operations but using sequential steps without the pi
 ```{r, eval = FALSE}
 my_morning <- wake_up(I, time = "8:00")
 my_morning <- get_out_of_bed(my_morning, side = "correct")
-my_morning <- get_dressed(my_morning, pants = TRUE, shirt = TRUE) %>%
+my_morning <- get_dressed(my_morning, pants = TRUE, shirt = TRUE)
 my_morning <- leave_house(my_morning, car = TRUE, bike = FALSE)
 ```
 This is readable but contains quite a bit of duplicative code.
@@ -290,7 +290,7 @@ Let's start a new project :
 2.  Select **New Directory** option
 3.  In the Project Type prompt, select **New Project**
 4.  In the Directory Name prompt under Create New Project, enter
-    "sample-project-structure"
+    "msacl-201-mass-spec-project"
 5.  In the Create Project as a Subdirectory of prompt under Create New
     Project, navigate to the Projects folder you just created (or
     another directory of your choosing). You can type in the path or hit
@@ -349,7 +349,7 @@ multiple resources that provide some guidance [(Parzakonis
 **Exercise 3**
 
 Be sure to work within the RStudio window that contains your
-"sample-project-structure" project. Refer to the top right of the window
+"msacl-201-mass-spec-project" project. Refer to the top right of the window
 and you should see the project name displayed there. Let's go ahead and
 create a minimal project structure by running the following code within
 the console:
@@ -442,7 +442,7 @@ file.csv is a data file in the root directory (I know, not ideal
 practice per our discussion on project structure above), then you can
 reference the file using `here("file.csv")`, where `here()` indicates
 the current directory. So reading the file could be accomplished with
-`read.csv(here("file.csv"))` and it could be run by any who you share
+`read_csv(here("file.csv"))` and it could be run by any who you share
 the project with.
 
 The here package couples well with an RStudio Project because there is
