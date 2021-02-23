@@ -72,17 +72,10 @@ Try to use `bind_rows()` to combine all of the sample data from February and eac
 
 First try binding a peaks file with the February samples file:
 
-
 ```{r, echo = FALSE, eval = FALSE}
 # complete this code
 peaks_samples <- bind_rows()
 summary(peaks_samples)
-```
-
-
-```{r}
-peaks_samples <- bind_rows(january_peaks, february_samples)
-summary(peaks_samples) # bind_rows completes, but adds all columns in data set with NAs
 ```
 
 Observe the number of columns and visualize the new data frame directly.
@@ -95,11 +88,6 @@ batches_samples <- bind_rows()
 summary(batches_samples)
 ```
 
-```{r}
-batches_samples <- bind_rows(january_batches,   february_samples)
-summary(batches_samples) # bind_rows completes, but adds all columns in data set with NAs
-```
-
 Now bind both samples files:
 
 ```{r, echo = FALSE, eval = FALSE}
@@ -108,10 +96,6 @@ batches_samples <- bind_rows()
 summary(batches_samples)
 ```
 
-```{r}
-samples_samples <- bind_rows(january_samples, february_samples) # no extra columns
-summary(samples_samples)
-```
 **End Exercise**
 
 There is an related command called `bind_cols` which will append columns to a tibble, but it also requires very clean data. This command will not check to make sure the order of values are correct between the two things being bound.
@@ -183,15 +167,6 @@ select_all <- left_join()
 select_allR <- right_join() 
 ```
 
-```{r}
-#data from all 3 tables joined to retain data based on select_samples
-select_all <- left_join(select_samples, select_peaksWide) #notice which is first
-
-#alternative
-select_allR <- right_join(select_peaksWide, select_samples) #notice reverse in right_join
-```
-
-
 **End Exercise**
 
 ## Back to our problem
@@ -230,58 +205,11 @@ Summarize the grouped data to find the mean, sd, and cv of peak areas and the nu
 
 ```
 
-
-```{r}
-#create primary keys in each table
-january_peaks <- january_peaks %>%
-  unite(keyB, c(batch_name, compound_name), sep=":", remove = FALSE)
-
-january_batches <- january_batches %>%
-  unite(keyB, c(batch_name, compound_name), sep=":", remove = FALSE)
-
-january_samples <- january_samples %>%
-  unite(keyB, c(batch_name, compound_name), sep=":", remove = FALSE)
-
-#join peaks with batches and then with samples to retain data from samples
-jan_peaks_batches <- left_join(january_peaks,january_batches)
-jan_samples_peaks_batches <- right_join(jan_peaks_batches, january_samples)
-```
-
-```{r}
-#group by conditions and summarize
-qc_table <- jan_samples_peaks_batches %>% 
-  filter(sample_type == "qc") %>% 
-  group_by(instrument_name, compound_name, expected_concentration, chromatogram_name) %>%
-  summarize(mean_area = mean(peak_area),
-            sd_area = sd(peak_area),
-            cv_area = sd_area/mean_area,
-            n = n()) 
-```
-
-```{r}
-ggplot(filter(jan_samples_peaks_batches, sample_type == "qc")) +
-  geom_boxplot(aes(x = compound_name, y = peak_area, color = instrument_name)) +
-  facet_grid(as.factor(expected_concentration)~chromatogram_name, scales = "free") +
-  labs(x = " ", y = "Peak Area", color = "Instrument") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1),
-        panel.spacing.x = unit(3.6, "mm"))
-```
-
 Bonus!
 Create a boxplot showing QC concentration by compound and instrument for each expected concentration.
 
 ```{r, echo = FALSE, eval = FALSE}
 
-```
-
-
-```{r}
-ggplot(filter(jan_samples_peaks_batches, sample_type == "qc", chromatogram_name == "quant")) +
-  geom_boxplot(aes(x = compound_name, y = concentration, color = instrument_name)) +
-  facet_grid(as.factor(expected_concentration)~., scales = "free") +
-  labs(x = " ", y = "Concentration", color = "Instrument") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1),
-        panel.spacing.x = unit(3.6, "mm"))
 ```
 
 
