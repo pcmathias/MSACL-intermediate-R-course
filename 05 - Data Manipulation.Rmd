@@ -202,7 +202,7 @@ batch_jan_tat <- batch_jan %>%
   mutate(tat_duration = batch_collected_timestamp %--% review_complete_timestamp,
          tat_minutes = tat_duration / dminutes(1),
          tat_hours = tat_duration / dhours(1),
-         tat_dayss = tat_duration / ddays(1))
+         tat_days = tat_duration / ddays(1))
 ```
 
 **Exercise 2**
@@ -451,7 +451,7 @@ There are other useful tidyr functions such as `separate()` and `unite()` to spl
 The "2017-01-06-batch-messy.csv" file in the messy subdirectory of the data dir is related to the "2017-01-06.xlsx" batch file you have worked with before. Unfortunately, it is not set up to have a single observation per row. There are two problems that need to be solved:
 
 1. Each parameter in a batch is represented with a distinct column per compound, but all compounds appear on the same row. Each compound represents a distinct observation, so these should appear on their own rows.
-1. There are 3 parameters per obsevation (compound) - calibration slope, intercept, and R^2. However these appear on different lines. All 3 paramters need to appear on the same row.
+1. There are 3 parameters per observation (compound) - calibration slope, intercept, and R^2. However these appear on different lines. All 3 parameters need to appear on the same row.
 
 After solving these problems, each row should contain a single compound with all three parameters appearing on that single row. Use `pivot_longer()` and `pivot_wider()` to reformat this data.
 
