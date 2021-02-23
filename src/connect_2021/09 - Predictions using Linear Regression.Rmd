@@ -12,6 +12,7 @@ library(RColorBrewer)
 library(broom)
 library(Metrics)
 library(car)
+library(janitor)
 
 ```
 
@@ -23,14 +24,14 @@ We will need to use our previously learned skills to read in the data and join t
 
 ```{r}
 #load in CKD_data.csv and CKD_GFR.csv
-data <- read_csv("data/CKD_data.csv")
+data <- read_csv("data/CKD_data.csv") %>% clean_names()
 glimpse(data)
 
-GFR <- read_csv("data/CKD_GFR.csv")
-glimpse(GFR)
+gfr <- read_csv("data/CKD_GFR.csv") %>% clean_names()
+glimpse(gfr)
 
 #join by ID, convert ID to factor
-ckd <- left_join(GFR, data, by = "id") %>%
+ckd <- left_join(gfr, data, by = "id") %>%
         mutate(id = factor(id))
 glimpse(ckd)
 
@@ -48,9 +49,11 @@ summary(ckd)
 Let's take a quick look at the distributions of our variables using violin plots. We can do this with a few lines of code, if we gather our data into a long format and then use the `facet_wrap` function to create small tiled plots for each variable.  
 
 ```{r}
-meltData <- gather(ckd[2:14], variable, value)
+long_data <- ckd %>% pivot_longer(cols = 2:14, 
+                                  names_to = "variable", 
+                                  values_to = "value")
 
-ggplot(meltData, aes(factor(variable), value)) +
+ggplot(long_data, aes(factor(variable), value)) +
   geom_violin() + facet_wrap(~variable, scale="free")
 ```
 
@@ -82,10 +85,10 @@ We will first fit the model and then examine the model output. `lm` returns an o
 ```{r}
 #fit the linear model
 # lm(formula = ___, data = ___)
-slr.fit <- lm(iGFRc ~ SCr, ckd)
+slr_fit <- lm(igfrc ~ scr, ckd)
 
 #print the model
-slr.fit
+slr_fit
 
 #what is the equation of our model? Does this make sense to you?
 ```
@@ -97,10 +100,10 @@ Next, we want to know more about our model - is it a good fit? What are the pred
 
 ```{r}
 #view a summary of the model
-summary(slr.fit)
+summary(slr_fit)
 
 #extract information
-coef(slr.fit)
+coef(slr_fit)
 
 ```
 
@@ -109,23 +112,23 @@ A model fit summary is fine for scrolling through and enables you to extract som
 The `tidy` function takes the coefficient information and organizes it into a dataframe where each row holds data for one term of the model.  
 
 ```{r}
-tidy(slr.fit)
+tidy(slr_fit)
 # aha!
 ```
 
 You may also want to see the actual values with the fitted values and their residuals, or bring them into a format you can analyze further. This is done using the `augment` function - because it augments the original data with the information from the model.
 
 ```{r}
-head(augment(slr.fit))
+head(augment(slr_fit))
 
 #if you want to add the fit-related columns to the entire data frame, specify the data frame
-head(augment(slr.fit, ckd))
+head(augment(slr_fit, ckd))
 ```
 
 Finally, you can use the `glance` function to get a single row of the performance and error metrics. This format becomes very useful when comparing different fits on the same data.  
 
 ```{r}
-glance(slr.fit)
+glance(slr_fit)
 ```
 
 
@@ -139,10 +142,10 @@ Select a variable (other than SCr) and perform a single variable regression for 
 ```
 
 ```{r}
-my.slr.fit <- lm(iGFRc ~ SDMA, ckd)
+my_slr_fit <- lm(igfrc ~ sdma, ckd)
 
-tidy(my.slr.fit) #equation: iGFRc = -24.7*SDMA + 73.5
-glance(my.slr.fit) #R2: 0.48
+tidy(my_slr_fit) #equation: iGFRc = -24.7*SDMA + 73.5
+glance(my_slr_fit) #R2: 0.48
 ```
 
 **End exercise**
@@ -153,13 +156,13 @@ Now that we've created a model, we want to use it to make predictions. This is d
 
 ```{r}
 ckd <- ckd %>%
-        mutate(iGFR_pred = round(predict(slr.fit, ckd),0))
+        mutate(igfr_pred = round(predict(slr_fit, ckd),0))
 ```
 
 The values we get from the predict call are identical to the fitted.values from the model fit call since we used the same data for both functions. 
 
 ```{r}
-comp <- cbind(round(slr.fit$fitted.values,0), ckd$iGFR_pred)
+comp <- cbind(round(slr_fit$fitted.values,0), ckd$igfr_pred)
 head(comp)
 ```
 
@@ -168,7 +171,7 @@ We can plot the actual vs predicted values to gain a sense of how well the model
 
 ```{r}
 # Make a plot to compare predictions to actual (prediction on x axis). 
-ggplot(ckd, aes(x = iGFR_pred, y = iGFRc)) + 
+ggplot(ckd, aes(x = igfr_pred, y = igfrc)) + 
   geom_point() +
   geom_abline(color = "blue")
 
@@ -186,10 +189,10 @@ Now is a good time to introduce the concept of train and test data sets. This is
 
 ```{r}
 #reload data to remove SLR predictions
-data <- read_csv("data/CKD_data.csv")
-GFR <- read_csv("data/CKD_GFR.csv")
+data <- read_csv("data/CKD_data.csv") %>% clean_names()
+gfr <- read_csv("data/CKD_GFR.csv") %>% clean_names()
 #join by ID, convert ID to factor
-ckd <- left_join(GFR, data, by = "id") %>%
+ckd <- left_join(gfr, data, by = "id") %>%
         mutate(id = factor(id))
 
 # sample(x, size, replace = FALSE, prob = NULL)
@@ -213,22 +216,22 @@ We will use values in the train and test variables we created as indices to assi
 Let's build a model for iGFRc based on all variables (except id). We will fit it to the training data. 
 ```{r }
 #fit the model
-mod.full <- lm(iGFRc ~ ., data = ckd_train)
+mod_full <- lm(igfrc ~ ., data = ckd_train)
 
 #check out the model info
-glance(mod.full)
+glance(mod_full)
 
-tidy(mod.full) %>%
+tidy(mod_full) %>%
     arrange(p.value)
 
 #add the predicted values to the train set
 ckd_train <- ckd_train %>%
-              mutate(iGFR_pred = round(augment(mod.full)$.fitted,0))
+              mutate(igfr_pred = round(augment(mod_full)$.fitted,0))
 ```
 
 Plot the actual vs predicted for the training set fit for mod.full.
 ```{r}
-ggplot(ckd_train, aes(x = iGFR_pred, y = iGFRc)) + 
+ggplot(ckd_train, aes(x = igfr_pred, y = igfrc)) + 
   geom_point() +
   geom_abline(color = "blue")
 
@@ -251,11 +254,11 @@ Predict the iGFRc values for the test set using the mod.full and plot the actual
 ```{r}
 #predict values for test set and add as new column, iGFR_pred
 ckd_test <- ckd_test %>%
-              mutate(iGFR_pred = round(predict(mod.full, ckd_test),0))
+              mutate(igfr_pred = round(predict(mod_full, ckd_test),0))
 
 
 #plot actual vs predicted for test set
-ggplot(ckd_test, aes(x = iGFR_pred, y = iGFRc)) + 
+ggplot(ckd_test, aes(x = igfr_pred, y = igfrc)) + 
   geom_point() +
   geom_abline(color = "blue")
 
@@ -278,15 +281,15 @@ We can examine the residuals to make sure our assumptions are valid for a partic
 
 ```{r, echo = FALSE}
 ckd_test <- ckd_test %>%
-              mutate(iGFR_pred = round(predict(mod.full, ckd_test),0))
+              mutate(igfr_pred = round(predict(mod_full, ckd_test),0))
 ```
 
 ```{r}
 # Make a residual plot (prediction on x axis). 
 ckd_test <- ckd_test %>%
-        mutate(residuals = iGFRc - iGFR_pred)
+        mutate(residuals = igfrc - igfr_pred)
 
-ggplot(ckd_test, aes(x = iGFR_pred, y = residuals)) + 
+ggplot(ckd_test, aes(x = igfr_pred, y = residuals)) + 
   geom_point() +
   geom_hline(yintercept = 0, color = "blue")
 
@@ -303,12 +306,13 @@ We can use the `rmse` function from the `Metrics` package to calculate the RMSE 
 
 ```{r}
 # rmse(actual, predicted)
-rmse(ckd_train$iGFRc, mod.full$fitted.values) #7.04
-rmse(ckd_test$iGFRc, ckd_test$iGFR_pred) #8.10
+rmse(ckd_train$igfrc, mod_full$fitted.values) #7.36
+rmse(ckd_test$igfrc, ckd_test$igfr_pred) #6.37
 
 # mape(actual, predicted)
-mape(ckd_train$iGFRc, mod.full$fitted.values) #0.13 or 13%
-mape(ckd_test$iGFRc, ckd_test$iGFR_pred) #0.16 or 16%
+mape(ckd_train$igfrc, mod_full$fitted.values) #0.15 or 15%
+mape(ckd_test$igfrc, ckd_test$igfr_pred) #0.12 or 12%
+
 ```
 
 ### Examining collinearity
@@ -319,7 +323,7 @@ The smallest possible value of VIF is one (absence of multicollinearity). As a r
 
 
 ```{r}
-vif(mod.full)
+vif(mod_full)
 ```
 As we expected! There are several VIF above 5 or 10 in our model. Though it seems to fit well, the coefficients may be unstable due to the multicollinearity, making the model's performance on new data unpredictable.
 
@@ -333,7 +337,7 @@ Let's go back and review the information from our full model fit to get an idea 
 
 ```{r}
 #sort the variables by the p value of their coefficients
-tidy(mod.full) %>%
+tidy(mod_full) %>%
     arrange(p.value)
 
 #if we select the 'most' significant variables with pvalues ~ 0.05:
@@ -349,10 +353,10 @@ To specify a formula for multiple variables, we use the y ~ a + b + c format, wh
 
 ```{r}
 #reload data to remove full model predictions
-data <- read_csv("data/CKD_data.csv")
-GFR <- read_csv("data/CKD_GFR.csv")
+data <- read_csv("data/CKD_data.csv") %>% clean_names()
+gfr <- read_csv("data/CKD_GFR.csv") %>% clean_names()
 #join by ID, convert ID to factor
-ckd <- left_join(GFR, data, by = "id") %>%
+ckd <- left_join(gfr, data, by = "id") %>%
         mutate(id = factor(id))
 
 # sample(x, size, replace = FALSE, prob = NULL)
@@ -373,15 +377,15 @@ ckd_test <- ckd[test, ] %>%
 ```
 
 ```{r}
-mod2 <- lm(iGFRc ~ Trp + Kynurenine + BUN + CYC_DB 
-               + Phe + ADMA, data = ckd_train)
+mod2 <- lm(igfrc ~ trp + kynurenine + bun + cyc_db 
+               + phe + adma, data = ckd_train)
 glance(mod2)
 tidy(mod2) %>%
     arrange(p.value)
 
 #add the predicted values to the train set
 ckd_train <- ckd_train %>%
-              mutate(iGFR_pred = round(augment(mod2)$.fitted,0))
+              mutate(igfr_pred = round(augment(mod2)$.fitted,0))
 ```
 
 (3) Write out the equation for this model. Does it make sense, based on your prior knowledge?
@@ -391,7 +395,7 @@ ckd_train <- ckd_train %>%
 
 
 ```{r}
-# iGFRc = 0.44*Trp - 2.95*Kynurenine - 0.43*BUN - 5.94*CYC_DB - 12.2*ADMA - 0.13*Phe
+# iGFRc = 0.42*Trp - 2.99*Kynurenine - 0.49*BUN - 5.4*CYC_DB - 14.7*ADMA - 0.09*Phe + 75.16
 ```
 
 (4) Find the R2, RMSE, and MAPE values for the model fit on the training set.
@@ -401,9 +405,10 @@ ckd_train <- ckd_train %>%
 
 
 ```{r}
-glance(mod2)$r.squared #0.870
-rmse(ckd_train$iGFRc, mod2$fitted.values) #7.08
-mape(ckd_train$iGFRc, mod2$fitted.values) #0.14 or 14%
+glance(mod2)$r.squared #0.851
+rmse(ckd_train$igfrc, mod2$fitted.values) #7.48
+mape(ckd_train$igfrc, mod2$fitted.values) #0.15 or 15%
+
 ```
 
 (5) Check for collinearity.
@@ -425,14 +430,14 @@ vif(mod2) #yay!!
 ```{r}
 # Make a residual plot (prediction on x axis). 
 ckd_train <- ckd_train %>%
-        mutate(residuals = iGFRc - iGFR_pred)
+        mutate(residuals = igfrc - igfr_pred)
 
-ggplot(ckd_train, aes(x = iGFR_pred, y = residuals)) + 
+ggplot(ckd_train, aes(x = igfr_pred, y = residuals)) + 
   geom_point() +
   geom_hline(yintercept = 0, color = "blue")
 
 #plot actual vs predicted
-ggplot(ckd_train, aes(x = iGFR_pred, y = iGFRc)) + 
+ggplot(ckd_train, aes(x = igfr_pred, y = igfrc)) + 
   geom_point() +
   geom_abline(color = "blue")
 ```
@@ -441,26 +446,26 @@ ggplot(ckd_train, aes(x = iGFR_pred, y = iGFRc)) +
 
 As the last step, we'll confirm the performance on our test set.
 ```{r, echo = FALSE}
-mod2 <- lm(iGFRc ~ Trp + Kynurenine + BUN + CYC_DB 
-               + Phe + ADMA, data = ckd_train)
+mod2 <- lm(igfrc ~ trp + kynurenine + bun + cyc_db 
+               + phe + adma, data = ckd_train)
 ```
 
 ```{r}
 #predict values for test set and add as new column, iGFR_pred
 ckd_test <- ckd_test %>%
-              mutate(iGFR_pred = round(predict(mod2, ckd_test),0))
+              mutate(igfr_pred = round(predict(mod2, ckd_test),0))
 
 
 #plot actual vs predicted for test set
-ggplot(ckd_test, aes(x = iGFR_pred, y = iGFRc)) + 
+ggplot(ckd_test, aes(x = igfr_pred, y = igfrc)) + 
   geom_point() +
   geom_abline(color = "blue")
 
 # Make a residual plot (prediction on x axis). 
 ckd_test <- ckd_test %>%
-        mutate(residuals = iGFRc - iGFR_pred)
+        mutate(residuals = igfrc - igfr_pred)
 
-ggplot(ckd_test, aes(x = iGFR_pred, y = residuals)) + 
+ggplot(ckd_test, aes(x = igfr_pred, y = residuals)) + 
   geom_point() +
   geom_hline(yintercept = 0, color = "blue")
 
@@ -469,8 +474,8 @@ ggplot(ckd_test, aes(sample = residuals)) +
   stat_qq() + stat_qq_line(linetype = 2, color = "blue")
 
 #calculate test set error
-rmse(ckd_test$iGFRc, ckd_test$iGFR_pred) #7.92
-mape(ckd_test$iGFRc, ckd_test$iGFR_pred) #0.16 or 16%
+rmse(ckd_test$igfrc, ckd_test$igfr_pred) #6.66
+mape(ckd_test$igfrc, ckd_test$igfr_pred) #0.13 or 13%
 ```
 We solved our collinearity problem and didn't really lose anything on performance. This also made our model less complex. The RMSE and MAPE values for the train and test sets are similar and the residual plots look pretty good. From our prior knowledge, the variables and signs of the coefficients in the model seem reasonable. These results suggest we could expect similar performance from our model when it is applied to new data that is of a similar range as our train and test sets. 
 
