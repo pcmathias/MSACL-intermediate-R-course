@@ -188,6 +188,8 @@ batch_jan_timestamps <- batch_jan %>%
   )
 summary(batch_jan_timestamps)
 ```
+Note, there is an alternate week selector function, `isoweek()`. This one uses the ISO 8601 system and begins each week on a Monday. The `week()` selector returns the number of complete seven day periods that have occurred between the date and January 1st, plus one.  
+
 You can see from the above example that these functions provide a great deal of flexibility in associating a row with arbitrary time scales. This allows the ability to group items by time and calculate summary data, which we will discuss in the next section.
 
 Another common manipulation of interest to the laboratory is calculating the difference between 2 timestamps to analyze turnaround times (TATs). Lubridate has a duration data type and associated operator `%--%` for calculating differences between timestamps. Both variables we perform the calculation on should already be recognized by R as a datetime data type (e.g. POSIXct) and the calculation will return a special interval data type. The syntax is `start_time %--% end_time`. Here we calculate the turnaround time from collection to completing review of a batch:

@@ -12,6 +12,7 @@ library(RColorBrewer)
 library(broom)
 library(car)
 library(pROC)
+library(janitor)
 
 ```
 
@@ -25,16 +26,16 @@ We will need to use our previously learned skills to read in the data and join t
 
 ```{r}
 #load in CKD_data.csv and CKD_stage.csv
-data <- read_csv("data/CKD_data.csv")
+data <- read_csv("data/CKD_data.csv") %>% clean_names()
 glimpse(data)
 
-stage <- read_csv("data/CKD_stage.csv")
+stage <- read_csv("data/CKD_stage.csv") %>% clean_names()
 glimpse(stage)
 
 #join by ID, convert ID and Stage variables to factors
 ckd <- left_join(stage, data, by = "id") %>%
         mutate(id = factor(id), 
-               Stage = factor(Stage))
+               stage = factor(stage))
 glimpse(ckd)
 
 #how many subjects do we have? how many variables? how many subjects in each class?
@@ -46,17 +47,17 @@ glimpse(ckd)
 Let's look at the summary statistics. We also need to be aware of any class bias. This is a situation where one class is over-represented in the data. If so, this can create problems with the modeling. The ideal state is for classes to be balanced. There are several ways to handle class imbalance problems, but they are outside the scope of this course. For this activity, we have provided data that is balanced. 
 
 ```{r}
-prop.table(table(ckd$Stage))
+prop.table(table(ckd$stage))
 summary(ckd)
 ```
 
 We can create boxplots for each variable, filled by Stage, to see if there are differences in distributions across the classes. This may provide clues about which variables may be good predictors for CKD Stage.
 
 ```{r}
-grpData <- pivot_longer(data = ckd, names_to = "variable", 
+long_data <- pivot_longer(data = ckd, names_to = "variable", 
                         values_to = "value", cols = 3:14)
 
-ggplot(grpData, aes(factor(variable), value, fill = Stage)) +
+ggplot(long_data, aes(factor(variable), value, fill = stage)) +
   geom_boxplot() + facet_wrap(~variable, scale="free")
 
 ```
@@ -65,7 +66,7 @@ From the boxplots, it looks like we have several candidate predictors for Stage 
 
 ```{r}
 cors <- ckd %>% 
-        select(-id, -Stage) %>%
+        select(-id, -stage) %>%
         cor(use = 'pairwise.complete.obs')
 
 corrplot(cors, type="lower", method="circle", addCoef.col="black", 
@@ -113,28 +114,29 @@ ckd_test <- ckd[test, ] %>%
 We will fit a new model, modGLM, that uses SCr, BUN, and Kynurenine to predict Stage in the training set. As before, we will add the predicted probability values to the training set as a new variable, Stage_prob. The function `contrasts` shows what `R` is considering as the reference state for the prediction.
 
 ```{r}
-contrasts(ckd$Stage) #what is R considering the reference? CKD3b: 0 = N, 1 = Y
+contrasts(ckd$stage) #what is R considering the reference? CKD3b: 0 = N, 1 = Y
 
-modGLM <- glm(Stage ~ SCr + BUN + Kynurenine, data = ckd_train, family = "binomial")
+mod_glm <- glm(stage ~ scr + bun + kynurenine, data = ckd_train, family = "binomial")
 
 # what is in .fitted? Log odds. 
-head(augment(modGLM))
+head(augment(mod_glm))
 
 # If we want probabilities for comparison, then we need to predict the train using type = "response"
 #add the predicted values to the train set and set the type argument to response
 ckd_train <- ckd_train %>%
-              mutate(Stage_prob = predict(modGLM, ckd_train, type = "response"))
+              mutate(stage_prob = predict(mod_glm, ckd_train, 
+                                          type = "response"))
 
 #using threshold 0.5, convert probabilities to predicted stage
-ckd_train$Stage_pred<- ifelse(ckd_train$Stage_prob > 0.5, "CKD3b", "CKD2")
+ckd_train$stage_pred<- ifelse(ckd_train$stage_prob > 0.5, "CKD3b", "CKD2")
 ```
 
 How did the model do at predicting stage in our training data? We can calculate the accuracy of the model and plot the density of the predicted probabilities by class.  
 ```{r }
 #calculate accuracy, if == statement is TRUE, value = 1, otherwise = 0
-mean(ckd_train$Stage_pred == ckd_train$Stage) 
+mean(ckd_train$stage_pred == ckd_train$stage) 
 
-ggplot(ckd_train, aes(Stage_prob, color = Stage)) + 
+ggplot(ckd_train, aes(stage_prob, color = stage)) + 
   geom_density() 
 ```
 
@@ -151,19 +153,19 @@ Examine modGLM using the `glance()` and `tidy()` functions of the `broom` packag
 ```
 
 ```{r}
-glance(modGLM)
-#AIC 67
-#BIC 79
+glance(mod_glm)
+#AIC 56
+#BIC 68
 
 # The difference between the null deviance and the residual deviance shows how our model is doing against the null model (a model with only the intercept). The wider this gap, the better. 
 # logLik
 
-tidy(modGLM) %>%
+tidy(mod_glm) %>%
     arrange(p.value)
 # The logistic regression coefficients (estimate) give the change in the log odds of the outcome for a one unit increase in the predictor variable. You can take the exp and convert this to odds ratio.
 
-exp(coef(modGLM))
-# Now we can say that for a one unit increase in SCr, the odds of being in group CKD3b (vs in CKD2) increase by a factor of 1.27
+exp(coef(mod_glm))
+# Now we can say that for a one unit increase in SCr, the odds of being in group CKD3b (vs in CKD2) increase by a factor of 1.40
 
 ```
 
@@ -174,7 +176,7 @@ exp(coef(modGLM))
 As mentioned before, we need to be careful when several predictors have strong correlation. Remember that we can calculate the variance inflation factor (VIF) for each model to determine how much the variance of a regression coefficient is inflated due to multicollinearity in the model. We want VIF values close to 1 (meaning no multicollinearity) and less than 5.
 
 ```{r}
-vif(modGLM)
+vif(mod_glm)
 ```
 There does not seem to be a collinearity problem in our model.
 
@@ -184,15 +186,15 @@ When we use the predict function on this model, it will predict the log(odds) of
 
 ```{r}
 #predict on test
-table(ckd_test$Stage) #CKD3b ~ 50%
-ckd_test$Stage_prob <- predict(modGLM, ckd_test, type = "response")
+table(ckd_test$stage) #CKD3b ~ 50%
+ckd_test$stage_prob <- predict(mod_glm, ckd_test, type = "response")
 ```
 
 With the predicted probabilities, we can now apply a threshold and assign each row to either the CKD3b or CKD2 class, based on probability. We will start with a threshold of 0.5. We know the actual assignment from the Stage column (of this training data) so we can calculate the accuracy of our model to predict class. 
 
 ```{r}
-ckd_test$Stage_pred<- ifelse(ckd_test$Stage_prob > 0.5, "CKD3b", "CKD2")
-mean(ckd_test$Stage_pred == ckd_test$Stage) #0.98
+ckd_test$stage_pred<- ifelse(ckd_test$stage_prob > 0.5, "CKD3b", "CKD2")
+mean(ckd_test$stage_pred == ckd_test$stage) #0.9
 ```
 
 **Exercise 2:**
@@ -204,8 +206,8 @@ Select a different threshold and determine the accuracy of the model for that th
 ```
 
 ```{r}
-ckd_test$Stage_pred<- ifelse(ckd_test$Stage_prob > 0.6, "CKD3b", "CKD2")
-mean(ckd_test$Stage_pred == ckd_test$Stage) #0.96
+ckd_test$stage_pred<- ifelse(ckd_test$stage_prob > 0.65, "CKD3b", "CKD2")
+mean(ckd_test$stage_pred == ckd_test$stage) #0.92
 ```
 
 **End exercise**
@@ -217,16 +219,19 @@ Sometimes calculating the accuracy is not good enough to determine model perform
 ```{r}
 # Convert Stage to numeric probability variable (0 or 1)
 ckd_test <- ckd_test %>%
-            mutate(Stage_num = ifelse(Stage == "CKD3b", 1, 0))
+            mutate(stage_num = ifelse(stage == "CKD3b", 1, 0))
 
 # Create a ROC curve object from columns of actual and predicted probabilities
-ROC <- roc(ckd_test$Stage_num, ckd_test$Stage_prob)
+roc_ckd <- roc(ckd_test$stage_num, ckd_test$stage_prob)
 
 # Plot the ROC curve object
-ggroc(ROC, alpha = 0.5, colour = "blue")
+ggroc(roc_ckd, alpha = 0.5, colour = "blue")
 
 # Calculate the area under the curve (AUC)
-auc(ROC)
+auc(roc_ckd) #0.9776
+
+# find the optimal thresholds for different criteria
+coords(roc_ckd, "best")
 
 ```
 
