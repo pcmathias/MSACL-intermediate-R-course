@@ -256,8 +256,11 @@ Develop a visualization that shows the distribution of different result-to-revie
 
 ```{r}
 orders <- orders %>%
-  mutate(rr_interval = as.numeric(difftime(review_time, result_time, units = "days")))
-ggplot(orders, aes(x = department, y = rr_interval)) +
+  mutate(tat_duration = 
+           batch_collected_timestamp %--% review_complete_timestamp,
+         tat_days = tat_duration / ddays(1))
+  
+ggplot(orders, aes(x = department, y = tat_days)) +
   geom_boxplot() +
   coord_flip()
 ```
@@ -342,7 +345,7 @@ pro_pref_sum <- function(df) {
 }
 ```
 
-Now we have our user defined function ready. We can test that it performs as expected by trying one data for of the departments.  
+Now we have our user defined function ready. We can test that it performs as expected by trying on data for of the departments.  
 
 ```{r}
 pro_pref_sum(orders_nest$data[[2]]) # look at endocrinology
@@ -376,7 +379,7 @@ Write a function that creates a density plot for the review TAT and apply it to 
 ```{r}
 plots <- function(df) {
   df %>%
-    ggplot(aes(rr_interval)) +
+    ggplot(aes(tat_days)) +
     geom_density() +
     labs(x = "Time to Result Review (days)")
 }

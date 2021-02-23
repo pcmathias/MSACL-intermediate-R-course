@@ -143,7 +143,7 @@ select_batches <- select_batches %>%
 
 ```
 
-This creates what is call a *primary key*, which is the unique identifier for each observation in a specific tibble. A *foreign key* is the same thing, only it uniqely identifies an observation in another tibble. The `left_join` command joins two tibbles based on matching the *primary key* in the first tibble with the *foreign key* in the second tibble.  
+This creates what is called a *primary key*, which is the unique identifier for each observation in a specific tibble. A *foreign key* is the same thing, only it uniquely identifies an observation in another tibble. The `left_join` command joins two tibbles based on matching the *primary key* in the first tibble with the *foreign key* in the second tibble.  
 
 ```{r}
 #create keys in peaks and samples tables
