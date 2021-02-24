@@ -1,5 +1,5 @@
 ---
-title: 'Lesson 11: Bringing it all together from import to graph to result'
+title: 'Lesson 11: Bringing it all together'
 output:
   html_document: default
 ---
@@ -10,19 +10,35 @@ library(tidyverse)
 library(lubridate)
 library(janitor)
 library(fs)
+library(here)
 ```
+
+## Working within your project
+
+For the final project we are going to take advantage of the project structure we built at the beginning of the course and perform data exploration on the large mass spec data set we have encountered in various lessons in the course.
+
+**Project setup**
+
+1. Navigate to the Session menu (top bar) and select "New Session" to start a new RStudio window.
+2. Use the project shortcut menu on the top right of the RStudio window (down arrow next to current project title) and select your msacl-201-project from the project list.
+3. Locate your class data file (data.zip) and place an uncompressed version into your project directory. It should replace the existing (but empty) data folder you built in lesson 1.
+4. Copy the R Markdown file for this lesson ("11 - Bringing It All Together.Rmd") into the "src" folder in your msacl-201-project directory. Normally when you open up a project you will start a new R Markdown or other R file from scratch, but we've included some starter code to get you started in the lesson Rmd file.
+5. If you haven't already installed them, install the here and renv packages: `install.packages(c("renv", "here"), dependencies = TRUE)`.
+6. Initialize your working directory using the `here::here()` command. This should set your reference directory to the main project directory. (The `set_here()` command can be used to force this to another directory if needed.)
+7. Initialize your project specific repostories using the `renv::init()` command. This will capture the current versions of packages used by files in your project. (Package updates or additions can be captured by running `renv::snapshot()`.)
+
+**End project setup**
 
 ## From Import to Graph
 
-Let's pull all oru data together and explore the big data set. What follows are the steps to replicate the discovery of one particular problem in the mock data: excessively good R^2^ data.
+Let's pull all our data together and explore the big data set. What follows are the steps to replicate the discovery of one particular problem in the mock data: excessively good R^2^ data.
 
 ```{r, message=FALSE}
-all_batches <- dir_ls("data", glob = "*_b.csv") %>%
+all_batches <- dir_ls(here("data"), glob = "*_b.csv") %>%
   #list.files("data/", pattern = "_b.csv$") %>%
   #file.path("data", .) %>%
   map_dfr(read_csv) %>%
-  clean_names() %>%
-  as_tibble()
+  clean_names()
 ```
 
 ```{r}
@@ -54,7 +70,7 @@ Whatever is going on, it looks like reviewer 'Dave' is the only person it is hap
 Based on the batch-level data, we can see that 'Dave' -- and apparently only Dave -- has perfect R^2^ values on every batch of data he reviewed throughout the month of May. Digging deeper will require merging information from the batch level with information at the sample (and possibly peak) level. 
 
 ```{r, message=FALSE}
-all_samples <- dir_ls("data", glob = "*_s.csv") %>%
+all_samples <- dir_ls(here("data"), glob = "*_s.csv") %>%
   map_dfr(read_csv) %>%
   clean_names()
 daves_data <- all_samples %>%
@@ -111,135 +127,14 @@ This is a very open ended exercise, so consider the following areas to explore:
 
 # put your code here
 
+
+
+
+
+
+
 ```
 
-```{r}
-all_samples %>%
-  left_join(all_batches) %>%
-  ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = compound_name)) +
-  geom_smooth() +
-  theme(axis.text.x = element_text(angle = 90)) +
-  facet_grid(compound_name ~ instrument_name) # doc is grossly out of step, 
-# look in more detail
-```
-
-```{r}
-# calculate weekly average peak area by compound and instrument
-# exclude internal standard compounds
-mean_by_week <- all_peaks %>%
-  left_join(all_batches) %>%
-  filter(!str_detect(compound_name, "-")) %>%
-  filter(peak_area > 0) %>%
-  mutate(week = week(batch_collected_timestamp)) %>%
-  group_by(compound_name, instrument_name, week, chromatogram_name) %>%
-  summarise(mean = mean(peak_area), sd = sd(peak_area), n = n())
-
-ggplot(mean_by_week, aes(x = week, y = mean, color = chromatogram_name)) +
-  geom_line() +
-  geom_point() +
-  geom_smooth() +
-  facet_grid(compound_name ~ instrument_name, scales = "free_y") # quant is constant, qual drops
-```
-
-```{r}
-all_samples %>%
-  left_join(all_batches) %>%
-  filter(instrument_name != "doc") %>%
-  ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = compound_name)) +
-  geom_smooth() +
-  facet_grid(compound_name ~ instrument_name) +
-  theme(axis.text.x = element_text(angle = 90)) # grumpy+oxycodone looks least like the others
-```
-
-```{r}
-all_samples %>%
-  left_join(all_batches) %>%
-  filter(compound_name == "oxycodone" & instrument_name != "doc") %>%
-  ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = instrument_name)) +
-  ggtitle("oxycodone") +
-  geom_smooth() # grumpy+oxycodone clearly outlying
-```
-
-```{r}
-all_samples %>%
-  left_join(all_batches) %>%
-  filter(compound_name == "oxycodone" & instrument_name != "doc" & ion_ratio > 0) %>%
-  ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = instrument_name)) +
-  ggtitle("oxycodone") +
-  #geom_point() +
-  geom_smooth() # ion_ratio!=0 makes it even more clear
-```
-
-
-```{r}
-all_peaks <- dir_ls("data", glob = "*_p.csv") %>%
-  #list.files("data/", pattern = "_p.csv$") %>%
-  #file.path("data", .) %>%
-  map_dfr(read_csv, col_types = cols()) %>%
-  clean_names()
-
-mean_by_week <- all_peaks %>%
-  left_join(all_batches) %>%
-  filter(compound_name == "oxycodone" & instrument_name == "grumpy" & peak_area > 0) %>%
-  mutate(week = week(batch_collected_timestamp)) %>%
-  group_by(week, chromatogram_name) %>%
-  summarise(mean = mean(peak_area), sd = sd(peak_area), n = n())
-
-ggplot(mean_by_week, aes(x = week, y = mean, color = chromatogram_name)) +
-  geom_line() +
-  geom_point() +
-  geom_smooth() +
-  ggtitle("oxycodone + grumpy") +
-  facet_grid(chromatogram_name ~ ., scales = "free_y") # quant is constant, qual drops
-```
-
-
-```{r}
-mean_by_week %>%
-  mutate(sd = NULL, n = NULL) %>%
-  spread(chromatogram_name, mean) %>%
-  mutate(ion_ratio = quant / qual) %>%
-  ggplot(aes(x = week, y = ion_ratio)) +
-  geom_line() +
-  geom_smooth() +
-  ggtitle("ion_ratio by week for oxycodone on grumpy") # basically recreate step 4
-```
-```
-
-```{r}
-mean_by_week_reviewer <- all_peaks %>%
-left_join(all_batches) %>% 
-filter(!str_detect(compound_name, "-")) %>% 
-filter(peak_area > 0) %>%
-mutate(week = week(batch_collected_timestamp)) %>%
-group_by(compound_name, reviewer_name, week, chromatogram_name) %>%
-summarise(mean = mean(peak_area), sd = sd(peak_area), n = n())
-
-ggplot(mean_by_week_reviewer, aes(x = week, y = mean, color = chromatogram_name)) +
-   geom_line() +
-   geom_point() +
-   geom_smooth() +
-   facet_grid(compound_name ~ reviewer_name, scales = "free_y")
-# quants run by Walter show a dip
-```
-
-```{r}
-mean_by_week_Walter <- all_peaks %>%
-left_join(all_batches) %>% 
-filter(reviewer_name == "Walter") %>%
-filter(!str_detect(compound_name, "-")) %>% 
-filter(peak_area > 0) %>%
-mutate(week = week(batch_collected_timestamp)) %>%
-group_by(compound_name, instrument_name, week, chromatogram_name) %>%
-summarise(mean = mean(peak_area), sd = sd(peak_area), n = n())
-
-ggplot(mean_by_week_Walter, aes(x = week, y = mean, color = chromatogram_name)) +
-   geom_line() +
-   geom_point() +
-   geom_smooth() +
-   facet_grid(compound_name ~ instrument_name, scales = "free_y")
-# downward trend in quant peak areas over time across instruments
-```
 
 **End of Exercise**
 
