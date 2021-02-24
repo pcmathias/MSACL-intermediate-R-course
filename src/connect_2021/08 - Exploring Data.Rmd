@@ -267,6 +267,31 @@ ggplot(orders, aes(x = department, y = tat_days)) +
 
 **End Exercise**
 
+```{r, echo = FALSE}
+# code chunk added to prep objects from exercises for knitting
+orders_raw <- read_excel("data/orders_data_set.xlsx") %>%
+  clean_names()
+order_details <- read_csv("data/order_details.csv") %>%
+  clean_names()
+# relationship is one-to-one so inner_join/left_join/right_join all work
+orders_joined <- orders_raw %>%
+  left_join(order_details, by = "order_id")
+# may be some variation in which fields you choose to turn into factors
+# numeric codes could be factors too
+orders <- orders_joined %>%
+  mutate(description = as.factor(description),
+         proc_code = as.factor(proc_code),
+         order_class_c_descr = as.factor(order_class_c_descr),
+         lab_status_c_descr = as.factor(lab_status_c_descr),
+         order_status_c_descr = as.factor(order_status_c_descr),
+         reason_for_canc_c_descr = as.factor(reason_for_canc_c_descr),
+         department = as.factor(department),
+         ordering_route = as.factor(ordering_route),
+         pref_list_type = as.factor(pref_list_type)) %>%
+  mutate(order_month = month(order_time),
+         order_week = week(order_time))
+summary(orders)
+```
 
 ## Using nested data frames to scale analyses
 
