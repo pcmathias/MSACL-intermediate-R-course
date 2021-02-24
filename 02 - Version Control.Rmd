@@ -46,7 +46,7 @@ If you have not previously set up Git and the interface within RStudio on your s
 
 Next we will take our sample project and enable Git within the project to demonstrate the workflow.
 
-1. Navigate to your msacl-201-mass-spec-project RStudio window (refer to upper right hand corner to see project name)
+1. Navigate to your msacl-201-project RStudio window (refer to upper right hand corner to see project name)
 1. Note the tabs you see on the upper right quadrant. You should see tabs for Environment, History, and Connections (depending on version of RStudio and any personal window customizations)
 1. Navigate to the Tools menu in your menubar and select "Version Control", then "Project Setup..."
 1. In the Project Options window that pops up, navigate to the "Git/SVN" menu (if not already there).

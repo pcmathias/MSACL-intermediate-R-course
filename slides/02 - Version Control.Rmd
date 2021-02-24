@@ -1,0 +1,68 @@
+---
+title: "Version Control"
+author: "Patrick Mathias"
+output: powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Why use version control?
+
+![One of many justifications for using version control. Source: phdcomics.com](../assets/phd_comic_final_version.jpg)
+
+## Git principles
+
+- Git works by taking snapshots of a set of files over time
+- Most operations are performed on your local machine
+- Every change is captured
+- Git generally adds data and does not remove it (which means it is hard to lose data)
+
+## Git workflow
+
+![Git basic workflow. Source: https://git-scm.com/book/en/v2/Getting-Started-Git-Basics](../assets/git_basic_workflow.png)
+
+## Git setup
+
+If you have not set up Git per the pre-course instructions (https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and signed up for an account on Github.com (https://github.com/join), you will need to do so before you can complete the next exercise.
+
+## Exercise 1
+
+Walk through a local Git workflow to commit a file in your msacl-201-project
+
+## Exercise 1 Comments
+
+- Local Git workflow addresses versioning issues
+  - You decide when to stage and commit a version
+  - Commit messages can help trace your work
+- Provides ability to roll back to a previous version (not covered but quick access through History button)
+
+## Distributed workflows: central management
+
+![Integration manager workflow with Git. Credit: https://git-scm.com/book/en/v2/Distributed-Git-Distributed-Workflows](../assets/integration-manager.png)
+
+## Exercise 2
+
+Fork course repository and open as new project in RStudio
+
+## Exercise 3
+
+Push your changes to your remote repository
+
+## Exericise 2 & 3 comments
+
+- Github (or other hosted Git solution) allows a remote repository to be synced and worked on at multiple locations/computers
+- More importantly, a remote repository provides a mechanism for collaboration
+
+## Optional exercise
+
+Open a pull request and have your edits come back into the base repository
+
+## Additional Git wisdom
+
+- Use branches and couple to features/issues
+- Set up ssh to transfer data
+- Consider what should and shouldn't go into version control
+- [Happy Git and GitHub for the useR](http://happygitwithr.com) online book - Git in RStudio
+- [Pro Git](https://git-scm.com/book/en/v2) - general Git info
