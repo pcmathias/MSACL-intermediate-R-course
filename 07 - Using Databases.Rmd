@@ -7,7 +7,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(DBI)
 library(tidyverse)
-#install.packages("RPostgres") # install this package for example connection
 ```
 
 ## Motivations for working with relational databases
@@ -25,6 +24,16 @@ One approach to managing data in these scenarios is to store it in a relational 
 Connecting to a database is analogous to reading data into a file: specific functions are required to interact with the outside data source. The DBI package allows R to communicate with various relational database management systems (RDBMS). This package provides a general mechanism to connect but in addition each specific RDBMS also requires a separate package to support the appropriate syntax and translate commands into the specific RDBMS commands. For example, the RSQLite package allows connection to SQLite.
 
 The first step in connecting to a database is to use the `dbConnect()` function from the DBI package. This function accepts a number of arguments to configure the database connection, but the most important is the definition of the driver. For example, connecting to a SQLite database can be done by calling `RSQLite::SQLite()` as the first argument (RSQLite is the name of the package for the driver and `SQLite()` is the function called to set up the connection). The other arguments to provide the function include the location of the database (e.g. a file or a host server name), database name (often the host has multiple databases), username, password, and port (for databases configured to use a specific port).
+
+**Setup**
+
+1. Add your "project_data.sqlite" file (downloaded prior to class) containing a database of the course mass spec project results into your "data" folder.
+2. Install a couple packages specific to different "flavors" of SQL:
+```{r, eval = FALSE}
+install.packages(c("RSQLite", "RPostgres"), dependencies = TRUE)
+```
+
+**End Setup**
 
 As an example, let's connect to a publicly available PostgreSQL database and provide all the details required to establish the connection. Below we connect to a database hosted by RNAcentral, which requires authentication (user and password) to access the database in addition to specifying the server and database name that you are connecting to. `dbConnect()` uses all of these arguments to establish a connection.
 
@@ -96,6 +105,11 @@ SQL was intended to be more accessible than many of the programming languages of
 - a SELECT clause chooses the columns to return in a query - this is identical to the `select()` functionality from the dplyr package
 - a FROM clause chooses the table for which the columns are returned - this is analogous to specifying the data frame you apply a function to
 
+```{r, echo = FALSE}
+projectdb <- dbConnect(RSQLite::SQLite(), "data/project_data.sqlite")
+sample <- tbl(projectdb, "sample")
+```
+
 RStudio has nice multi-language support that allows us to run SQL within a Markdown file, provided we supply the connection to run the query on. As an example, let's consider our project data database we connected to in the last exercise. If we wanted to retrieve sample name, compound name, and ion ratio from a "sample" table, we would write the following SQL query:
 
 ```{sql, connection = projectdb}
@@ -144,6 +158,7 @@ There are few more details to consider in the query above:
 SQL is not the focus of this course, but let's do a quick exercise to practice writing a query. 
 
 **Exercise 2**
+
 We will connect to the same projectdb database. 
 
 1. Retrieve sample and batch data (like the example above) for oxycodone (compound_name) and unknown samples (sample_type). Collect only the first 20 results.
@@ -174,6 +189,10 @@ Keep in mind that there are actually a variety of implementations of SQL (based 
 - MySQL
 - SQLite
 While many SQL commands and clauses are identical between SQL flavors, even some basic commands can vary dramatically. One example: the analogy of `head()` (i.e. return only the top n rows) is TOP() within the SELECT clause in Microsoft SQL Server and a separate LIMIT clause after other clauses in PostgreSQL.
+
+```{r, echo = FALSE}
+dbDisconnect(projectdb)
+```
 
 ## Security Considerations
 
