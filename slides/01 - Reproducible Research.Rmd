@@ -109,8 +109,35 @@ my_morning <- I %>%
 
 ## Exercise 1
 
-Navigate your directory structure
-
+1.  Navigate to "Global Options" under the Tools menu in the RStudio
+    application and note the *Default working directory (when not in a
+    project)*
+2.  Navigate to your Console and get the working directory using
+    `getwd()`
+3.  If you haven't already installed the fs package (from the pre-course
+    instructions), do so now: `install.packages("fs")`. Then load the
+    package with `library(fs)` if you did not already run the set up
+    chunk above.
+4.  Review the contents of your current folder using `dir_ls()`. (Base
+    equivalent: `list.files()`)
+5.  Now try to set your working directory using `setwd("test_dir")`.
+    What happened?
+6.  Create a new test directory using `dir_create("test_dir")`. (Base
+    equivalent: `dir.create("test_dir")`)
+7.  Review your current directory
+8.  Set your directory to the test directory you just created
+9.  Using the Files window (bottom right in RStudio, click on **Files**
+    tab if on another tab), navigate to the test directory you just
+    created and list the files. *Pro tip: The More menu here has
+    shortcuts to set the currently displayed directory as your working
+    directory and to navigate to the current working directory*
+10. Navigate back to one level above the directory you created using
+    `setwd("..")` and list the files
+11. Delete the directory you created using the `dir_delete()` function.
+    Learn more about how to use the function by reviewing the
+    documentation: `?dir_delete`. (Base equivalent: `unlink()` +
+    additional arguments)
+    
 ## fs package: `dir_ls` to list files in a directory
 
 ```{r, echo = TRUE, eval = FALSE}
@@ -144,7 +171,18 @@ setwd("/Projects")
 
 ## Exercise 2
 
-Create a new project using RStudio functionality
+1.  Navigate to the **File** menu and select **New Project...** OR
+    Select the **Create a project** button on the global toolbar (2nd
+    from the left)
+2.  Select **New Directory** option
+3.  In the Project Type prompt, select **New Project**
+4.  In the Directory Name prompt under Create New Project, enter
+    "msacl-201-project"
+5.  In the Create Project as a Subdirectory of prompt under Create New
+    Project, navigate to the Projects folder you just created (or
+    another directory of your choosing). You can type in the path or hit
+    the **Browse** button to find the directory. Check the option for
+    "Open in a new session" and create your project.
 
 ## Exercise 2 Comments
 
@@ -163,6 +201,14 @@ Create a new project using RStudio functionality
 ## Exericse 3
 
 Create a minimal project structure
+
+```{r, echo = TRUE, eval = FALSE}
+library(fs)
+dir_create("data") # raw data
+dir_create("output") # output from analysis
+dir_create("cache") # intermediate data (after processing raw data)
+dir_create("src") # code goes into this folder
+```
 
 ## Exercise 3 Comments
 
@@ -216,11 +262,11 @@ Your script may fail to run or (much worse) your script runs but produces incorr
 
 ## System packages are shared between different projects
 
-![One library rules them all. Source: https://kevinushey-2020-rstudio-conf.netlify.app/slides.html](../assets/shared-library.svg)
+![One library rules them all. Source: https://kevinushey-2020-rstudio-conf.netlify.app/slides.html](../assets/shared-library.png)
 
 ## Package management solutions link projects to specific packages
 
-![One library per package. Source: https://kevinushey-2020-rstudio-conf.netlify.app/slides.html](../assets/project-library.svg)
+![One library per package. Source: https://kevinushey-2020-rstudio-conf.netlify.app/slides.html](../assets/project-library.png)
 
 ## Package management solutions - checkpoint
 
