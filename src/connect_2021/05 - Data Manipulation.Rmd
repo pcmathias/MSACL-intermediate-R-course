@@ -308,6 +308,16 @@ sample_means_jan
 **End Exercise**
 
 Whenever you use the `group_by()` function, the data frame preserves the groups, so it is important to recognize that subsequent operations you perform on the data will work on those groups. Performing a `summarize()` "peels off" one variable from the group. Let's revisit the the sample_states_jan data from the last exercise. We grouped by batch_name and compound_name and performed one `summarize()` to generate statistics for the concentrations by batch and compound. Reviewing the sample_stats_jan data frame shows that the output is still grouped by batch_name (see Groups output above the output table):
+```{r, echo = FALSE}
+sample_stats_jan <- samples_jan %>%
+  filter(sample_type == "unknown") %>%
+  group_by(batch_name, compound_name) %>%
+  summarize(min_conc = min(concentration),
+            median_conc = median(concentration),
+            mean_conc = mean(concentration),
+            max_conc = max(concentration)
+            )
+```
 ```{r}
 head(sample_stats_jan)
 ```

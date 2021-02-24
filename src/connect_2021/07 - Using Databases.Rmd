@@ -114,6 +114,11 @@ SQL was intended to be more accessible than many of the programming languages of
 - a SELECT clause chooses the columns to return in a query - this is identical to the `select()` functionality from the dplyr package
 - a FROM clause chooses the table for which the columns are returned - this is analogous to specifying the data frame you apply a function to
 
+```{r, echo = FALSE}
+projectdb <- dbConnect(RSQLite::SQLite(), "data/project_data.sqlite")
+sample <- tbl(projectdb, "sample")
+```
+
 RStudio has nice multi-language support that allows us to run SQL within a Markdown file, provided we supply the connection to run the query on. As an example, let's consider our project data database we connected to in the last exercise. If we wanted to retrieve sample name, compound name, and ion ratio from a "sample" table, we would write the following SQL query:
 
 ```{sql, connection = projectdb}
@@ -209,6 +214,10 @@ Keep in mind that there are actually a variety of implementations of SQL (based 
 - MySQL
 - SQLite
 While many SQL commands and clauses are identical between SQL flavors, even some basic commands can vary dramatically. One example: the analogy of `head()` (i.e. return only the top n rows) is TOP() within the SELECT clause in Microsoft SQL Server and a separate LIMIT clause after other clauses in PostgreSQL.
+
+```{r, echo = FALSE}
+dbDisconnect(projectdb)
+```
 
 ## Security Considerations
 
