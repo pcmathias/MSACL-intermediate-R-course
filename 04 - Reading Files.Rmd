@@ -76,9 +76,9 @@ Excel files have an added layer of complexity in that one file may have multiple
 
 You might be able to guess what comes next: we'll read in an Excel file.
 1. Use the `read_excel()` function to read the "orders_data_set.xlsx" file into a data frame
-1. View a summary of the imported data
-1. Now read in only the first 5 columns using the `range` parameter
-1. Review the first 6 lines of the imported data
+2. View a summary of the imported data
+3. Now read in only the first 5 columns using the `range` parameter
+4. Review the first 6 lines of the imported data
 
 ```{r readxl, echo = FALSE, eval = FALSE}
 readxl_load <- read_excel( )
