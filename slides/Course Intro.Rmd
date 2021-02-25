@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ### Introduction to Instructors
 
 - Patrick Mathias
-  - Department of Laboratory Medicine
+  - Department of Laboratory Medicine and Pathology
   - University of Washington School of Medicine 
   - <pcm10@uw.edu>
 
@@ -33,11 +33,10 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ### Pre-course survey results
 
-[Course survey](https://docs.google.com/forms/d/1YnnYzcgXe1rx9brOXPr57IWRmMrH3-3u25yK_ZJEb4c)
+[Course survey](https://docs.google.com/forms/d/10HmmKTgkwfoGY1lbvW2z77GPtuM_raiRoakNgzQo5DA/edit#responses)
 
 ### Other course mechanics
 
 - One instructor presenting, one instructor assisting
-  - Teaching assistant floating in from 101
-- Raise hand at any time for assistance
+- General questions in the chat window - if you have a question, it's likely that someone else has the same question!
 - Let us know right now if you had problems with pre-course installations
