@@ -94,6 +94,13 @@ samples_jan_subset <- samples_jan %>%
 head(samples_jan_subset)
 ```
 
+There are also helper functions to select columns meeting certain criteria:
+```{r}
+samples_jan_vars <- samples_jan %>%
+  select(starts_with("sample"))
+glimpse(samples_jan_vars)
+```
+
 ### Filter rows
 
 Now let's carve the data set in the other direction. If you need only a subset of rows from your data set, `filter()` allows you to pick rows (cases) based on values, ie. you can subset your data based on logic.
@@ -186,9 +193,12 @@ Note, there is an alternate week selector function, `isoweek()`. This one uses t
 You can see from the above example that these functions provide a great deal of flexibility in associating a row with arbitrary time scales. This allows the ability to group items by time and calculate summary data, which we will discuss in the next section.
 
 Another common manipulation of interest to the laboratory is calculating the difference between 2 timestamps to analyze turnaround times (TATs). Lubridate has a duration data type and associated operator `%--%` for calculating differences between timestamps. Both variables we perform the calculation on should already be recognized by R as a datetime data type (e.g. POSIXct) and the calculation will return a special interval data type. The syntax is `start_time %--% end_time`. Here we calculate the turnaround time from collection to completing review of a batch:
+
 ```{r}
 batch_jan_tat <- batch_jan %>%
-  mutate(tat_duration = batch_collected_timestamp %--% review_complete_timestamp)
+  mutate(tat_duration = batch_collected_timestamp %--% review_complete_timestamp) %>%
+  select(tat_duration)
+head(batch_jan_tat)
 ```
 
 The duration data type will display both timestamps and store the difference between the times in seconds, but this isn't very helpful if we want to visualize the data in common units of measure such as minutes, hours, days, weeks, or months. Lubridate provides a helpful set of duration objects that can help convert calculated durations into a usable numeric value. Functions such as `dminutes()`, `dhours()`, and `ddays()` take an argument for the number of that unit to perform a calculation for and return a duration object that contains the number of seconds corresponding to the unit of interest. For example, `dhours(1)` will return a duration object with a value of 3600 (seconds). When you divide a duration by another duration the result will be a numeric data element. Here we can expand our TAT duration calculation for each row of the data frame into TATs in minutes, hours, and days: 
@@ -392,9 +402,9 @@ In this case, we have sample_type and sample_name stored in the rows, compound_n
 
 This certainly isn't impossible to work with, but there are some challenges with not having separate observations on each row. Arguably the biggest challenges revolve around built-in tidyverse functionality, with grouping and plotting as the most prominent issues you might encounter. Luckily the [tidyr package](https://tidyr.tidyverse.org) can help reshape your data.
 
-Previous versions (i.e., prior to 1.0.0) of `tidyr` used the `gather()` function to gather data into tidy, longer formats. A newer approach is to use `pivot_longer()` to make datasets longer by increasing the number of rows and decreasing the number of columns. (The `gather()` function isn't going away, but it is recommended to use `pivot_longer()` instead.) 
+The`pivot_longer()` function makes datasets longer by increasing the number of rows and decreasing the number of columns. (Previous versions (i.e., prior to 1.0.0) of `tidyr` used the `gather()` function to gather data into tidy, longer formats. The `gather()` function isn't going away, but it is recommended to use `pivot_longer()` instead.) 
 
-![Gather operation](assets/data_gather.png)
+![Pivot longer operation](assets/data_gather.png)
 
 ```{r}
 samples_jan_tidy_longer <-samples_jan_messy %>% 
@@ -446,4 +456,5 @@ batch_jan_tidy <- batch_jan_longer %>%
   - `mutate()` adds additional columns, typically with calculations or logic based on other columns
   - `group_by()` and `summarize()` allow grouping by one or more variables and performing calculations within the group
 - Manipulating dates and times with the `lubridate` package can make grouping by time periods easier
+- `across()` scales columnwise operations
 - `pivot_longer()` and `pivot_wider()` allow you to pivot your data frame to and from a tidy data structure
