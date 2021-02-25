@@ -9,10 +9,12 @@ library(DBI)
 library(dplyr)
 ```
 
-## Install Postgres driver
+## Lesson setup
 
+1. Add your "project_data.sqlite" file (downloaded prior to class) containing a database of the course mass spec project results into your "data" folder.
+2. Install a couple packages specific to different "flavors" of SQL:
 ```{r, echo = TRUE, eval = FALSE}
-install.packages("RPostgres")
+install.packages(c("RSQLite", "RPostgres"), dependencies = TRUE)
 ```
 
 ## Motivations for working with relational databases
@@ -25,6 +27,7 @@ install.packages("RPostgres")
 ## Configuration 1: local database
 
 ![Local database configuration](../assets/local_db_connect.png)
+
 - Database is on same machine as RStudio
 - May or may not require additional credentials, i.e. database may require separate username and password
 
@@ -76,6 +79,7 @@ dbDisconnect(exampledb)
 ## Exericise 1
 
 The project dataset for the course is included in a file called "project_data.sqlite", so we will connect to this this SQLite database. 
+
 1. Use the `dbConnect()` function to connect to this database
 2. Connect to the "sample" table and view the first 10 records.
 3. Perform a `summary()` on only the standards from the sample table (sample_type == 'standard') and note the minimum, median, and maximum concentrations.
@@ -102,7 +106,8 @@ The project dataset for the course is included in a file called "project_data.sq
 ## Basic query
 
 ```{r, echo = FALSE}
-projectdb <- dbConnect(RSQLite::SQLite(), "../project_data.sqlite")
+projectdb <- dbConnect(RSQLite::SQLite(), "../data/project_data.sqlite")
+sample <- tbl(projectdb, "sample")
 ```
 
 ```{sql, connection = projectdb, echo = TRUE, eval = FALSE}
@@ -113,6 +118,7 @@ FROM
 LIMIT
         10;
 ```
+
 ## Basic query
 
 ```{sql, connection = projectdb}
@@ -170,6 +176,10 @@ FROM
         INNER JOIN batch ON sample.batch_name = batch.batch_name
           AND sample.compound_name = batch.compound_name
 LIMIT  10;
+```
+
+```{r, echo = FALSE}
+dbDisconnect(projectdb)
 ```
 
 ## Exercise 2
