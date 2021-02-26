@@ -1,0 +1,222 @@
+---
+title: 'Reading files: beyond the basics'
+author: "Patrick Mathias"
+output: powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(here)
+library(tidyverse)
+library(janitor)
+library(fs)
+library(readxl)
+```
+
+## Data import with the readr package
+
+- readr package = tidyverse spin on base file reading functions
+- Faster (~10x) than base
+- Strings are preserved by default
+- Straightforward syntax: `read_csv("path/file_name.csv")`
+
+## readr syntax
+
+```{r, echo = TRUE, eval = FALSE}
+# purely a dummy example, not executable!
+imaginary_data_frame <- read_csv(
+  "imaginary_file.csv",
+  col_types = cols(
+    x = col_integer(),
+    y = col_character(),
+    z = col_datetime()
+  )
+)
+```
+
+## Exercise 1
+
+1. Use the `read_csv()` function to read the "2017-01-06_s.csv" file into a data frame. The file is within the "data" folder so you will need to provide a path to that files that includes the folder.
+2. What is the internal structure of the object? (Hint: use the `str()` function.)
+3. Summarize the data.
+4. Finally, let's follow some best practices and explicitly define columns with the `col_types` argument. We want to explicitly define compoundName and sampleType as factors. Note that the `col_factor()` expects a definition of the factor levels but you can get around this by supplying a `NULL`. Then run a summary to review the data.
+
+## Dealing with Excel files (gracefully)
+
+- [readxl package](http://readxl.tidyverse.org/)
+- no external dependencies like xlsx package
+- Syntax: `read_excel("file_name.xlsx")`
+- Can pull in specific worksheets or subsets of data:
+  - `sheet = "worksheet_name"` argument
+  - `read_excel("file_name.xlsx", range = "B1:D6")`
+  - `read_excel("file_name.xlsx, range = cell_cols("A:F")`
+
+## Exercise 2
+
+1. Use the `read_excel()` function to read the "orders_data_set.xlsx" file from the "data" folder into a data frame
+2. View a summary of the imported data
+3. Now read in only the first 5 columns using the `range` parameter
+4. Review the first 6 lines of the imported data
+
+## Exercise 2
+
+```{r, echo = TRUE, eval = FALSE}
+#library(readxl)
+readxl_load <- read_excel("data/orders_data_set.xlsx")
+summary(readxl_load)
+readxl_load_subset <- read_excel("data/orders_data_set.xlsx", range = cell_cols("A:E"))
+head(readxl_load_subset)
+```
+
+## Comment on base reading functions
+
+Problems with `read.csv()` and similar base functions:
+
+- Parsing strings: `stringsAsFactors = TRUE`
+  - Big problem: converting factor back to numeric
+  - Consider explicitly defining data types
+- Slow for reading large files (slow compared to?)
+- Output with row names by default can be annoying to turn off
+
+## Writing files
+
+- readr has writing funtions as well
+- `write_excel_csv` writes csvs that play nice with Excel
+
+## Writing files syntax
+
+```{r, echo = TRUE, eval = FALSE}
+write_csv(x, 
+          path, 
+          na = "NA", 
+          append = FALSE, 
+          col_names = !append, 
+          delim = ",", 
+          quote_escape = "double")
+```
+
+## Exercise 3
+
+1. Import the "August" worksheet from the "monthly_orders_data_set.xlsx" file in the data folder
+2. Store this in an object called august_orders
+3. Write the imported data to a csv file called "august_orders.csv" within the data folder. Output empty cells instead of NAs when there is missing data.
+
+## Importing dirty data with janitor
+
+[janitor package](https://github.com/sfirke/janitor)
+
+- `clean_names()` will reformat column names to conform to the tidyverse style guide: spaces are replaced with underscores & uppercase letters are converted to lowercase
+- empty rows and columns are removed with `remove_empty_rows()` or `remove_empty_columns()`
+- `tabyl(variable)` will tabulate into a data frame based on 1-3 variables supplied to it
+
+## Clean names example
+
+```{r janitor_code, echo = TRUE, eval = FALSE}
+# install.packages("janitor", dependencies = TRUE) # uncomment to install if needed
+library(janitor)
+readxl_load <- read_excel("data/orders_data_set.xlsx")
+readxl_load_cleaned <- readxl_load %>%
+  clean_names()
+head(readxl_load_cleaned)
+```
+
+## Clean names example
+
+```{r janitor, echo = FALSE}
+# install.packages("janitor", dependencies = TRUE) # uncomment to install if needed
+library(janitor)
+readxl_load <- read_excel("../data/orders_data_set.xlsx")
+readxl_load_cleaned <- readxl_load %>%
+  clean_names()
+head(readxl_load_cleaned)
+```
+
+## Tabluation example
+
+```{r tabyl_code, echo = TRUE, eval = FALSE}
+readxl_load_cleaned %>% tabyl(order_class_c_descr)
+```
+
+## Tabluation example
+
+```{r tabyl, echo = FALSE}
+readxl_load_cleaned %>% tabyl(order_class_c_descr)
+```
+
+## Exercise 4
+
+The orders data set we loaded with readxl contains a data set of laboratory orders. We are interested in understanding the breakdown of the tally of order classes for each specific laboratory test. Use the `tabyl` function to generate a table where the rows are the tests (description variable) and the columns represent the order_class_c_descr. Output the first 10 tests in the table.
+
+## Why use iteration when reading files?
+
+Scenario:
+
+- you have 12 months of data in 12 different files
+- you want to create a single data frame that includes the data
+- files are named systematically and have the same structure & column names
+
+Perfect scenario to iterate through a list
+
+## Purrr package and map functions
+
+- [purrr package](https://purrr.tidyverse.org) has a variety of `map()` functions
+- `map()` functions
+  - take a vector as an input
+  - apply a function to elements of the vector
+  - return a vector of identical length to the input vector
+
+## map() example
+
+```{r}
+df <- tibble(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
+df %>%
+  map_dbl(mean)
+```
+
+## Prerequisites to use map() to read files
+
+- the underlying file structure must be the same: for spreadsheet-like data, columns must be in the same positions in each with consistent data types
+- the files must have the same file extension
+- if there are multiple different file types (with different data structures) mixed in one directory, the files must organized and named in a way to associate like data sets with like
+
+## Reading class data into one large data frame
+
+```{r, echo = TRUE, eval = FALSE}
+all_samples <- dir_ls("data", glob = "*_s.csv") %>%
+  map_dfr(read_csv) %>%
+  clean_names()
+summary(all_samples)
+```
+
+## Reading class data into one large data frame
+
+```{r, echo = FALSE, message = FALSE}
+all_samples <- dir_ls(here("data"), glob = "*_s.csv") %>%
+  map_dfr(read_csv) %>%
+  clean_names()
+summary(all_samples)
+```
+
+## Exercise 5
+
+a) Use the `map()` function to create a list of data frames, each containing one of the sheets in the "monthly_orders_data_set.xlsx" file, read the date from each sheet, and store the result in an object called orders_list.
+b) Use the `map_df()` function to create a single data frame containing all of the data from the 3 sheets. Use the ".id" argument to add a column indicating which sheet each row came from.
+
+## Word of warning
+
+Don't automate a broken process!
+
+Always thoroughly vet your iteration code
+
+## Summary
+
+- readr functions such as `read_delim()` or `read_csv()` are faster than base R functions and do not automatically convert strings to factors
+- The readxl function `read_excel()` reads Excel files and offers functionality in specifying worksheets or subsets of the spreadsheet
+- The janitor package can help with cleaning up irregularly structured input files
+- The purrr package has useful tools for iterating that can be very powerful when coupled with file reading functions

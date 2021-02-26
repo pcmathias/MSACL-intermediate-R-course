@@ -1,0 +1,8 @@
+default:
+  sampledb:
+    driver: 'Postgres'
+    host: 'hh-pgsql-public.ebi.ac.uk'
+    user: 'reader'
+    password: 'NWDMCE5xdipIjRrp'
+    port: 5432
+    dbname: 'pfmegrnargs'

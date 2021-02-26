@@ -21,47 +21,52 @@ output:
 ```{r lesson_1, child = '01 - Principles of Reproducible Research.Rmd'}
 ```
 
+# Version control
+
+```{r lesson_2, child = '02 - Version Control.Rmd'}
+```
+
 # Getting cozy with R Markdown
 
-```{r lesson_2, child = '02 - R Markdown.Rmd'}
+```{r lesson_3, child = '03 - R Markdown.Rmd'}
 ```
 
 # Reading files - beyond the basics
 
-```{r lesson_3, child = '03 - Reading Files.Rmd'}
+```{r lesson_4, child = '04 - Reading Files.Rmd'}
 ```
 
 # Data manipulation in the tidyverse
 
-```{r lesson_4, child = '04 - Data Manipulation.Rmd'}
+```{r lesson_5, child = '05 - Data Manipulation.Rmd'}
 ```
 
 # Blending data from multiple files and sources
 
-```{r lesson_5, child = '05 - Blending Data.Rmd'}
+```{r lesson_6, child = '06 - Blending Data.Rmd'}
 ```
 
-# Stronger visualizations with ggplot2
+# Using databases
 
-```{r lesson_6, child = '06 - Visualizations.Rmd'}
+```{r lesson_7, child = '07 - Using Databases.Rmd'}
 ```
 
 # Exploring lab order data
 
-```{r lesson_7, child = '07 - Exploring Data.Rmd'}
+```{r lesson_8, child = '08 - Exploring Data.Rmd'}
 ```
 
 # Predictions using linear regression
 
-```{r lesson_8, child = '08 - Predictions using Linear Regression.Rmd'}
+```{r lesson_9, child = '09 - Predictions using Linear Regression.Rmd'}
 ```
 
 # Classifications using linear regression
 
-```{r lesson_9, child = '09 - Classifications using Linear Regression.Rmd'}
+```{r lesson_10, child = '10 - Classifications using Linear Regression.Rmd'}
 ```
 
 # Bringing it all together
 
-```{r lesson_10, child = '10 - Bringing It All Together.Rmd'}
+```{r lesson_11, child = '11 - Bringing It All Together.Rmd'}
 ```
