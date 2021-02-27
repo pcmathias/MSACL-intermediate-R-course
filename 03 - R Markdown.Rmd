@@ -53,13 +53,7 @@ Text is written in whitespace sections using [R Markdown syntax](http://rmarkdow
 - point 2
 - point 3
 
-The text sections of your notebook can be organized into sections like a document you would create in software like Microsoft Word. There are multiple levels of headers available and syntax is simple: `# Header 1` on it's own line will create a section of the document:
-
-# Header 1
-
-Under that header multiple subsections can be built with a similar syntax - just add more `#` signs to create the next level header: `## Header 2`. For the header to work, it should be on its own line.
-
-## Header 2
+The text sections of your notebook can be organized into sections like a document you would create in software like Microsoft Word. There are multiple levels of headers available and syntax is simple: `# Header 1` on it's own line will create a section of the document. Under that header multiple subsections can be built with a similar syntax - just add more `#` signs to create the next level header: `## Header 2`. For the header to work, it should be on its own line.
 
 Let's practice making modifications to the document in the header and the text.
 
