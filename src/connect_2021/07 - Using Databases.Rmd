@@ -26,6 +26,16 @@ Connecting to a database is analogous to reading data into a file: specific func
 
 The first step in connecting to a database is to use the `dbConnect()` function from the DBI package. This function accepts a number of arguments to configure the database connection, but the most important is the definition of the driver. For example, connecting to a SQLite database can be done by calling `RSQLite::SQLite()` as the first argument (RSQLite is the name of the package for the driver and `SQLite()` is the function called to set up the connection). The other arguments to provide the function include the location of the database (e.g. a file or a host server name), database name (often the host has multiple databases), username, password, and port (for databases configured to use a specific port).
 
+**Setup**
+
+1. Add your "project_data.sqlite" file (downloaded prior to class) containing a database of the course mass spec project results into your "data" folder.
+2. Install a couple packages specific to different "flavors" of SQL:
+```{r, eval = FALSE}
+install.packages(c("RSQLite", "RPostgres"), dependencies = TRUE)
+```
+
+**End Setup**
+
 As an example, let's connect to a publicly available PostgreSQL database and provide all the details required to establish the connection. Below we connect to a database hosted by RNAcentral, which requires authentication (user and password) to access the database in addition to specifying the server and database name that you are connecting to. `dbConnect()` uses all of these arguments to establish a connection.
 
 ```{r}
