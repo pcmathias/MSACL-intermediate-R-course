@@ -237,7 +237,16 @@ max(reviews_jan_grouped$review_duration_minutes)
 
 ### Grouped summaries with `group_by()` and `summarize()`
 
-Carving and expanding your data are helpful but they are relatively simple. Often you will need to do more sophisticated analyses such as calculating statistical measures for multiple subsets of data. Grouping data by a variable using the `group_by()` function is critical tool provided by dplyr and naturally couples with its summary function `summarize()`. By grouping data you can apply a function within individual groups and calculate things like mean or standard deviation. As an example, we may want to look at our January sample data set and look at some statistics for the ion ratios by compound for the unknown sample type with non-zero concentation.
+Carving and expanding your data are helpful but they are relatively simple. Often you will need to do more sophisticated analyses such as calculating statistical measures for multiple subsets of data. Grouping data by a variable using the `group_by()` function is critical tool provided by dplyr and naturally couples with its summary function `summarize()`. 
+
+The `group_by()` function takes one or more variables as an argument, and based on the variable(s) will generate groups of rows or observations that share the same value. As an example, if we refer to our sample data set, calling `group_by(compound_name)` will group together all the rows with the compound name "morphine", then group together all the rows with "hydromorphone" as the compound name, and so on.
+
+![Groups based on a variable](assets/group_by.png)
+The `summarize()` function does exactly what it says - it calculates a value summarizing a specific variable. The syntax for the function is very similar to `mutate()`. Each argument represents a new column for the data set in which the variable name is specified followed by an assignment (`=`) to the output of a function. For example `summarize(mean_conc = mean(concentration))` will apply the `mean()` function to the concentration variable and the output of taking the mean of all the values in the column will be stored in a new variable "mean_conc".
+
+![Summarize a variable](assets/summarize.png)
+
+Combining these two functions provides a rapid mechanism to perform analyses on subsets of your data and perform comparisons between these subsets. By grouping data you can apply a function within individual groups and calculate things like mean or standard deviation. As an example, we may want to look at our January sample data set and look at some statistics for the ion ratios by compound for the unknown sample type with non-zero concentation.
 ```{r}
 samples_jan_ir_stats <- samples_jan %>%
   filter(sample_type == "unknown", concentration > 0) %>%

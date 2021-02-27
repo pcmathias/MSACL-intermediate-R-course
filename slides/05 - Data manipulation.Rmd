@@ -326,6 +326,14 @@ How long an average does it take to review each batch? Using the January batch d
 - Couples with its summary function `summarize()`
 - Allows summary calculations on specific groups within data set
 
+## Overview of group_by() operation
+
+![Groups based on a variable](../assets/group_by.png)
+
+## Overview of summarize() function
+
+![Groups based on a variable](../assets/summarize.png)
+
 ## Example: grouping and summarizing
 
 ```{r}
