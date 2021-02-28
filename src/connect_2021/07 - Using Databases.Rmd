@@ -181,7 +181,7 @@ We will connect to the same projectdb database.
 
 1. Retrieve sample and batch data (like the example above) for oxycodone (compound_name) and unknown samples (sample_type). Collect only the first 20 results.
 
-```{sql, connection = projectdb, eval = FALSE}
+```{sql, connection = projectdb, echo = FALSE, eval = FALSE}
 SELECT
 
 FROM
@@ -206,7 +206,7 @@ LIMIT  20;
 
 2. Disconnect from the project database (hint: this is R code, not SQL).
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 
 ```
 
