@@ -7,6 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(DBI)
 library(tidyverse)
+#install.packages("RPostgres") # install this package for example connection
 ```
 
 ## Motivations for working with relational databases
@@ -73,11 +74,20 @@ The project dataset for the course is included in a file called "project_data.sq
 projectdb <- 
 ```
 
+```{r}
+projectdb <- dbConnect(RSQLite::SQLite(), "data/project_data.sqlite")
+```
+
 2. The data in this database mirrors the structure of the files we've seen already. There are tables for batches, samples, and peaks. Connect to the "sample" table and view the first 10 records.
 
 ```{r, echo = FALSE, eval = FALSE}
 sample <- 
 
+```
+
+```{r}
+sample <- tbl(projectdb, "sample")
+head(sample, 10)
 ```
 
 3. Using the dplyr tools we have learned thus far, perform a `summary()` on only the standards from the sample table (sample_type == 'standard') and note the minimum, median, and maximum concentrations. Hint: you may need to bring the data into your local environment for `summary()` to perform as expected.
@@ -87,6 +97,15 @@ sample %>%
   
   
   
+```
+
+```{r}
+sample_summary <- sample %>%
+  dplyr::filter(sample_type == 'standard') %>%
+    # without collecting the data locally, summary will provide a summary of connection object, not of data
+  collect() %>% 
+  summary()
+sample_summary
 ```
 
 **End Exercise**
@@ -158,12 +177,11 @@ There are few more details to consider in the query above:
 SQL is not the focus of this course, but let's do a quick exercise to practice writing a query. 
 
 **Exercise 2**
-
 We will connect to the same projectdb database. 
 
 1. Retrieve sample and batch data (like the example above) for oxycodone (compound_name) and unknown samples (sample_type). Collect only the first 20 results.
 
-```{sql, connection = projectdb, eval = FALSE}
+```{sql, connection = projectdb, echo = FALSE, eval = FALSE}
 SELECT
 
 FROM
@@ -173,10 +191,27 @@ WHERE
 
 ```
 
+```{sql, connection = projectdb}
+SELECT  
+        sample.*, batch.*   -- * is shorthand for return all columns
+FROM
+        sample
+        INNER JOIN batch ON sample.batch_name = batch.batch_name
+          AND sample.compound_name = batch.compound_name
+WHERE
+        sample.compound_name = 'oxycodone' 
+        AND sample.sample_type = 'unknown'
+LIMIT  20;
+```
+
 2. Disconnect from the project database (hint: this is R code, not SQL).
 
-```{r, eval = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 
+```
+
+```{r}
+dbDisconnect(projectdb)
 ```
 
 **End Exercise**
@@ -273,10 +308,27 @@ rna <-
 head()
 ```
 
+```{r}
+dw <- config::get("sampledb")
+con <- DBI::dbConnect(RPostgres::Postgres(),
+                      dbname = dw$dbname,
+                      host = dw$host,
+                      port = dw$port,
+                      user = dw$user,
+                      password = dw$password
+                      )
+rna <- tbl(con, "rna")
+head(rna, 20)
+```
+
 4. Disconnect from the database.
 
 ```{r, echo = FALSE, eval = FALSE}
 
+```
+
+```{r}
+dbDisconnect(con)
 ```
 
 **End Exercise**

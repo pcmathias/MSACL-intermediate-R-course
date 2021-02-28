@@ -94,13 +94,6 @@ samples_jan_subset <- samples_jan %>%
 head(samples_jan_subset)
 ```
 
-There are also helper functions to select columns meeting certain criteria:
-```{r}
-samples_jan_vars <- samples_jan %>%
-  select(starts_with("sample"))
-glimpse(samples_jan_vars)
-```
-
 ### Filter rows
 
 Now let's carve the data set in the other direction. If you need only a subset of rows from your data set, `filter()` allows you to pick rows (cases) based on values, ie. you can subset your data based on logic.
@@ -146,6 +139,13 @@ samples_jan_oxy_ir <- samples_jan %>%
 summary()
 ```
 
+```{r}
+samples_jan_oxy_ir <- samples_jan %>%
+  filter(sample_type == "unknown", concentration > 0, compound_name == "oxycodone") %>%
+  select(batch_name, sample_name, compound_name, ion_ratio)
+summary(samples_jan_oxy_ir)
+```
+
 **End Exercise**
 
 ### Add new columns with `mutate()`
@@ -188,17 +188,12 @@ batch_jan_timestamps <- batch_jan %>%
   )
 summary(batch_jan_timestamps)
 ```
-Note, there is an alternate week selector function, `isoweek()`. This one uses the ISO 8601 system and begins each week on a Monday. The `week()` selector returns the number of complete seven day periods that have occurred between the date and January 1st, plus one.  
-
 You can see from the above example that these functions provide a great deal of flexibility in associating a row with arbitrary time scales. This allows the ability to group items by time and calculate summary data, which we will discuss in the next section.
 
 Another common manipulation of interest to the laboratory is calculating the difference between 2 timestamps to analyze turnaround times (TATs). Lubridate has a duration data type and associated operator `%--%` for calculating differences between timestamps. Both variables we perform the calculation on should already be recognized by R as a datetime data type (e.g. POSIXct) and the calculation will return a special interval data type. The syntax is `start_time %--% end_time`. Here we calculate the turnaround time from collection to completing review of a batch:
-
 ```{r}
 batch_jan_tat <- batch_jan %>%
-  mutate(tat_duration = batch_collected_timestamp %--% review_complete_timestamp) %>%
-  select(tat_duration)
-head(batch_jan_tat)
+  mutate(tat_duration = batch_collected_timestamp %--% review_complete_timestamp)
 ```
 
 The duration data type will display both timestamps and store the difference between the times in seconds, but this isn't very helpful if we want to visualize the data in common units of measure such as minutes, hours, days, weeks, or months. Lubridate provides a helpful set of duration objects that can help convert calculated durations into a usable numeric value. Functions such as `dminutes()`, `dhours()`, and `ddays()` take an argument for the number of that unit to perform a calculation for and return a duration object that contains the number of seconds corresponding to the unit of interest. For example, `dhours(1)` will return a duration object with a value of 3600 (seconds). When you divide a duration by another duration the result will be a numeric data element. Here we can expand our TAT duration calculation for each row of the data frame into TATs in minutes, hours, and days: 
@@ -207,7 +202,7 @@ batch_jan_tat <- batch_jan %>%
   mutate(tat_duration = batch_collected_timestamp %--% review_complete_timestamp,
          tat_minutes = tat_duration / dminutes(1),
          tat_hours = tat_duration / dhours(1),
-         tat_days = tat_duration / ddays(1))
+         tat_dayss = tat_duration / ddays(1))
 ```
 
 **Exercise 2**
@@ -226,11 +221,32 @@ mean()
 max()
 ```
 
+```{r}
+batch_jan_reviews <- batch_jan %>%
+  mutate(review_duration = review_start_timestamp %--% review_complete_timestamp,
+         review_duration_minutes = review_duration / dminutes(1))
+reviews_jan_grouped <- batch_jan_reviews %>%
+  distinct(batch_name, review_duration_minutes) 
+min(reviews_jan_grouped$review_duration_minutes)
+median(reviews_jan_grouped$review_duration_minutes)
+mean(reviews_jan_grouped$review_duration_minutes)
+max(reviews_jan_grouped$review_duration_minutes)
+```
+
 **End Exercise**
 
 ### Grouped summaries with `group_by()` and `summarize()`
 
-Carving and expanding your data are helpful but they are relatively simple. Often you will need to do more sophisticated analyses such as calculating statistical measures for multiple subsets of data. Grouping data by a variable using the `group_by()` function is critical tool provided by dplyr and naturally couples with its summary function `summarize()`. By grouping data you can apply a function within individual groups and calculate things like mean or standard deviation. As an example, we may want to look at our January sample data set and look at some statistics for the ion ratios by compound for the unknown sample type with non-zero concentation.
+Carving and expanding your data are helpful but they are relatively simple. Often you will need to do more sophisticated analyses such as calculating statistical measures for multiple subsets of data. Grouping data by a variable using the `group_by()` function is critical tool provided by dplyr and naturally couples with its summary function `summarize()`. 
+
+The `group_by()` function takes one or more variables as an argument, and based on the variable(s) will generate groups of rows or observations that share the same value. As an example, if we refer to our sample data set, calling `group_by(compound_name)` will group together all the rows with the compound name "morphine", then group together all the rows with "hydromorphone" as the compound name, and so on.
+
+![Groups based on a variable](assets/group_by.png)
+The `summarize()` function does exactly what it says - it calculates a value summarizing a specific variable. The syntax for the function is very similar to `mutate()`. Each argument represents a new column for the data set in which the variable name is specified followed by an assignment (`=`) to the output of a function. For example `summarize(mean_conc = mean(concentration))` will apply the `mean()` function to the concentration variable and the output of taking the mean of all the values in the column will be stored in a new variable "mean_conc".
+
+![Summarize a variable](assets/summarize.png)
+
+Combining these two functions provides a rapid mechanism to perform analyses on subsets of your data and perform comparisons between these subsets. By grouping data you can apply a function within individual groups and calculate things like mean or standard deviation. As an example, we may want to look at our January sample data set and look at some statistics for the ion ratios by compound for the unknown sample type with non-zero concentation.
 ```{r}
 samples_jan_ir_stats <- samples_jan %>%
   filter(sample_type == "unknown", concentration > 0) %>%
@@ -282,6 +298,22 @@ sample_means_jan <- sample_stats_jan %>%
 sample_means_jan
 ```
 
+```{r}
+sample_stats_jan <- samples_jan %>%
+  filter(sample_type == "unknown") %>%
+  group_by(batch_name, compound_name) %>%
+  summarize(min_conc = min(concentration),
+            median_conc = median(concentration),
+            mean_conc = mean(concentration),
+            max_conc = max(concentration)
+            )
+head(sample_stats_jan)
+sample_means_jan <- sample_stats_jan %>%
+  group_by(compound_name) %>%
+  summarize(overall_mean = mean(mean_conc))
+sample_means_jan
+```
+
 **End Exercise**
 
 Whenever you use the `group_by()` function, the data frame preserves the groups, so it is important to recognize that subsequent operations you perform on the data will work on those groups. Performing a `summarize()` "peels off" one variable from the group. Let's revisit the the sample_states_jan data from the last exercise. We grouped by batch_name and compound_name and performed one `summarize()` to generate statistics for the concentrations by batch and compound. Reviewing the sample_stats_jan data frame shows that the output is still grouped by batch_name (see Groups output above the output table):
@@ -295,7 +327,6 @@ sample_stats_jan <- samples_jan %>%
             max_conc = max(concentration)
             )
 ```
-
 ```{r}
 head(sample_stats_jan)
 ```
@@ -388,6 +419,11 @@ batch_jan_dates <- batch_jan %>%
   mutate(   )
 ```
 
+```{r}
+batch_jan_dates <- batch_jan %>%
+  mutate(across(where(is.POSIXct), list(date = ~ floor_date(.x, unit = "day"))))
+```
+
 **End Exercise**
 
 ## Shaping and tidying data with tidyr
@@ -402,9 +438,9 @@ In this case, we have sample_type and sample_name stored in the rows, compound_n
 
 This certainly isn't impossible to work with, but there are some challenges with not having separate observations on each row. Arguably the biggest challenges revolve around built-in tidyverse functionality, with grouping and plotting as the most prominent issues you might encounter. Luckily the [tidyr package](https://tidyr.tidyverse.org) can help reshape your data.
 
-The`pivot_longer()` function makes datasets longer by increasing the number of rows and decreasing the number of columns. (Previous versions (i.e., prior to 1.0.0) of `tidyr` used the `gather()` function to gather data into tidy, longer formats. The `gather()` function isn't going away, but it is recommended to use `pivot_longer()` instead.) 
+Previous versions (i.e., prior to 1.0.0) of `tidyr` used the `gather()` function to gather data into tidy, longer formats. A newer approach is to use `pivot_longer()` to make datasets longer by increasing the number of rows and decreasing the number of columns. (The `gather()` function isn't going away, but it is recommended to use `pivot_longer()` instead.) 
 
-![Pivot longer operation](assets/data_gather.png)
+![Gather operation](assets/data_gather.png)
 
 ```{r}
 samples_jan_tidy_longer <-samples_jan_messy %>% 
@@ -434,7 +470,7 @@ There are other useful tidyr functions such as `separate()` and `unite()` to spl
 The "2017-01-06-batch-messy.csv" file in the messy subdirectory of the data dir is related to the "2017-01-06.xlsx" batch file you have worked with before. Unfortunately, it is not set up to have a single observation per row. There are two problems that need to be solved:
 
 1. Each parameter in a batch is represented with a distinct column per compound, but all compounds appear on the same row. Each compound represents a distinct observation, so these should appear on their own rows.
-1. There are 3 parameters per observation (compound) - calibration slope, intercept, and R^2. However these appear on different lines. All 3 parameters need to appear on the same row.
+1. There are 3 parameters per obsevation (compound) - calibration slope, intercept, and R^2. However these appear on different lines. All 3 paramters need to appear on the same row.
 
 After solving these problems, each row should contain a single compound with all three parameters appearing on that single row. Use `pivot_longer()` and `pivot_wider()` to reformat this data.
 
@@ -447,6 +483,16 @@ batch_jan_tidy <- batch_jan_longer %>%
   pivot_wider()
 ```
 
+```{r}
+batch_jan_messy <- read_csv("data/messy/2017-01-06-batch-messy.csv")
+head(batch_jan_messy, 10)
+batch_jan_longer <- batch_jan_messy %>%
+  pivot_longer(cols = c(codeine:oxymorphone), names_to = "compound_name", values_to = "value")
+batch_jan_tidy <- batch_jan_longer %>%
+  pivot_wider(names_from = "parameter", values_from = "value")
+head(batch_jan_tidy, 10)
+```
+
 **End Exercise**
 
 ## Summary
@@ -456,5 +502,4 @@ batch_jan_tidy <- batch_jan_longer %>%
   - `mutate()` adds additional columns, typically with calculations or logic based on other columns
   - `group_by()` and `summarize()` allow grouping by one or more variables and performing calculations within the group
 - Manipulating dates and times with the `lubridate` package can make grouping by time periods easier
-- `across()` scales columnwise operations
 - `pivot_longer()` and `pivot_wider()` allow you to pivot your data frame to and from a tidy data structure
