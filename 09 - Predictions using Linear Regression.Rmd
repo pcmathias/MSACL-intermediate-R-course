@@ -141,6 +141,13 @@ Select a variable (other than SCr) and perform a single variable regression for 
 
 ```
 
+```{r}
+my_slr_fit <- lm(igfrc ~ sdma, ckd)
+
+tidy(my_slr_fit) #equation: iGFRc = -24.7*SDMA + 73.5
+glance(my_slr_fit) #R2: 0.48
+```
+
 **End exercise**
 
 ### Making predictions from our model
@@ -241,6 +248,19 @@ Predict the iGFRc values for the test set using the mod.full and plot the actual
 
 ```{r, echo = FALSE, eval = FALSE}
 
+
+```
+
+```{r}
+#predict values for test set and add as new column, iGFR_pred
+ckd_test <- ckd_test %>%
+              mutate(igfr_pred = round(predict(mod_full, ckd_test),0))
+
+
+#plot actual vs predicted for test set
+ggplot(ckd_test, aes(x = igfr_pred, y = igfrc)) + 
+  geom_point() +
+  geom_abline(color = "blue")
 
 ```
 
@@ -356,13 +376,38 @@ ckd_test <- ckd[test, ] %>%
 
 ```
 
+```{r}
+mod2 <- lm(igfrc ~ trp + kynurenine + bun + cyc_db 
+               + phe + adma, data = ckd_train)
+glance(mod2)
+tidy(mod2) %>%
+    arrange(p.value)
+
+#add the predicted values to the train set
+ckd_train <- ckd_train %>%
+              mutate(igfr_pred = round(augment(mod2)$.fitted,0))
+```
+
 (3) Write out the equation for this model. Does it make sense, based on your prior knowledge?
 ```{r, echo = FALSE, eval = FALSE}
 
 ```
 
+
+```{r}
+# iGFRc = 0.42*Trp - 2.99*Kynurenine - 0.49*BUN - 5.4*CYC_DB - 14.7*ADMA - 0.09*Phe + 75.16
+```
+
 (4) Find the R2, RMSE, and MAPE values for the model fit on the training set.
 ```{r, echo = FALSE, eval = FALSE}
+
+```
+
+
+```{r}
+glance(mod2)$r.squared #0.851
+rmse(ckd_train$igfrc, mod2$fitted.values) #7.48
+mape(ckd_train$igfrc, mod2$fitted.values) #0.15 or 15%
 
 ```
 
@@ -371,9 +416,30 @@ ckd_test <- ckd[test, ] %>%
 
 ```
 
+
+```{r}
+vif(mod2) #yay!!
+```
+
 (6) Examine the residuals and actual vs predicted.
 ```{r, echo = FALSE, eval = FALSE}
 
+```
+
+
+```{r}
+# Make a residual plot (prediction on x axis). 
+ckd_train <- ckd_train %>%
+        mutate(residuals = igfrc - igfr_pred)
+
+ggplot(ckd_train, aes(x = igfr_pred, y = residuals)) + 
+  geom_point() +
+  geom_hline(yintercept = 0, color = "blue")
+
+#plot actual vs predicted
+ggplot(ckd_train, aes(x = igfr_pred, y = igfrc)) + 
+  geom_point() +
+  geom_abline(color = "blue")
 ```
 
 **End Exercise** 
