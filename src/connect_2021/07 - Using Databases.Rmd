@@ -75,7 +75,7 @@ projectdb <-
 ```
 
 ```{r}
-projectdb <- dbConnect(RSQLite::SQLite(), "project_data.sqlite")
+projectdb <- dbConnect(RSQLite::SQLite(), "data/project_data.sqlite")
 ```
 
 2. The data in this database mirrors the structure of the files we've seen already. There are tables for batches, samples, and peaks. Connect to the "sample" table and view the first 10 records.
