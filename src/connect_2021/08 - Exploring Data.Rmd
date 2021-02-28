@@ -362,7 +362,7 @@ Great - so, we could iterate over all 20 departments manually by changing the de
 pro_pref_sum <- function(df) {
   df %>%
   tabyl(description, pref_list_type) %>%
-    arrange(desc(`Provider Preference List`)) %>%
+    # arrange(desc(`Provider Preference List`)) %>% # issues with arrange coupled with mutate/map
     slice_head(n = 10) %>%
     adorn_totals("row") %>%
     adorn_percentages("row") %>%
