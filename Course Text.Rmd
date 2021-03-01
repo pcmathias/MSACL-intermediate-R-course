@@ -6,14 +6,15 @@ author:
 - Randall Julian
 - Adam Zabell
 output:
+  pdf_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: '2'
   html_document:
     number_sections: yes
     toc: yes
     toc_depth: 2
     toc_float: yes
-  pdf_document:
-    toc: yes
-    toc_depth: '2'
 ---
 
 # Adopting principles of reproducible research
