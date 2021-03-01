@@ -4,7 +4,7 @@ output:
   html_document: default
 ---
 
-## Use a version control system
+## Rationale for version control
 
 ![One of many justifications for using version control. Source: phdcomics.com](assets/phd_comic_final_version.jpg)
 
@@ -12,7 +12,7 @@ The concept of capturing changes to a document by resaving the file with differe
 
 The basic functionality of a version control system tracks changes (in addition to who made changes in collaborative settings) and makes it easier to undo changes. But you can go further with version control and implement it as a tool in collaboration workflows because it enables multiple people to work on changes to the same set of files at once.
 
-### A brief intro to Git
+## A brief intro to Git
 
 This section is a high level summary of many concepts explained in Chapter 1 of the [Pro Git](https://git-scm.com/book/en/v2) textbook. There are other great resources to learn about using Git and using Git with RStudio, including http://happygitwithr.com, https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN, and http://r-bio.github.io/intro-git-rstudio/.
 
@@ -71,7 +71,7 @@ Congratulations! You have learned to stage and commit changes in your local Git 
 
 **End Exercise**
 
-### Moving to distributed workflows
+## Moving to distributed workflows
 
 So far everything we have done has been on a local repository. A powerful aspect of Git is the ability to maintain a centralized repository outside of your local machine. This can help you synchronize the repo (short for repository) between multiple computers, but more importantly, this facilitates workflows in which multiple people contribute to a project. Imagine our local Git repository has a copy that lives on another system but is publically available for yourself and others to access. That is the function of GitHub, which hosts our course repo.
 
@@ -176,9 +176,9 @@ These instructions were adapted from the following: https://help.github.com/arti
 
 The Git workflow for keeping changes updated is not as seamless as many modern document editors such as Office 365 or Google Docs, which continuously update changes for you without manual saving. One reason Git does not work that way is that your commits are expected to be strategic and coupled with changes that you may want to roll back. This is important to give you confidence that you do not need to create backup copies of your work, but the trade off is that you have to do extra work to make sure updates are captured. This is especially important when working with a remote repository. We made local changes and pushed those to the remote to update it. But imagine another scenario where you are working on multiple computers and made changes on computer A yesterday but are working on computer B today. If you pushed your changes from computer A to the remote yesterday, you can perform the opposite function on computer B today. You would use the "Pull" button to pull the contents of the remote repository onto your local computer B.
 
-### Addditional Git tips and tricks
+## Addditional Git tips and tricks
 
-#### Using branches
+### Using branches
 
 When multiple people are working on a repository or you are working on multiple types of changes in a repository, there are other potential workflows besides forking a repository, making changes, and sending a pull request. A branch in Git is essentially another line of development that allows you to work without disrupting the primary line of code development (most often the *master* branch). RStudio provides support to create new branches and change branches - both features are on the top right of the Git window.
 
@@ -186,17 +186,17 @@ When multiple people are working on a repository or you are working on multiple 
 
 So when should you use branches? Arguably the cleanest way to use branches is to couple each branch to a major feature or change in your code. This is particularly helpful if you (and your team) want to work on multiple features at once. You can isolate each feature to branch, test it, and merge the branch (this can be done via similar workflows to the pull request) but also allows parallel development. To take this workflow one step further, GitHub and other Git-based systems allow you to open up "issues" (note the "Issues" tab on a GitHub repo page) that can include feature requests. You can open up a branch, name it for an issue, work on the feature, and then close out the issue when the feature is completed and tested.
 
-#### Setting up ssh
+### Setting up ssh
 
 Typing in your password every time you interact with remote repository (eg. in GitHub) can be annoying to do repeatedly. An alternative is to set up SSH. At a high level, this requires setting up a public-private SSH key pair, where the private key lives on your machine (and should not be shared!) and the public key lives in your GitHub profile. There are nice instructions for setting this up from either RStudio or the shell (eg. Terminal tab) at http://happygitwithr.com/ssh-keys.html. 
 
 SSH is a useful protocol to know about in general. There is a short tutorial at https://www.hostinger.com/tutorials/ssh-tutorial-how-does-ssh-work that explains many of the concepts. For a general reading resource on cryptography, [The Code Book](https://www.amazon.com/gp/product/B004IK8PLE/ref=kinw_myk_ro_title) by Simon Singh is highly recommended.
 
-#### What should and shouldn't go into version control
+### What should and shouldn't go into version control
 
 The last thing to consider is a question: should you put everything in your project under version control? Maybe not. Git and similar version control systems typically do not handle raw data files well and the repository site you use may impose file size limits (Github has a 100 MB limit). *Also note that your repository site may be public so storing sensitive data (such as health information) within the repo may be problematic.* The excellent article by [Wilson et al.](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510) covers these issues in more details and provides nice guidance about what should not go into version control. Practically, the .gitignore can help exclude specific files - it is simply a list of files or groups of files to ignore. As an example, including "*.html" in the .gitignore will exclude html pages from your repository. (The reason for doing this will become more obvious in the next lesson.)
 
-#### Additional Git resources
+### Additional Git resources
 
 Finally, there are variety of resources available to learn Git.
 - The [Happy Git and GitHub for the useR](http://happygitwithr.com) online book walks through Git in a lot more detail, with a lot more explanation.
