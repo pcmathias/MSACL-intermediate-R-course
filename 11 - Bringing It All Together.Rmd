@@ -127,14 +127,136 @@ This is a very open ended exercise, so consider the following areas to explore:
 
 # put your code here
 
-
-
-
-
-
-
 ```
 
+```{r}
+# need to bring in all peaks data in addition to batches and samples
+all_peaks <- dir_ls(here("data"), glob = "*_p.csv") %>%
+  map_dfr(read_csv, col_types = cols()) %>%
+  clean_names()
+```
+
+```{r}
+all_samples %>%
+  left_join(all_batches) %>%
+  ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = compound_name)) +
+  geom_smooth() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  facet_grid(compound_name ~ instrument_name) # doc is grossly out of step, 
+# look in more detail
+```
+
+```{r}
+# calculate weekly average peak area by compound and instrument
+# exclude internal standard compounds
+mean_by_week <- all_peaks %>%
+  left_join(all_batches) %>%
+  filter(!str_detect(compound_name, "-")) %>%
+  filter(peak_area > 0) %>%
+  mutate(week = week(batch_collected_timestamp)) %>%
+  group_by(compound_name, instrument_name, week, chromatogram_name) %>%
+  summarise(mean = mean(peak_area), sd = sd(peak_area), n = n())
+
+ggplot(mean_by_week, aes(x = week, y = mean, color = chromatogram_name)) +
+  geom_line() +
+  geom_point() +
+  geom_smooth() +
+  facet_grid(compound_name ~ instrument_name, scales = "free_y") # quant is constant, qual drops
+```
+
+```{r}
+all_samples %>%
+  left_join(all_batches) %>%
+  filter(instrument_name != "doc") %>%
+  ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = compound_name)) +
+  geom_smooth() +
+  facet_grid(compound_name ~ instrument_name) +
+  theme(axis.text.x = element_text(angle = 90)) # grumpy+oxycodone looks least like the others
+```
+
+```{r}
+all_samples %>%
+  left_join(all_batches) %>%
+  filter(compound_name == "oxycodone" & instrument_name != "doc") %>%
+  ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = instrument_name)) +
+  ggtitle("oxycodone") +
+  geom_smooth() # grumpy+oxycodone clearly outlying
+```
+
+```{r}
+all_samples %>%
+  left_join(all_batches) %>%
+  filter(compound_name == "oxycodone" & instrument_name != "doc" & ion_ratio > 0) %>%
+  ggplot(aes(x = batch_collected_timestamp, y = ion_ratio, color = instrument_name)) +
+  ggtitle("oxycodone") +
+  #geom_point() +
+  geom_smooth() # ion_ratio!=0 makes it even more clear
+```
+
+
+```{r}
+mean_by_week <- all_peaks %>%
+  left_join(all_batches) %>%
+  filter(compound_name == "oxycodone" & instrument_name == "grumpy" & peak_area > 0) %>%
+  mutate(week = week(batch_collected_timestamp)) %>%
+  group_by(week, chromatogram_name) %>%
+  summarise(mean = mean(peak_area), sd = sd(peak_area), n = n())
+
+ggplot(mean_by_week, aes(x = week, y = mean, color = chromatogram_name)) +
+  geom_line() +
+  geom_point() +
+  geom_smooth() +
+  ggtitle("oxycodone + grumpy") +
+  facet_grid(chromatogram_name ~ ., scales = "free_y") # quant is constant, qual drops
+```
+
+
+```{r}
+mean_by_week %>%
+  mutate(sd = NULL, n = NULL) %>%
+  spread(chromatogram_name, mean) %>%
+  mutate(ion_ratio = quant / qual) %>%
+  ggplot(aes(x = week, y = ion_ratio)) +
+  geom_line() +
+  geom_smooth() +
+  ggtitle("ion_ratio by week for oxycodone on grumpy") # basically recreate step 4
+```
+```
+
+```{r}
+mean_by_week_reviewer <- all_peaks %>%
+left_join(all_batches) %>% 
+filter(!str_detect(compound_name, "-")) %>% 
+filter(peak_area > 0) %>%
+mutate(week = week(batch_collected_timestamp)) %>%
+group_by(compound_name, reviewer_name, week, chromatogram_name) %>%
+summarise(mean = mean(peak_area), sd = sd(peak_area), n = n())
+
+ggplot(mean_by_week_reviewer, aes(x = week, y = mean, color = chromatogram_name)) +
+   geom_line() +
+   geom_point() +
+   geom_smooth() +
+   facet_grid(compound_name ~ reviewer_name, scales = "free_y")
+# quants run by Walter show a dip
+```
+
+```{r}
+mean_by_week_Walter <- all_peaks %>%
+left_join(all_batches) %>% 
+filter(reviewer_name == "Walter") %>%
+filter(!str_detect(compound_name, "-")) %>% 
+filter(peak_area > 0) %>%
+mutate(week = week(batch_collected_timestamp)) %>%
+group_by(compound_name, instrument_name, week, chromatogram_name) %>%
+summarise(mean = mean(peak_area), sd = sd(peak_area), n = n())
+
+ggplot(mean_by_week_Walter, aes(x = week, y = mean, color = chromatogram_name)) +
+   geom_line() +
+   geom_point() +
+   geom_smooth() +
+   facet_grid(compound_name ~ instrument_name, scales = "free_y")
+# downward trend in quant peak areas over time across instruments
+```
 
 **End of Exercise**
 
