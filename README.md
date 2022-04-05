@@ -1,4 +1,5 @@
 # MSACL-intermediate-R-course
+
 Course content for MSACL Data Science 201: Going Further with R
 
 This course is intended for laboratory professionals with a basic command of R and is a follow-up course to the introductory R course at MSACL (Data Science 101). The emphasis of this course will be best practices in applying R to solve problems in mass spectrometry and in the clinical laboratory.
@@ -10,7 +11,7 @@ This course is intended for laboratory professionals with a basic command of R a
 
 - A laptop or workstation with access to the internet, and the ability to download files is required
   - Having 2 screens can be helpful for this type of virtual course: a tablet or other computer dedicated to showing the presentation/screen share separately from the space you are working can help
-- Complete the following survey so we can better understand your R experience and what you want out of the course: [MSACL Intermediate R Pre-Course Survey](https://forms.gle/wvC8bBB2PsitKBZY9)
+- Complete the following survey so we can better understand your R experience and what you want out of the course: [MSACL Intermediate R Pre-Course Survey](https://forms.gle/ANQdLeH8sHkiZeJt9)
 - You are welcome to continue using whatever version of R and RStudio you already have on your computer, but you may run into issues running old versions. Our recommendation (if it won't disrupt your working R environment too much):
   - Install the latest version of R by choosing the closest CRAN mirror here at https://cran.r-project.org/mirrors.html and downloading the version for your operating system
   - If you don't already have a recent version, install the latest version of RStudio Desktop at https://www.rstudio.com/products/rstudio/download/#download 
