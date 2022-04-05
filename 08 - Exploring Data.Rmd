@@ -67,31 +67,6 @@ orders <- orders_joined %>%
 summary(orders)
 ```
 
-```{r}
-orders_raw <- read_excel("data/orders_data_set.xlsx") %>%
-  clean_names()
-order_details <- read_csv("data/order_details.csv") %>%
-  clean_names()
-# relationship is one-to-one so inner_join/left_join/right_join all work
-orders_joined <- orders_raw %>%
-  left_join(order_details, by = "order_id")
-# may be some variation in which fields you choose to turn into factors
-# numeric codes could be factors too
-orders <- orders_joined %>%
-  # mutate(description = as.factor(description),
-  #        proc_code = as.factor(proc_code),
-  #        order_class_c_descr = as.factor(order_class_c_descr),
-  #        lab_status_c_descr = as.factor(lab_status_c_descr),
-  #        order_status_c_descr = as.factor(order_status_c_descr),
-  #        reason_for_canc_c_descr = as.factor(reason_for_canc_c_descr),
-  #        department = as.factor(department),
-  #        ordering_route = as.factor(ordering_route),
-  #        pref_list_type = as.factor(pref_list_type)) %>%
-  mutate(order_month = month(order_time),
-         order_week = week(order_time))
-summary(orders)
-```
-
 **End Exercise**
 
 ## Exploration of data
@@ -112,24 +87,10 @@ General hint for upcoming exercises: review documentation on [janitor package](h
 
 ```
 
-```{r}
-ggplot(data = orders) + 
-  geom_histogram(mapping = aes(x = order_time), binwidth = 60*60*24)
-ggplot(data = orders) + 
-  geom_histogram(mapping = aes(x = order_time), binwidth = 60*60*24*7)
-```
-
 2. Plot or tabulate the breakdown of test orders in the data set (using description or procedure code). Use the `slice_head()` function to restrict the output to the top 25 most commonly ordered tests. (Review the help documentation for `slice()` and related functions.)
 
 ```{r, echo = FALSE, eval = FALSE}
 
-```
-
-```{r}
-orders %>%
-  tabyl(description) %>%
-  arrange(desc(n)) %>%
-  slice_head(n = 25)
 ```
 
 3. Plot and/or tabulate cancellations over time for the data set.
@@ -138,34 +99,10 @@ orders %>%
 
 ```
 
-```{r}
-ggplot(data = orders) + 
-  geom_histogram(mapping = aes(x = order_time, fill = order_status_c_descr), binwidth = 60*60*24*7)
-orders %>%
-  tabyl(order_status_c_descr, order_week) %>%
-  adorn_totals("row") %>% # tabulate operations below across rows
-  adorn_percentages("row") %>% # express counts as percentages
-  adorn_pct_formatting() %>% # clean up percentages for nicer printing
-  adorn_ns() # add back in counts (N's)
-```
-
 4. Explore whether there are specific tests that are cancelled more frequently than others. Restrict the output to the top 25 tests.
 
 ```{r, echo = FALSE, eval = FALSE}
 
-```
-
-```{r}
-orders %>%
-  #filter(description %in% orders_top25$description) %>%
-  tabyl(description, order_status_c_descr) %>%
-  arrange(desc(Completed)) %>%
-  #top_n(25, Completed) %>%
-  adorn_totals("row") %>% # tabulate operations below across rows
-  adorn_percentages("row") %>% # express counts as percentages
-  adorn_pct_formatting() %>% # clean up percentages for nicer printing
-  adorn_ns()  %>%# add back in counts (N's)
-  slice_head(n = 25)
 ```
 
 **End Exercise**
@@ -186,58 +123,9 @@ The following is a list of questions regarding clinic-specific characteristics o
 
 ```{r, echo = FALSE, eval = FALSE}
 
-```
 
-Clinics ordering the highest volume of tests:
-```{r}
-orders %>% 
-  tabyl(department) %>%
-  arrange(desc(n))
-```
 
-Clinics with the highest numbers and rates of cancels:
-```{r}
-orders %>% 
-  tabyl(department, order_status_c_descr) %>%
-  arrange(desc(Completed)) %>%
-  adorn_totals("row") %>% 
-  adorn_percentages("row") %>% 
-  adorn_pct_formatting() %>% 
-  adorn_ns() 
-```
 
-Rates of clinic collections:
-```{r}
-orders %>% 
-  tabyl(department, order_class_c_descr) %>%
-  arrange(desc(`Clinic Collect`)) %>%
-  adorn_totals("row") %>% 
-  adorn_percentages("row") %>% 
-  adorn_pct_formatting() %>% 
-  adorn_ns() 
-```
-
-Rate of SmartSet usage:
-```{r}
-orders %>% 
-  tabyl(department, ordering_route) %>%
-  arrange(desc(`SmartSet`)) %>%
-  adorn_totals("row") %>%
-  adorn_percentages("row") %>%
-  adorn_pct_formatting() %>% 
-  adorn_ns() %>%
-  select(department, SmartSet)
-```
-
-Rates of Provider Preference List Usage:
-```{r}
-orders %>% 
-  tabyl(department, pref_list_type) %>%
-  arrange(desc(`Provider Preference List`)) %>%
-  adorn_totals("row") %>%
-  adorn_percentages("row") %>%
-  adorn_pct_formatting() %>% 
-  adorn_ns()
 ```
 
 **End Exercise**
@@ -252,17 +140,6 @@ Develop a visualization that shows the distribution of different result-to-revie
 
 ```{r, echo = FALSE, eval = FALSE}
 
-```
-
-```{r}
-orders <- orders %>%
-  mutate(tat_duration = 
-           result_time %--% review_time,
-         tat_days = tat_duration / ddays(1))
-  
-ggplot(orders, aes(x = department, y = tat_days)) +
-  geom_boxplot() +
-  coord_flip()
 ```
 
 **End Exercise**
@@ -400,17 +277,5 @@ Write a function that creates a density plot for the review TAT and apply it to 
 
 ```
 
-
-```{r}
-plots <- function(df) {
-  df %>%
-    ggplot(aes(tat_days)) +
-    geom_density() +
-    labs(x = "Time to Result Review (days)")
-}
-
-orders_nest <- orders_nest %>%
-          mutate(plots = map(data, plots))
-```
 
 **End Exercise**

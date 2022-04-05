@@ -152,23 +152,6 @@ Examine modGLM using the `glance()` and `tidy()` functions of the `broom` packag
 
 ```
 
-```{r}
-glance(mod_glm)
-#AIC 56
-#BIC 68
-
-# The difference between the null deviance and the residual deviance shows how our model is doing against the null model (a model with only the intercept). The wider this gap, the better. 
-# logLik
-
-tidy(mod_glm) %>%
-    arrange(p.value)
-# The logistic regression coefficients (estimate) give the change in the log odds of the outcome for a one unit increase in the predictor variable. You can take the exp and convert this to odds ratio.
-
-exp(coef(mod_glm))
-# Now we can say that for a one unit increase in SCr, the odds of being in group CKD3b (vs in CKD2) increase by a factor of 1.40
-
-```
-
 **End exercise**
 
 ### Examining collinearity
@@ -203,11 +186,6 @@ Select a different threshold and determine the accuracy of the model for that th
 ```{r, echo = FALSE, eval = FALSE}
 
 
-```
-
-```{r}
-ckd_test$stage_pred<- ifelse(ckd_test$stage_prob > 0.65, "CKD3b", "CKD2")
-mean(ckd_test$stage_pred == ckd_test$stage) #0.92
 ```
 
 **End exercise**

@@ -40,28 +40,16 @@ Now let's run through using the readr function for a csv:
 readr_load <- 
 ```
 
-```{r}
-readr_load <- read_csv("data/2017-01-06_s.csv")
-```
-
 2. What is the internal structure of the object? (Hint: use the `str()` function.)
 
 ```{r, echo = FALSE, eval = FALSE}
 
 ```
 
-```{r}
-str(readr_load)
-```
-
 3. Summarize the data.
 
 ```{r, echo = FALSE, eval = FALSE}
 
-```
-
-```{r}
-summary(readr_load)
 ```
 
 4. Finally, let's follow some best practices and explicitly define columns with the `col_types` argument. We want to explicitly define compoundName and sampleType as factors. Note that the `col_factor()` expects a definition of the factor levels but you can get around this by supplying a `NULL`. Then run a summary to review the data.
@@ -74,16 +62,6 @@ readr_load_factors <- read_csv( ,
     )
   )
 summary( )
-```
-
-```{r}
-readr_load_factors <- read_csv("data/2017-01-06_s.csv",
-                               col_types = cols(
-                                 compoundName = col_factor(NULL),
-                                 sampleType = col_factor(NULL)
-                                 )
-                               )
-summary(readr_load_factors)
 ```
 
 **End Exercise**
@@ -107,13 +85,6 @@ readxl_load <- read_excel( )
 ## insert additional code here
 readxl_load_subset <- read_excel( , range = )
 ## insert additional code here
-```
-
-```{r}
-readxl_load <- read_excel("data/orders_data_set.xlsx")
-summary(readxl_load)
-readxl_load_subset <- read_excel("data/orders_data_set.xlsx", range = cell_cols("A:E"))
-head(readxl_load_subset)
 ```
 
 **End Exercise**
@@ -169,11 +140,6 @@ august_orders <- read_excel(path = , sheet = ) %>%
   
 ```
 
-```{r}
-august_orders <- read_excel(path = "data/monthly_orders_data_set.xlsx", sheet = "August") %>%
-  write_csv(path = "data/august_orders.csv", na = "")
-```
-
 **End Exercise**
 
 ## Importing dirty data
@@ -206,12 +172,6 @@ The orders data set we loaded with readxl contains a data set of laboratory orde
 
 ```{r}
 
-```
-
-```{r}
-test_class_table <- readxl_load_cleaned %>% 
-  tabyl(description, order_class_c_descr)
-head(test_class_table, 10)
 ```
 
 **End Exercise**
@@ -274,24 +234,12 @@ orders_list <- excel_sheets(path = ) %>%
   map( , path = )
 ```
 
-```{r}
-orders_list <- excel_sheets("data/monthly_orders_data_set.xlsx") %>%
-  set_names() %>%
-  map(read_excel, path = "data/monthly_orders_data_set.xlsx")
-```
-
 b) Use the `map_df()` function to create a single data frame containing all of the data from the 3 sheets. Use the ".id" argument to add a column indicating which sheet each row came from.
 
 ```{r, echo = FALSE, eval = FALSE}
 orders_df <- excel_sheets(path = ) %>%
   set_names() %>%
   map_df(~ read_excel(path = , sheet = ), .id = "sheet")
-```
-
-```{r}
-orders_df <- excel_sheets("data/monthly_orders_data_set.xlsx") %>%
-  set_names() %>%
-  map_df(~ read_excel(path = "data/monthly_orders_data_set.xlsx", sheet = .x), .id = "sheet")
 ```
 
 **End Exercise**
