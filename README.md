@@ -18,7 +18,7 @@ This course is intended for laboratory professionals with a basic command of R a
 - Open RStudio and confirm you are able to install packages by running `install.packages(c("tidyverse", "tinytex"), dependencies = TRUE)`
   - **If you do not already have LaTeX installed on your computer, run the following from the RStudio console to install TinyTeX: `tinytex::install_tinytex()`.** Note that you will get error messages when installing on Windows that are OK to click through.
   - In addition to the tidyverse set of packages and tinytex, install additional packages with the following command: `install.packages(c("fs", "janitor", "tidylog", "DBI", "RSQLite", "corrplot", "RColorBrewer", "Metrics", "car", "pROC"), dependencies = TRUE)`
-- **Download the class data zip files from [link 1](https://drive.google.com/file/d/1kmYTwlQ_JvQF9bR-tvnmvd5dDgRlj3rf/view?usp=sharing) and [link 2](https://drive.google.com/file/d/1nD-5JoqyJv6-6bmnBbmfNgJzoAJFoSGE/view?usp=sharing) (hit the download button), park them someplace you will remember for the course, and uncompress.**
+- **Download the class data zip files from [link 1](https://drive.google.com/file/d/1kmYTwlQ_JvQF9bR-tvnmvd5dDgRlj3rf/view?usp=sharing) and [link 2](https://drive.google.com/file/d/1nD-5JoqyJv6-6bmnBbmfNgJzoAJFoSGE/view?usp=sharing) (hit the download button on upper right), park them someplace you will remember for the course, and uncompress.**
 - If not already installed, install Git per instructions at https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
   - **When installing on a Windows machine, select "Use Git from the Windows Command Prompt"**
 - Go to Github at https://github.com and sign up for an account (if you don't have one already)
