@@ -177,7 +177,7 @@ setwd("/Projects")
 2.  Select **New Directory** option
 3.  In the Project Type prompt, select **New Project**
 4.  In the Directory Name prompt under Create New Project, enter
-    "msacl-201-project"
+    "sample-project-structure"
 5.  In the Create Project as a Subdirectory of prompt under Create New
     Project, navigate to the Projects folder you just created (or
     another directory of your choosing). You can type in the path or hit
