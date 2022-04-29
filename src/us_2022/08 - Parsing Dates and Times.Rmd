@@ -1,0 +1,129 @@
+---
+title: "08 - Dealing with Dates and Times"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here) 
+library(tidyverse)
+library(lubridate)
+```
+```{r, message=FALSE}
+all_batches <- dir_ls(here("data"), glob = "*_b.csv") %>%
+  map_dfr(read_csv) %>%
+  clean_names()
+```
+
+## Dealing with Dates and Times
+
+Material in this lesson is based on the Dates and Times chapter of R for Data Science: https://r4ds.had.co.nz/dates-and-times.html
+
+### Convert datetime to date data type
+
+```{r}
+batches_ts <- all_batches %>%
+  mutate(review_complete_date = as_date(review_complete_timestamp))
+review_count <- batches_ts %>%
+  group_by(review_complete_date) %>%
+  summarize(tally = n())
+ggplot(review_count, aes(x = review_complete_date, y = tally)) +
+  geom_line()
+```
+
+### Extract month from datetime field
+
+```{r}
+batches_monthly <- all_batches %>%
+  mutate(review_complete_month = month(review_complete_timestamp))
+ggplot(batches_monthly, aes(x = review_complete_month)) +
+  geom_histogram(bins = 12)
+```
+
+**Exercise 1**
+
+What days of the week is the lab open? During what hours does the lab team typically review data? Aggregate the review complete timestamp at different levels and visualize the results.
+
+```{r}
+batches_daily <- all_batches %>%
+  mutate(review_complete_daily = wday(review_complete_timestamp, label = TRUE))
+ggplot(batches_daily, aes(x = review_complete_daily)) +
+  geom_histogram(stat = "count")
+```
+
+```{r}
+batches_hourly <- all_batches %>%
+  mutate(review_complete_hour = hour(review_complete_timestamp))
+ggplot(batches_hourly, aes(x = review_complete_hour)) +
+  geom_histogram()
+```
+
+
+### Round to capture weekly data but keep datetime format
+
+```{r}
+batches_weekly <- all_batches %>%
+  mutate(review_complete_weekly = floor_date(review_complete_timestamp, unit = "week"))
+batches_weekly %>% count(review_complete_weekly) %>% View()
+ggplot(batches_weekly, aes(x = review_complete_weekly)) +
+  geom_bar()
+```
+
+
+## Review Difftime Output
+
+```{r}
+batches_tat <- all_batches %>%
+  mutate(review_duration = review_complete_timestamp - review_start_timestamp)
+ggplot(batches_tat, aes(x = review_duration)) +
+  geom_histogram(binwidth = 1)
+```
+
+Output may change depending on magnitude of time difference
+
+```{r}
+mean(batches_tat$review_duration)
+```
+
+### Convert difftime to a duration
+
+```{r}
+batches_tat <- all_batches %>%
+  mutate(review_duration = as.duration(review_complete_timestamp - review_start_timestamp))
+mean(batches_tat$review_duration)
+```
+
+### Convert interval into numeric output by dividing by d... functions
+
+```{r}
+batches_tat <- all_batches %>%
+  mutate(review_duration_min = (review_start_timestamp %--% review_complete_timestamp)/dminutes(1))
+mean(batches_tat$review_duration)
+```
+
+**Exercise 2**
+
+The lab has set a turnaround time goal of reviewing all batches within 40 minutes. Add a variable that captures the review turnaround time in minutes. Using the `if_else()` function (review how it works in the help documentation if needed), create a new logical variable (column) called "meets_tat" that returns a FALSE for all batches that take longer than 40 minutes from review start to review completion. Add another variable that helps to aggregate the data by week. Add a variable that captures the review turnaround time in minutes. 
+
+a) Plot a histogram showing the distribution of batch review times (it is OK to include duplicate review times for different compounds in the same batch).
+
+```{r}
+batches_tat <- all_batches %>%
+  mutate(review_tat = review_start_timestamp %--% review_complete_timestamp / dminutes(1))
+ggplot(batches_tat, aes(x = review_tat)) +
+  geom_histogram(binwidth = 1)
+```
+
+b) Create a visualization that shows the weekly volume of reviews and is color coded by the number of reviews that meet the turnaround time requirement. 
+
+```{r}
+batches_tat_flag <- all_batches %>%
+  mutate(meets_tat = if_else(review_complete_timestamp > review_start_timestamp + minutes(40), FALSE, TRUE),
+         review_complete_weekly = floor_date(review_complete_timestamp, unit = "week"))
+summary(batches_tat_flag)
+ggplot(batches_tat_flag, aes(x = review_complete_weekly, fill = meets_tat)) +
+  geom_bar()
+```
+
+**End Exercise**
