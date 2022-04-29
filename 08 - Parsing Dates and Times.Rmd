@@ -6,12 +6,11 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(here) 
 library(tidyverse)
 library(lubridate)
 ```
 ```{r, message=FALSE}
-all_batches <- dir_ls(here("data"), glob = "*_b.csv") %>%
+all_batches <- dir_ls("data", glob = "*_b.csv") %>%
   map_dfr(read_csv) %>%
   clean_names()
 ```
